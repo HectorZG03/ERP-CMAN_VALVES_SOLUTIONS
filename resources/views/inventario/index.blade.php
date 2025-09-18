@@ -33,7 +33,9 @@
     <!-- Estadísticas rápidas -->
     @if(auth()->user()->canManageInventory())
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <!-- Total Productos -->
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200 cursor-pointer hover:shadow-md" 
+             id="filter-all" data-filter="all">
             <div class="p-5">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
@@ -51,7 +53,9 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <!-- En Stock -->
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200 cursor-pointer hover:shadow-md" 
+             id="filter-stock" data-filter="with-stock">
             <div class="p-5">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
@@ -69,7 +73,9 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <!-- Sin Stock -->
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200 cursor-pointer hover:shadow-md" 
+             id="filter-no-stock" data-filter="without-stock">
             <div class="p-5">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
@@ -152,7 +158,8 @@
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700" id="inventory-table">
                         @forelse($inventarios as $inventario)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 inventory-row" 
+                            data-stock="{{ $inventario->existencia > 0 ? 'with-stock' : 'without-stock' }}">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10">
@@ -282,21 +289,74 @@
     </div>
 </div>
 
-<!-- Script mejorado para búsqueda -->
+<!-- Script mejorado para búsqueda y filtros -->
 <script>
-document.getElementById('search').addEventListener('keyup', function() {
-    let filter = this.value.toLowerCase();
-    let rows = document.querySelectorAll('#inventory-table tr');
+// Variables globales
+let currentFilter = 'all';
+let searchTerm = '';
+
+// Función para aplicar filtros
+function applyFilters() {
+    let rows = document.querySelectorAll('.inventory-row');
     
     rows.forEach(row => {
+        let stockStatus = row.getAttribute('data-stock');
         let text = row.textContent.toLowerCase();
-        if (text.includes(filter)) {
+        
+        // Verificar si la fila coincide con el filtro de stock y el término de búsqueda
+        const matchesFilter = currentFilter === 'all' || stockStatus === currentFilter;
+        const matchesSearch = searchTerm === '' || text.includes(searchTerm);
+        
+        if (matchesFilter && matchesSearch) {
             row.style.display = '';
             row.classList.add('fade-in');
         } else {
             row.style.display = 'none';
         }
     });
+}
+
+// Evento para el buscador
+document.getElementById('search').addEventListener('keyup', function() {
+    searchTerm = this.value.toLowerCase();
+    applyFilters();
+});
+
+// Eventos para los filtros de stock
+document.getElementById('filter-all').addEventListener('click', function() {
+    currentFilter = 'all';
+    updateActiveFilter(this);
+    applyFilters();
+});
+
+document.getElementById('filter-stock').addEventListener('click', function() {
+    currentFilter = 'with-stock';
+    updateActiveFilter(this);
+    applyFilters();
+});
+
+document.getElementById('filter-no-stock').addEventListener('click', function() {
+    currentFilter = 'without-stock';
+    updateActiveFilter(this);
+    applyFilters();
+});
+
+// Función para actualizar el filtro activo visualmente
+function updateActiveFilter(activeElement) {
+    // Quitar la clase activa de todos los filtros
+    document.querySelectorAll('[id^="filter-"]').forEach(filter => {
+        filter.classList.remove('border-blue-500', 'dark:border-blue-400', 'border-2');
+        filter.classList.add('border-gray-200', 'dark:border-gray-700');
+    });
+    
+    // Agregar la clase activa al filtro seleccionado
+    activeElement.classList.remove('border-gray-200', 'dark:border-gray-700');
+    activeElement.classList.add('border-blue-500', 'dark:border-blue-400', 'border-2');
+}
+
+// Inicializar con el filtro "Todos" activo
+document.addEventListener('DOMContentLoaded', function() {
+    updateActiveFilter(document.getElementById('filter-all'));
 });
 
 // Animación simple para las filas filtradas

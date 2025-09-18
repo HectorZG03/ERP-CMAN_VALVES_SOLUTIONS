@@ -40,6 +40,7 @@
                         <option value="Recursos Humanos">Recursos Humanos</option>
                         <option value="TI">Tecnología</option>
                         <option value="Dirección">Dirección</option>
+                        <option value="Operaciones">Operaciones</option>
                     </select>
                 </div>
 

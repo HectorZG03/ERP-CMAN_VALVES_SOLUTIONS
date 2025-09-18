@@ -38,6 +38,9 @@
                                 Productos Solicitados
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Destino
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Resumen
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -82,6 +85,7 @@
                                                 <div class="text-sm font-medium text-gray-900 truncate">
                                                     {{ $detalle->inventario->nombre_producto ?? 'Producto no disponible' }}
                                                 </div>
+                                                
                                                 <div class="text-xs text-gray-500">
                                                     {{ $detalle->cantidad_solicitada }} {{ $detalle->inventario->medida ?? '' }}
                                                 </div>
@@ -99,6 +103,32 @@
                                             No hay productos asociados
                                         </div>
                                     @endif
+                                </div>
+                            </td>
+
+                            <!-- Destino -->
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <!-- Icono de casa fuera del círculo -->
+                                    <svg class="w-5 h-5 text-blue-500 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M4 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10"/>
+                                    </svg>
+                                    <div>
+                                        @if($solicitud->destino)
+                                            <div class="text-sm font-medium text-gray-900">
+                                                {{ $solicitud->destino }}
+                                            </div>
+                                            @if($solicitud->destino == 'BMS MAYA')
+                                                <div class="text-xs text-gray-500">
+                                                    {{ $solicitud->user->name }} - {{ $solicitud->cantidad_solicitada }} unidades
+                                                </div>
+                                            @endif
+                                        @else
+                                            <div class="text-sm font-medium text-red-600 dark:text-red-400">
+                                                Destino no disponible
+                                            </div>
+                                        @endif
+                                    </div>
                                 </div>
                             </td>
 

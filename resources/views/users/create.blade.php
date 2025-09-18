@@ -57,6 +57,8 @@
                         <option value="aux_logistica">Auxiliar Logística</option>
                         <option value="rh">Recursos Humanos</option>
                         <option value="aux_rh">Auxiliar RH</option>
+                        <option value="operaciones">Operaciones</option>
+                        <option value="aux_operaciones">Auxiliar Operaciones</option>
                     </select>
                 </div>
 

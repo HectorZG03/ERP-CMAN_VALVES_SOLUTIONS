@@ -67,16 +67,15 @@ Route::middleware(['auth'])->group(function () {
     });
     
     // Solicitudes y requisiciones (todos los roles)
-    // Por esta:
     Route::get('/solicitudes', [SolicitudMaterialController::class, 'index'])->name('solicitudes.index');
     Route::get('/solicitudes/create', [SolicitudMaterialController::class, 'create'])->name('solicitudes.create');
     Route::post('/solicitudes', [SolicitudMaterialController::class, 'store'])->name('solicitudes.store');
-     Route::get('/solicitudes/{solicitud}', [SolicitudMaterialController::class, 'show'])->name('solicitudes.show');
 
+    // Las rutas específicas deben ir antes de la ruta con parámetro {solicitud}
+    Route::get('/solicitudes/buscar-productos', [SolicitudMaterialController::class, 'buscarProductos'])->name('solicitudes.buscar-productos');
+    Route::get('/solicitudes/producto/{id}', [SolicitudMaterialController::class, 'obtenerProducto'])->name('solicitudes.obtener-producto');
 
-    // Rutas para búsqueda de productos en solicitudes
-Route::get('/solicitudes/buscar-productos', [SolicitudMaterialController::class, 'buscarProductos'])->name('solicitudes.buscar-productos');
-Route::get('/solicitudes/producto/{id}', [SolicitudMaterialController::class, 'obtenerProducto'])->name('solicitudes.obtener-producto');
+    Route::get('/solicitudes/{solicitud}', [SolicitudMaterialController::class, 'show'])->name('solicitudes.show');
 
 
     // Requisicion

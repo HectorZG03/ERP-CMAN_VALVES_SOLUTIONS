@@ -13,6 +13,7 @@ return new class extends Migration
             $table->foreignId('inventario_id')->constrained('inventarios');
             $table->foreignId('user_id')->constrained('users');
             $table->integer('cantidad_solicitada');
+            $table->text('destino')->nullable();
             $table->enum('estatus', ['pendiente', 'aprobado', 'denegado'])->default('pendiente');
             $table->text('comentario')->nullable();
             $table->timestamps();

@@ -65,6 +65,7 @@ class SolicitudMaterialController extends Controller
             // Crear la solicitud principal
             $solicitud = SolicitudMaterial::create([
                 'user_id' => auth()->id(),
+                'destino' => $request->destino,
                 'comentario' => $request->comentario,
                 'estatus' => 'pendiente',
             ]);

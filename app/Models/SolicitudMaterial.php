@@ -13,6 +13,7 @@ class SolicitudMaterial extends Model
 
     protected $fillable = [
         'user_id',
+        'destino',
         'estatus',
         'comentario',
     ];
