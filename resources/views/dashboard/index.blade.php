@@ -11,11 +11,13 @@
 
     <!-- Estadísticas Principales -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <!-- Total Inventario -->
+        <a href="{{ route('inventario.index') }}" 
+           class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200 hover:shadow-md cursor-pointer group">
             <div class="p-5">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-blue-500 dark:bg-blue-600 rounded-full flex items-center justify-center">
+                        <div class="w-8 h-8 bg-blue-500 dark:bg-blue-600 rounded-full flex items-center justify-center group-hover:bg-blue-600 dark:group-hover:bg-blue-500 transition-colors">
                             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z"></path>
                                 <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"></path>
@@ -34,13 +36,15 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
 
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <!-- Solicitudes Pendientes -->
+        <a href="{{ route('solicitudes.index', ['estatus' => 'pendiente']) }}" 
+           class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200 hover:shadow-md cursor-pointer group">
             <div class="p-5">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-yellow-500 dark:bg-yellow-600 rounded-full flex items-center justify-center">
+                        <div class="w-8 h-8 bg-yellow-500 dark:bg-yellow-600 rounded-full flex items-center justify-center group-hover:bg-yellow-600 dark:group-hover:bg-yellow-500 transition-colors">
                             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                             </svg>
@@ -58,13 +62,15 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
 
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <!-- Requisiciones Pendientes -->
+        <a href="{{ route('requisiciones.index', ['estatus' => 'pendiente']) }}" 
+           class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200 hover:shadow-md cursor-pointer group">
             <div class="p-5">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-green-500 dark:bg-green-600 rounded-full flex items-center justify-center">
+                        <div class="w-8 h-8 bg-green-500 dark:bg-green-600 rounded-full flex items-center justify-center group-hover:bg-green-600 dark:group-hover:bg-green-500 transition-colors">
                             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
                             </svg>
@@ -82,13 +88,15 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
 
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200">
+        <!-- Usuarios Activos -->
+        <a href="{{ route('users.index') }}" 
+           class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200 hover:shadow-md cursor-pointer group">
             <div class="p-5">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-purple-500 dark:bg-purple-600 rounded-full flex items-center justify-center">
+                        <div class="w-8 h-8 bg-purple-500 dark:bg-purple-600 rounded-full flex items-center justify-center group-hover:bg-purple-600 dark:group-hover:bg-purple-500 transition-colors">
                             <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"></path>
                             </svg>
@@ -106,7 +114,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Acciones Rápidas -->
@@ -181,16 +189,21 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Productos con Bajo Stock -->
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Productos con Bajo Stock</h3>
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white">Productos con Bajo Stock</h3>
+                <a href="{{ route('inventario.index') }}" class="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm">Ver inventario</a>
+            </div>
             <div class="space-y-3">
                 @foreach(\App\Models\Inventario::where('existencia', '<=', 5)->limit(5)->get() as $producto)
-                <div class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-800">
-                    <div>
-                        <div class="font-medium text-gray-900 dark:text-white">{{ $producto->nombre_producto }}</div>
-                        <div class="text-sm text-gray-500 dark:text-gray-400">{{ $producto->categoria }}</div>
+                <a href="{{ route('inventario.show', $producto) }}" class="block">
+                    <div class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+                        <div>
+                            <div class="font-medium text-gray-900 dark:text-white">{{ $producto->nombre_producto }}</div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">{{ $producto->categoria }}</div>
+                        </div>
+                        <div class="text-red-600 dark:text-red-400 font-bold">{{ $producto->existencia }}</div>
                     </div>
-                    <div class="text-red-600 dark:text-red-400 font-bold">{{ $producto->existencia }}</div>
-                </div>
+                </a>
                 @endforeach
                 
                 @if(\App\Models\Inventario::where('existencia', '<=', 5)->count() === 0)
@@ -220,52 +233,54 @@
                 @endphp
                 
                 @forelse($ultimasSolicitudes as $solicitud)
-                <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 bg-blue-500 dark:bg-blue-600 rounded-lg flex items-center justify-center">
-                            <span class="text-white text-xs font-medium">#{{ $solicitud->id }}</span>
-                        </div>
-                        <div>
-                            @if($solicitud->detalles && $solicitud->detalles->count() > 0)
-                                @if($solicitud->detalles->count() == 1)
-                                    {{-- Una sola solicitud --}}
+                <a href="{{ route('solicitudes.show', $solicitud) }}" class="block">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-blue-500 dark:bg-blue-600 rounded-lg flex items-center justify-center">
+                                <span class="text-white text-xs font-medium">#{{ $solicitud->id }}</span>
+                            </div>
+                            <div>
+                                @if($solicitud->detalles && $solicitud->detalles->count() > 0)
+                                    @if($solicitud->detalles->count() == 1)
+                                        {{-- Una sola solicitud --}}
+                                        <div class="font-medium text-gray-900 dark:text-white">
+                                            {{ $solicitud->detalles->first()->inventario->nombre_producto ?? 'Producto no disponible' }}
+                                        </div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            {{ $solicitud->user->name }} - {{ $solicitud->detalles->first()->cantidad_solicitada }} unidades
+                                        </div>
+                                    @else
+                                        {{-- Múltiples productos --}}
+                                        <div class="font-medium text-gray-900 dark:text-white">
+                                            Solicitud múltiple ({{ $solicitud->detalles->count() }} productos)
+                                        </div>
+                                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                                            {{ $solicitud->user->name }} - {{ $solicitud->total_unidades }} unidades total
+                                        </div>
+                                    @endif
+                                @elseif($solicitud->inventario)
+                                    {{-- Compatibilidad con estructura antigua --}}
                                     <div class="font-medium text-gray-900 dark:text-white">
-                                        {{ $solicitud->detalles->first()->inventario->nombre_producto ?? 'Producto no disponible' }}
+                                        {{ $solicitud->inventario->nombre_producto }}
                                     </div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $solicitud->user->name }} - {{ $solicitud->detalles->first()->cantidad_solicitada }} unidades
+                                        {{ $solicitud->user->name }} - {{ $solicitud->cantidad_solicitada }} unidades
                                     </div>
                                 @else
-                                    {{-- Múltiples productos --}}
-                                    <div class="font-medium text-gray-900 dark:text-white">
-                                        Solicitud múltiple ({{ $solicitud->detalles->count() }} productos)
-                                    </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-400">
-                                        {{ $solicitud->user->name }} - {{ $solicitud->total_unidades }} unidades total
-                                    </div>
+                                    {{-- Sin productos (solicitud corrupta) --}}
+                                    <div class="font-medium text-red-500 dark:text-red-400">Solicitud sin productos</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ $solicitud->user->name }}</div>
                                 @endif
-                            @elseif($solicitud->inventario)
-                                {{-- Compatibilidad con estructura antigua --}}
-                                <div class="font-medium text-gray-900 dark:text-white">
-                                    {{ $solicitud->inventario->nombre_producto }}
-                                </div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $solicitud->user->name }} - {{ $solicitud->cantidad_solicitada }} unidades
-                                </div>
-                            @else
-                                {{-- Sin productos (solicitud corrupta) --}}
-                                <div class="font-medium text-red-500 dark:text-red-400">Solicitud sin productos</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ $solicitud->user->name }}</div>
-                            @endif
+                            </div>
                         </div>
+                        <span class="px-2 py-1 text-xs font-medium rounded-full
+                            @if($solicitud->estatus === 'pendiente') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300
+                            @elseif($solicitud->estatus === 'aprobado') bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300
+                            @else bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 @endif">
+                            {{ ucfirst($solicitud->estatus) }}
+                        </span>
                     </div>
-                    <span class="px-2 py-1 text-xs font-medium rounded-full
-                        @if($solicitud->estatus === 'pendiente') bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300
-                        @elseif($solicitud->estatus === 'aprobado') bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300
-                        @else bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 @endif">
-                        {{ ucfirst($solicitud->estatus) }}
-                    </span>
-                </div>
+                </a>
                 @empty
                 <div class="text-center py-4 text-gray-500 dark:text-gray-400">
                     <svg class="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,4 +293,23 @@
         </div>
     </div>
 </div>
+
+<!-- Estilos adicionales para mejorar la interactividad -->
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    .group:hover .group-hover\:bg-blue-600 {
+        background-color: #2563eb;
+    }
+    .group:hover .group-hover\:bg-yellow-600 {
+        background-color: #d97706;
+    }
+    .group:hover .group-hover\:bg-green-600 {
+        background-color: #059669;
+    }
+    .group:hover .group-hover\:bg-purple-600 {
+        background-color: #7c3aed;
+    }
+</style>
 @endsection

@@ -104,6 +104,7 @@ Route::middleware(['auth'])->group(function () {
     
     // API endpoints
     Route::get('/api/inventario/search', [InventarioController::class, 'search']);
+    Route::get('/api/solicitudes/search', [SolicitudMaterialController::class, 'search']);
 
     // Rutas de exportación para inventario
     Route::get('/inventario-export/pdf', [InventarioController::class, 'exportPDF'])->name('inventario.export.pdf');

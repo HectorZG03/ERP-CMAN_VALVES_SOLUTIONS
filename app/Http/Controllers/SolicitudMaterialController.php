@@ -161,6 +161,31 @@ class SolicitudMaterialController extends Controller
         }
     }
 
+
+
+    // Buscar solicitudes por número de folio, destino o estatus
+    public function search(Request $request)
+    {
+        $query = SolicitudMaterial::query();
+
+        if ($request->filled('term')) {
+            $term = $request->get('term');
+            $query->where(function ($q) use ($term) {
+                $q->where('id', $term)
+                  ->orWhere('destino', 'like', "%{$term}%")
+                  ->orWhere('estatus', 'like', "%{$term}%");
+            });
+        }
+
+        // Opcional: limitar resultados y cargar relaciones
+        $solicitudes = $query->with(['user'])
+                             ->orderByDesc('created_at')
+                             ->limit(20)
+                             ->get();
+
+        return response()->json($solicitudes);
+    }
+
     // Método para búsqueda de productos via AJAX
     public function buscarProductos(Request $request)
     {
