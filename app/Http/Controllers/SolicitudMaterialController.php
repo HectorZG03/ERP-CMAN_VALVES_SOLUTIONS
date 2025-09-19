@@ -109,57 +109,78 @@ class SolicitudMaterialController extends Controller
         return view('solicitudes.show', compact('solicitud'));
     }
 
-    public function updateEstatus(Request $request, SolicitudMaterial $solicitud)
-    {
-        if (!auth()->user()->canApproveRequests()) {
-            abort(403);
-        }
 
-        $request->validate([
-            'estatus' => 'required|in:aprobado,denegado',
-        ]);
 
-        DB::beginTransaction();
+    // este no descuenta el inventario
+     public function updateEstatus(Request $request, SolicitudMaterial $solicitud)
+     {
+         if (!auth()->user()->canApproveRequests()) {
+             abort(403);
+         }
+
+         $request->validate([
+             'estatus' => 'required|in:aprobado,denegado',
+         ]);
+
+         $solicitud->update(['estatus' => $request->estatus]);
+
+         return back()->with('success', 'Estatus actualizado');
+     }
+
+
+
+    // CON ESTE  SI DESCUESTA EL INVENTARIO
+    // public function updateEstatus(Request $request, SolicitudMaterial $solicitud)
+    // {
+    //     if (!auth()->user()->canApproveRequests()) {
+    //         abort(403);
+    //     }
+
+    //     $request->validate([
+    //         'estatus' => 'required|in:aprobado,denegado',
+    //     ]);
+
+    //     DB::beginTransaction();
         
-        try {
-            $estatusAnterior = $solicitud->estatus;
-            $nuevoEstatus = $request->estatus;
+    //     try {
+    //         $estatusAnterior = $solicitud->estatus;
+    //         $nuevoEstatus = $request->estatus;
 
-            // Si se aprueba la solicitud, reducir existencia del inventario
-            if ($nuevoEstatus === 'aprobado' && $estatusAnterior !== 'aprobado') {
-                foreach ($solicitud->detalles as $detalle) {
-                    $inventario = $detalle->inventario;
+    //         // Si se aprueba la solicitud, reducir existencia del inventario
+    //         if ($nuevoEstatus === 'aprobado' && $estatusAnterior !== 'aprobado') {
+    //             foreach ($solicitud->detalles as $detalle) {
+    //                 $inventario = $detalle->inventario;
                     
-                    if (!$inventario) {
-                        throw new \Exception("No se puede procesar la solicitud porque uno de los productos no existe");
-                    }
+    //                 if (!$inventario) {
+    //                     throw new \Exception("No se puede procesar la solicitud porque uno de los productos no existe");
+    //                 }
                     
-                    if ($inventario->existencia < $detalle->cantidad_solicitada) {
-                        throw new \Exception("No hay suficiente existencia de '{$inventario->nombre_producto}' para aprobar esta solicitud");
-                    }
+    //                 if ($inventario->existencia < $detalle->cantidad_solicitada) {
+    //                     throw new \Exception("No hay suficiente existencia de '{$inventario->nombre_producto}' para aprobar esta solicitud");
+    //                 }
                     
-                    $inventario->decrement('existencia', $detalle->cantidad_solicitada);
-                }
-            }
+    //                 $inventario->decrement('existencia', $detalle->cantidad_solicitada);
+    //             }
+    //         }
             
-            // Si se deniega una solicitud previamente aprobada, restaurar existencia
-            if ($nuevoEstatus === 'denegado' && $estatusAnterior === 'aprobado') {
-                foreach ($solicitud->detalles as $detalle) {
-                    $detalle->inventario->increment('existencia', $detalle->cantidad_solicitada);
-                }
-            }
+    //         // Si se deniega una solicitud previamente aprobada, restaurar existencia
+    //         if ($nuevoEstatus === 'denegado' && $estatusAnterior === 'aprobado') {
+    //             foreach ($solicitud->detalles as $detalle) {
+    //                 $detalle->inventario->increment('existencia', $detalle->cantidad_solicitada);
+    //             }
+    //         }
 
-            $solicitud->update(['estatus' => $nuevoEstatus]);
+    //         $solicitud->update(['estatus' => $nuevoEstatus]);
 
-            DB::commit();
+    //         DB::commit();
             
-            return back()->with('success', 'Estatus actualizado correctamente');
+    //         return back()->with('success', 'Estatus actualizado correctamente');
             
-        } catch (\Exception $e) {
-            DB::rollback();
-            return back()->withErrors(['error' => $e->getMessage()]);
-        }
-    }
+    //     } catch (\Exception $e) {
+    //         DB::rollback();
+    //         return back()->withErrors(['error' => $e->getMessage()]);
+    //     }
+    // }
 
 
 
@@ -226,18 +247,4 @@ class SolicitudMaterialController extends Controller
     }
 }
 
-  // este no descuenta el inventario
-    // public function updateEstatus(Request $request, SolicitudMaterial $solicitud)
-    // {
-    //     if (!auth()->user()->canApproveRequests()) {
-    //         abort(403);
-    //     }
-
-    //     $request->validate([
-    //         'estatus' => 'required|in:aprobado,denegado',
-    //     ]);
-
-    //     $solicitud->update(['estatus' => $request->estatus]);
-
-    //     return back()->with('success', 'Estatus actualizado');
-    // }
+  

@@ -31,7 +31,8 @@
     </div>
 
     <!-- Estadísticas rápidas -->
-    @if(auth()->user()->canManageInventory())
+    @if(auth()->user()->canManageInventory()) user()->canManageInventoryadmin() @endif
+    @if($inventarios->count() > 0)
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Total Productos -->
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700 transition-colors duration-200 cursor-pointer hover:shadow-md" 

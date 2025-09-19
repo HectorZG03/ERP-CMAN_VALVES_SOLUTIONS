@@ -76,6 +76,14 @@
                                 Salidas
                             </a>
                         @endif
+
+                        @if(auth()->user()->canManageInventoryadmin())
+                        <a href="{{ route('inventario.index') }}" 
+                               class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('inventario.*') ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' : '' }}">
+                                Inventario
+                        </a>
+                        @endif
+                        
                         
                         <a href="{{ route('solicitudes.index') }}" 
                            class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('solicitudes.*') ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' : '' }}">
@@ -84,6 +92,10 @@
                         <a href="{{ route('requisiciones.index') }}" 
                            class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('requisiciones.*') ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' : '' }}">
                             Requisiciones
+                        </a>
+                        <a href="{{ route('prestamos.index') }}" 
+                           class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('prestamos.*') ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' : '' }}">
+                            Préstamos
                         </a>
                         
                         @if(auth()->user()->canManageUsers())

@@ -11,6 +11,7 @@ use App\Http\Controllers\SalidaController;
 use App\Http\Controllers\SolicitudMaterialController;
 use App\Http\Controllers\RequisicionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PrestamoMaterialController;
 
 Route::get('/', function () {
     return redirect('/dashboard');
@@ -33,6 +34,7 @@ Route::middleware(['auth'])->group(function () {
             'role' => '"' . $user->role . '"',
             'role_length' => strlen($user->role),
             'canManageInventory' => $user->canManageInventory(),
+            'canManageInventoryadmin' => $user->canManageInventoryadmin(),
             'canManageUsers' => $user->canManageUsers(),
             'canApproveRequests' => $user->canApproveRequests(),
             'all_roles_in_db' => \App\Models\User::pluck('role')->unique()->values(),
@@ -90,7 +92,44 @@ Route::middleware(['auth'])->group(function () {
     // Aprobación de solicitudes y requisiciones - Solo TI y Dirección
     Route::put('solicitudes/{solicitud}/estatus', [SolicitudMaterialController::class, 'updateEstatus'])->name('solicitudes.updateEstatus');
     Route::put('requisiciones/{requisicion}/estatus', [RequisicionController::class, 'updateEstatus'])->name('requisiciones.updateEstatus');
-    
+
+
+
+    // Prestamos de materiales
+Route::prefix('prestamos')->name('prestamos.')->group(function () {
+    // CRUD básico con resource (index, create, store, show)
+    Route::resource('/', PrestamoMaterialController::class)->only([
+        'index', 'create', 'store', 'show'
+    ])->parameters(['' => 'prestamo'])->names([
+        'index' => 'index',
+        'create' => 'create',
+        'store' => 'store',
+        'show' => 'show',
+    ]);
+
+    // Dashboard de préstamos
+    Route::get('/dashboard/overview', [PrestamoMaterialController::class, 'dashboard'])
+        ->name('dashboard');
+
+    // Búsqueda de productos (AJAX)
+    Route::get('/buscar-productos/search', [PrestamoMaterialController::class, 'buscarProductos'])
+        ->name('buscar-productos');
+    Route::get('/producto/{id}', [PrestamoMaterialController::class, 'obtenerProducto'])
+        ->name('obtener-producto');
+
+    // Aprobar / denegar préstamo (solo aprobadores) - SIN middleware
+    Route::put('/{prestamo}/estatus', [PrestamoMaterialController::class, 'updateEstatus'])
+        ->name('updateEstatus');
+
+    // Devoluciones (solo inventario) - SIN middleware
+    Route::get('/{prestamo}/devolucion', [PrestamoMaterialController::class, 'devolucion'])
+        ->name('devolucion');
+    Route::post('/{prestamo}/devolucion', [PrestamoMaterialController::class, 'procesarDevolucion'])
+        ->name('procesarDevolucion');
+});
+
+
+
     // Usuarios - Solo TI y Dirección
     Route::middleware(['user.access'])->group(function () {
         Route::resource('users', UserController::class);
