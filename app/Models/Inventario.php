@@ -19,27 +19,28 @@ class Inventario extends Model
 
     public function entradas()
     {
-        return $this->hasMany(Entrada::class);
+        return $this->hasMany(Entrada::class, 'inventario_id');
     }
 
     public function salidas()
     {
-        return $this->hasMany(Salida::class);
+        return $this->hasMany(Salida::class, 'inventario_id');
     }
 
     public function solicitudesMateriales()
     {
-        return $this->hasMany(SolicitudMaterial::class);
+        // La columna inventario_id está correcta según tu migración
+        return $this->hasMany(SolicitudMaterial::class, 'inventario_id');
     }
 
     public function prestamosMateriales()
     {
-        return $this->hasMany(PrestamoMaterial::class);
+        return $this->hasMany(PrestamoMaterial::class, 'inventario_id');
     }
 
     public function inventarioBarcos()
     {
-        return $this->hasMany(InventarioBarco::class);
+        return $this->hasMany(InventarioBarco::class, 'inventario_id');
     }
 
     public function getPrecioPromedio()

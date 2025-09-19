@@ -186,6 +186,9 @@
     </div>
 
     <!-- Últimas Actividades -->
+
+    @if($user->canManageInventory())
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Productos con Bajo Stock -->
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
@@ -293,6 +296,7 @@
         </div>
     </div>
 </div>
+    @endif
 
 <!-- Estilos adicionales para mejorar la interactividad -->
 <style>

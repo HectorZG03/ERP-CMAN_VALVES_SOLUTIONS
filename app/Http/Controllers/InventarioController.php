@@ -64,18 +64,31 @@ class InventarioController extends Controller
         return redirect()->route('inventario.index')->with('success', 'Producto actualizado');
     }
 
+
+
     public function destroy(Inventario $inventario)
-    {
-        // Verificar si tiene movimientos antes de eliminar
-        $tieneMovimientos = $inventario->entradas()->exists() || $inventario->salidas()->exists() || $inventario->solicitudesMateriales()->exists();
-        
-        if ($tieneMovimientos) {
-            return redirect()->route('inventario.index')->withErrors(['error' => 'No se puede eliminar el producto porque tiene movimientos asociados (entradas, salidas o solicitudes).']);
-        }
+{
+    try {
+        // Eliminación directa sin verificaciones de relaciones
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0');
         
         $inventario->delete();
-        return redirect()->route('inventario.index')->with('success', 'Producto eliminado');
+        
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        
+        return redirect()->route('inventario.index')->with('success', 'Producto eliminado exitosamente');
+        
+    } catch (\Exception $e) {
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        
+        return redirect()->route('inventario.index')
+            ->withErrors(['error' => 'Error al eliminar el producto: ' . $e->getMessage()]);
     }
+}
+
+
+
+
 
     public function search(Request $request)
     {
