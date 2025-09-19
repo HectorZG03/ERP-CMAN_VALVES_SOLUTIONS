@@ -342,6 +342,7 @@ function mostrarResultados(productos) {
 }
 
 // Función para agregar producto a la lista
+// Función para agregar producto a la lista
 function agregarProducto(producto) {
     if (productosAgregados.some(p => p.id === producto.id)) {
         return;
@@ -362,13 +363,26 @@ function agregarProducto(producto) {
             const index = contadorProductos++;
             clone.querySelector('.inventario-id').name = `productos[${index}][inventario_id]`;
             clone.querySelector('.inventario-id').value = productoCompleto.id;
-            clone.querySelector('.cantidad-hidden').name = `productos[${index}][cantidad_prestada]`;
-            clone.querySelector('.cantidad-hidden').value = 1;
+            
+            // Campos de cantidad
+            const cantidadHidden = clone.querySelector('.cantidad-hidden');
+            cantidadHidden.name = `productos[${index}][cantidad_prestada]`;
+            cantidadHidden.value = 1;
 
             const inputCantidad = clone.querySelector('.cantidad-input');
             inputCantidad.max = productoCompleto.existencia;
+            inputCantidad.value = 1;
+            
+            // Event listener para actualizar ambos campos
             inputCantidad.addEventListener('input', function() {
-                clone.querySelector('.cantidad-hidden').value = this.value;
+                const cantidad = parseInt(this.value) || 0;
+                cantidadHidden.value = cantidad;
+                
+                // Actualizar también en el array productosAgregados
+                if (productosAgregados[index]) {
+                    productosAgregados[index].cantidad = cantidad;
+                }
+                
                 actualizarResumen();
             });
 
@@ -397,8 +411,17 @@ function eliminarProducto(boton) {
     const item = boton.closest('.producto-item');
     const inventarioId = parseInt(item.querySelector('.inventario-id').value);
     
-    productosAgregados = productosAgregados.filter(p => p.id !== inventarioId);
+    // Encontrar el índice correcto en el array
+    const index = productosAgregados.findIndex(p => p.id === inventarioId);
+    
+    if (index !== -1) {
+        productosAgregados.splice(index, 1);
+    }
+    
     item.remove();
+    
+    // Reindexar los campos del formulario
+    reindexarCamposProductos();
     
     actualizarContador();
     actualizarResumen();
@@ -406,6 +429,33 @@ function eliminarProducto(boton) {
     if (productosAgregados.length === 0) {
         ocultarResumen();
     }
+}
+
+
+
+
+// Función para reindexar campos después de eliminar
+function reindexarCamposProductos() {
+    const items = document.querySelectorAll('.producto-item');
+    
+    items.forEach((item, newIndex) => {
+        // Actualizar campos hidden
+        const inventarioId = item.querySelector('.inventario-id');
+        const cantidadHidden = item.querySelector('.cantidad-hidden');
+        
+        inventarioId.name = `productos[${newIndex}][inventario_id]`;
+        cantidadHidden.name = `productos[${newIndex}][cantidad_prestada]`;
+        
+        // Actualizar el índice en el array productosAgregados
+        const id = parseInt(inventarioId.value);
+        const productoIndex = productosAgregados.findIndex(p => p.id === id);
+        if (productoIndex !== -1) {
+            productosAgregados[productoIndex].index = newIndex;
+        }
+    });
+    
+    // Actualizar contador
+    contadorProductos = items.length;
 }
 
 // Función para actualizar contador
@@ -431,15 +481,21 @@ function actualizarResumen() {
     let totalUnidades = 0;
     let valorEstimado = 0;
 
-    document.querySelectorAll('.producto-item').forEach((item, index) => {
-        const cantidad = parseInt(item.querySelector('.cantidad-input').value) || 0;
-        const precio = parseFloat(item.querySelector('.producto-precio').textContent.replace('$', '')) || 0;
-        
-        totalUnidades += cantidad;
-        valorEstimado += cantidad * precio;
-        
-        if (productosAgregados[index]) {
-            productosAgregados[index].cantidad = cantidad;
+    productosAgregados.forEach(producto => {
+        const item = document.querySelector(`.inventario-id[value="${producto.id}"]`)?.closest('.producto-item');
+        if (item) {
+            const cantidad = parseInt(item.querySelector('.cantidad-input').value) || 0;
+            const precio = parseFloat(item.querySelector('.producto-precio').textContent.replace('$', '')) || 0;
+            
+            totalUnidades += cantidad;
+            valorEstimado += cantidad * precio;
+            
+            // Asegurarse de que el campo hidden tenga el valor correcto
+            const cantidadHidden = item.querySelector('.cantidad-hidden');
+            cantidadHidden.value = cantidad;
+            
+            // Actualizar el array
+            producto.cantidad = cantidad;
         }
     });
 
@@ -480,6 +536,15 @@ function limpiarPrestamo() {
     actualizarContador();
     ocultarResumen();
     limpiarBuscador();
+    
+    // Reiniciar también los campos hidden del formulario
+    const form = document.getElementById('prestamoForm');
+    const hiddenFields = form.querySelectorAll('input[type="hidden"]');
+    hiddenFields.forEach(field => {
+        if (field.name.includes('productos')) {
+            field.remove();
+        }
+    });
 }
 </script>
 @endsection
