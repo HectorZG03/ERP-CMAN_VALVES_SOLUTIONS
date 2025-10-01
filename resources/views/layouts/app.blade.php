@@ -104,6 +104,19 @@
                                 Usuarios
                             </a>
                         @endif
+
+                        
+
+                        @php
+                            $canAccessProveedores = auth()->user()->canManageInventory() || auth()->user()->canManageUsers();
+                        @endphp
+
+                        @if($canAccessProveedores)
+                            <a href="{{ route('proveedores.index') }}"
+                            class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('proveedores.*') ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' : '' }}">
+                                Proveedores
+                            </a>
+                        @endif
                     @endauth
                 </div>
                 

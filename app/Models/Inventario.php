@@ -12,6 +12,7 @@ class Inventario extends Model
     protected $fillable = [
         'categoria',
         'nombre_producto',
+        'economico',
         'medida',
         'existencia',
         'precio_total',

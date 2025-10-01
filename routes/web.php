@@ -44,7 +44,7 @@ Route::middleware(['auth'])->group(function () {
     // Inventario - Almacén, Auxiliar Almacén, Dirección y TI
     Route::middleware(['inventory.access'])->group(function () {
         Route::resource('inventario', InventarioController::class);
-        Route::resource('proveedores', ProveedorController::class);
+        Route::resource('proveedores', ProveedorController::class)->parameters(['proveedores' => 'proveedor']);
         Route::resource('clientes', ClienteController::class);
 
 

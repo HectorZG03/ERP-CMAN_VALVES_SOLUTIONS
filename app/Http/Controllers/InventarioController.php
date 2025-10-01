@@ -26,6 +26,7 @@ class InventarioController extends Controller
         $request->validate([
             'categoria' => 'required|string|max:255',
             'nombre_producto' => 'required|string|max:255',
+            'economico' => 'required|string|max:255',
             'medida' => 'required|string|max:255',
         ]);
 
@@ -56,6 +57,7 @@ class InventarioController extends Controller
         $request->validate([
             'categoria' => 'required|string|max:255',
             'nombre_producto' => 'required|string|max:255',
+            'economico' => 'required|string|max:255',
             'medida' => 'required|string|max:255',
         ]);
 

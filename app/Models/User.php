@@ -45,7 +45,7 @@ class User extends Authenticatable
 
     public function canManageInventory()
     {
-        return in_array($this->role, ['almacen', 'aux_almacen']);
+        return in_array($this->role, ['almacen', 'aux_almacen',]);
     }
 
 

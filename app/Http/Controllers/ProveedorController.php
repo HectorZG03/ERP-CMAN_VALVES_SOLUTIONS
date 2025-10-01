@@ -23,6 +23,7 @@ class ProveedorController extends Controller
         $request->validate([
             'proveedor' => 'required|string|max:255',
             'direccion' => 'required|string',
+            'economico' => 'nullable|string|max:255',
         ]);
 
         Proveedor::create($request->all());
@@ -45,6 +46,7 @@ class ProveedorController extends Controller
         $request->validate([
             'proveedor' => 'required|string|max:255',
             'direccion' => 'required|string',
+            'economico' => 'nullable|string|max:255',
         ]);
 
         $proveedor->update($request->all());

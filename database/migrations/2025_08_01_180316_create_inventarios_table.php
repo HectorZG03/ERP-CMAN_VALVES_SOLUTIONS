@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('categoria');
             $table->string('nombre_producto');
+            $table->string('economico');
             $table->string('medida');
             $table->integer('existencia')->default(0);
             $table->decimal('precio_total', 10, 2)->default(0);

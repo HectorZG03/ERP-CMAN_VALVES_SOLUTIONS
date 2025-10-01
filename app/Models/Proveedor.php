@@ -14,6 +14,7 @@ class Proveedor extends Model
     protected $fillable = [
         'proveedor',
         'direccion',
+        'economico',
     ];
 
     public function entradas()

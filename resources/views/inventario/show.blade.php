@@ -72,7 +72,15 @@
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Unidad de Medida</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-white font-medium">
-                                            {{ $inventario->medida }}
+                                            {{ $inventario->medida }}                                         
+                                            
+                                        </dd>
+                                        {{-- economico --}}
+
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Economico</dt>
+                                        <dd class="mt-1 text-sm text-gray-900 dark:text-white font-medium">
+                                            {{ $inventario->economico ?? 'N/A' }}
+       
                                         </dd>
                                     </div>
                                 </div>
