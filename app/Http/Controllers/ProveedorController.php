@@ -22,7 +22,7 @@ class ProveedorController extends Controller
     {
         $request->validate([
             'proveedor' => 'required|string|max:255',
-            'direccion' => 'required|string',
+            'direccion' => 'nullable|string|max:255',
             'economico' => 'nullable|string|max:255',
         ]);
 
@@ -45,7 +45,7 @@ class ProveedorController extends Controller
     {
         $request->validate([
             'proveedor' => 'required|string|max:255',
-            'direccion' => 'required|string',
+            'direccion' => 'nullable|string|max:255',
             'economico' => 'nullable|string|max:255',
         ]);
 

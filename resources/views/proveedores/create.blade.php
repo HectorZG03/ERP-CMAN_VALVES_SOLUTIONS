@@ -57,12 +57,12 @@
                 <!-- Dirección -->
                 <div class="mb-6">
                     <label for="direccion" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Dirección <span class="text-red-500">*</span>
+                        Dirección 
                     </label>
                     <textarea name="direccion" 
                               id="direccion" 
                               rows="4"
-                              required
+                              
                               class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200"
                               placeholder="Calle, número, colonia, ciudad, estado, código postal...">{{ old('direccion') }}</textarea>
                     @error('direccion')
