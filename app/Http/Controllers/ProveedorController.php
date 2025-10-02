@@ -55,8 +55,18 @@ class ProveedorController extends Controller
     }
 
     public function destroy(Proveedor $proveedor)
-    {
+{
+    try {
+        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         $proveedor->delete();
-        return redirect()->route('proveedores.index')->with('success', 'Proveedor eliminado');
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        
+        return redirect()->route('proveedores.index')
+            ->with('success', 'Proveedor eliminado');
+    } catch (\Exception $e) {
+        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        return redirect()->route('proveedores.index')
+            ->with('error', 'Error al eliminar: ' . $e->getMessage());
     }
+}
 }
