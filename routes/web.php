@@ -149,4 +149,11 @@ Route::prefix('prestamos')->name('prestamos.')->group(function () {
     Route::get('/inventario-export/pdf', [InventarioController::class, 'exportPDF'])->name('inventario.export.pdf');
     Route::get('/inventario-export/excel', [InventarioController::class, 'exportExcel'])->name('inventario.export.excel');
     Route::get('/inventario-export/view-pdf', [InventarioController::class, 'viewPDF'])->name('inventario.view.pdf');
+
+
+
+    // PARTE DEL BOTON DEL EXCEL
+    Route::get('/solicitudes/{solicitud}/excel', [SolicitudMaterialController::class, 'exportExcel'])
+    ->name('solicitudes.exportExcel');
+
 });

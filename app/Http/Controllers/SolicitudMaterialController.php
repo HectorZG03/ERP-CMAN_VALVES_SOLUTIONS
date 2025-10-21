@@ -8,6 +8,12 @@ use App\Models\SolicitudMaterialDetalle;
 use App\Models\Inventario;
 use Illuminate\Support\Facades\DB;
 
+
+// PARTE PARA EXCEL
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
 class SolicitudMaterialController extends Controller
 {
     public function index()
@@ -245,6 +251,62 @@ class SolicitudMaterialController extends Controller
             'precio_promedio' => $producto->getPrecioPromedio(),
         ]);
     }
+
+
+
+
+
+
+    // ESTO ES LA PARTE DE LA EXPORTACION A EXCEL
+
+
+    public function exportExcel(SolicitudMaterial $solicitud)
+{
+    $solicitud->load(['detalles.inventario', 'user']);
+
+    // Ruta a la plantilla
+    $templatePath = storage_path('app/plantillas/SolicitudMateriales.xlsx');
+
+    // Cargar plantilla existente
+    $spreadsheet = IOFactory::load($templatePath);
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // 🔹 Rellena los datos donde corresponda
+    $sheet->setCellValue('F16', $solicitud->user->name);
+    $sheet->setCellValue('F14', $solicitud->user->role);
+    $sheet->setCellValue('F20', $solicitud->destino);
+    $sheet->setCellValue('F22', $solicitud->created_at->format('d/m/Y'));
+    $sheet->setCellValue('Q58', $solicitud->created_at->format('d/m/Y'));
+    $sheet->setCellValue('E47', $solicitud->comentario ?? 'N/A');
+
+    // Supongamos que tus productos comienzan en la fila 10:
+    $row = 27;
+    foreach ($solicitud->detalles as $detalle) {
+        $sheet->setCellValue('D' . $row, $detalle->cantidad_solicitada);
+        $sheet->setCellValue('E' . $row, $detalle->inventario->medida ?? '-');
+        $sheet->setCellValue('F' . $row, $detalle->inventario->nombre_producto ?? 'N/A');
+        
+        
+        
+        // $sheet->setCellValue('B' . $row, $detalle->inventario->categoria ?? '-');
+        // $sheet->setCellValue('E' . $row, $detalle->precio_unitario);
+        $row++;
+    }
+
+    // Descargar el archivo final
+    $writer = new Xlsx($spreadsheet);
+    $filename = 'Solicitud_Materiales_' . $solicitud->id . '.xlsx';
+
+    return new StreamedResponse(function() use ($writer) {
+        $writer->save('php://output');
+    }, 200, [
+        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition' => 'attachment;filename="' . $filename . '"',
+    ]);
+}
+
+
+
 }
 
   

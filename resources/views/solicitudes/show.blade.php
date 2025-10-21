@@ -330,6 +330,13 @@
                 </div>
             </div>
 
+
+            <a href="{{ route('solicitudes.exportExcel', $solicitud) }}"
+   class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
+   Exportar con Plantilla Excel
+</a>
+
+
             <!-- Destino -->
             <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
                 <div class="px-4 py-5 sm:p-6">
