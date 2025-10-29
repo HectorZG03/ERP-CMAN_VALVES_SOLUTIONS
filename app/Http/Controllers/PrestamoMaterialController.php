@@ -9,6 +9,14 @@ use App\Models\Inventario;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
+
+// PARTE PARA EXCEL
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+
+
 class PrestamoMaterialController extends Controller
 {
     public function index()
@@ -337,4 +345,68 @@ class PrestamoMaterialController extends Controller
 
         return view('prestamos.dashboard', compact('prestamosVencidos', 'prestamosProximos', 'estadisticas'));
     }
+
+
+
+
+
+
+
+    // ESTO ES LA PARTE DE LA EXPORTACION A EXCEL
+
+
+    public function exportExcel(PrestamoMaterial $prestamo)
+{
+    $prestamo->load(['detalles.inventario', 'user']);
+
+    // Ruta a la plantilla
+    $templatePath = storage_path('app/plantillas/Resguardo_de_Equipos_y_Herramientas.xlsx');
+
+    // Cargar plantilla existente
+    $spreadsheet = IOFactory::load($templatePath);
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // 🔹 Rellena los datos donde corresponda
+    $sheet->setCellValue('H13', $prestamo->user->name);
+    $sheet->setCellValue('B46', $prestamo->user->name);
+    $sheet->setCellValue('B13', $prestamo->user->role);
+    $sheet->setCellValue('M13', $prestamo->destino);
+    // $sheet->setCellValue('F22', $prestamo->created_at->format('d/m/Y'));
+    $sheet->setCellValue('P44', $prestamo->created_at->format('d/m/Y'));
+    $sheet->setCellValue('P45', $prestamo->estatus);
+    $sheet->setCellValue('F33', $prestamo->comentario ?? 'N/A');
+   
+
+    
+
+    // Supongamos que tus productos comienzan en la fila 10:
+    $row = 16;
+    foreach ($prestamo->detalles as $detalle) {
+        $sheet->setCellValue('E' . $row, $detalle->cantidad_prestada);
+        $sheet->setCellValue('F' . $row, $detalle->inventario->medida ?? '-');
+        $sheet->setCellValue('G' . $row, $detalle->inventario->economico ?? 'N/A');
+        $sheet->setCellValue('I' . $row, $detalle->inventario->nombre_producto ?? 'N/A');
+        
+        
+        
+        // $sheet->setCellValue('B' . $row, $detalle->inventario->categoria ?? '-');
+        // $sheet->setCellValue('E' . $row, $detalle->precio_unitario);
+        $row++;
+    }
+
+    // Descargar el archivo final
+    $writer = new Xlsx($spreadsheet);
+    $filename = 'Prestamo_Materiales' . $prestamo->id . '.xlsx';
+
+    return new StreamedResponse(function() use ($writer) {
+        $writer->save('php://output');
+    }, 200, [
+        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition' => 'attachment;filename="' . $filename . '"',
+    ]);
+}
+
+
+
+
 }

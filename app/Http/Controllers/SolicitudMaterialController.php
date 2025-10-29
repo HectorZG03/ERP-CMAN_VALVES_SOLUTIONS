@@ -265,7 +265,7 @@ class SolicitudMaterialController extends Controller
     $solicitud->load(['detalles.inventario', 'user']);
 
     // Ruta a la plantilla
-    $templatePath = storage_path('app/plantillas/SolicitudMateriales.xlsx');
+    $templatePath = storage_path('app/plantillas/SolicitudMateriales365.xlsx');
 
     // Cargar plantilla existente
     $spreadsheet = IOFactory::load($templatePath);
@@ -295,7 +295,7 @@ class SolicitudMaterialController extends Controller
 
     // Descargar el archivo final
     $writer = new Xlsx($spreadsheet);
-    $filename = 'Solicitud_Materiales_' . $solicitud->id . '.xlsx';
+    $filename = 'Solicitud_Materiales' . $solicitud->id . '.xlsx';
 
     return new StreamedResponse(function() use ($writer) {
         $writer->save('php://output');

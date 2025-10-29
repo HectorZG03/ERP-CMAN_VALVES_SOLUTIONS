@@ -152,8 +152,12 @@ Route::prefix('prestamos')->name('prestamos.')->group(function () {
 
 
 
-    // PARTE DEL BOTON DEL EXCEL
+    // PARTE DEL BOTON DEL EXCEL SOLICITUD DE MATERIAL
     Route::get('/solicitudes/{solicitud}/excel', [SolicitudMaterialController::class, 'exportExcel'])
     ->name('solicitudes.exportExcel');
+
+    // PARTE DEL BOTON DEL EXCEL PRESTAMO DE MATERIAL
+    Route::get('/prestamos/{prestamo}/excel', [PrestamoMaterialController::class, 'exportExcel'])
+    ->name('prestamos.exportExcel');
 
 });
