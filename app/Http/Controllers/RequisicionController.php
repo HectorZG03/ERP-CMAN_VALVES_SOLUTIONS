@@ -5,6 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Requisicion;
 
+
+
+// PARTE PARA EXCEL
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
 class RequisicionController extends Controller
 {
     public function index()
@@ -88,4 +95,60 @@ class RequisicionController extends Controller
 
         return back()->with('success', 'Estatus de requisición actualizado');
     }
+
+
+
+
+
+
+
+    // ESTO ES LA PARTE DE LA EXPORTACION A EXCEL
+
+
+    public function exportExcel(Requisicion $requisicion)
+{
+    $requisicion->load(['user']);
+
+    // Ruta a la plantilla
+    $templatePath = storage_path('app/plantillas/Requisicion.xlsx');
+
+    // Cargar plantilla existente
+    $spreadsheet = IOFactory::load($templatePath);
+    $sheet = $spreadsheet->getActiveSheet();
+
+    // 🔹 Rellena los datos donde corresponda
+    $sheet->setCellValue('H13', $requisicion->user->name);
+    $sheet->setCellValue('B46', $requisicion->user->name);
+    $sheet->setCellValue('B13', $requisicion->user->role);
+    $sheet->setCellValue('M13', $requisicion->nombre_solicitante);
+    $sheet->setCellValue('F22', $requisicion->created_at->format('d/m/Y'));
+    $sheet->setCellValue('P44', $requisicion->created_at->format('d/m/Y'));
+    $sheet->setCellValue('P45', $requisicion->estatus);
+    $sheet->setCellValue('F33', $requisicion->comentario ?? 'N/A');
+
+   
+
+    
+
+    // Supongamos que tus productos comienzan en la fila 10:
+    $row = 16;
+
+    foreach ([$requisicion] as $item) {
+    $sheet->setCellValue('E' . $row, $item->cantidad ?? '-');
+    $sheet->setCellValue('F' . $row, $item->unidad ?? '-');
+    $sheet->setCellValue('G' . $row, $item->material ?? '-');
+    $row++;
+        }   
+
+    // Descargar el archivo final
+    $writer = new Xlsx($spreadsheet);
+    $filename = 'Requisicion.xlsx' . $requisicion->id . '.xlsx';
+
+    return new StreamedResponse(function() use ($writer) {
+        $writer->save('php://output');
+    }, 200, [
+        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition' => 'attachment;filename="' . $filename . '"',
+    ]);
+}
 }

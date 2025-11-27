@@ -222,6 +222,22 @@
                                     @elseif(!auth()->user()->canApproveRequests() && !auth()->user()->canManageInventory() && $requisicion->user_id != auth()->id())
                                         <span class="text-gray-400 dark:text-gray-500 text-xs">Sin acciones</span>
                                     @endif
+
+
+
+                                    {{-- PDF --}}
+
+
+                                    {{-- Imprimir --}}
+                                    <div class="ml-2">
+                                        <a href="#" target="_blank" 
+                                           class="inline-flex items-center px-2 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-300 text-xs font-medium rounded-md transition-colors duration-200">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0014.414 6L10 1.586A2 2 0 008.586 1H6zM13 8V3.5L17.5 8H13z"/>
+                                            </svg>
+                                            PDF
+                                        </a>
+
                                 </div>
                             </td>
                         </tr>

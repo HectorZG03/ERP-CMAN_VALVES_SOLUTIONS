@@ -40,6 +40,18 @@
                     Requisición Denegada
                 </span>
             @endif
+
+
+
+
+            <a href="{{ route('requisiciones.exportExcel', $requisicion) }}"
+            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
+            Exportar con Plantilla Excel
+        </a>
+
+
+
+
         </div>
     </div>
 
