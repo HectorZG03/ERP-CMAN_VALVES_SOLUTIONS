@@ -35,22 +35,22 @@ class DemoDataSeeder extends Seeder
             Cliente::create($cliente);
         }
 
-        // Crear productos de inventario de ejemplo
-        $productos = [
-            ['categoria' => 'Herramientas', 'nombre_producto' => 'Martillo Industrial', 'medida' => 'Piezas'],
-            ['categoria' => 'Herramientas', 'nombre_producto' => 'Destornillador Phillips', 'medida' => 'Piezas'],
-            ['categoria' => 'Materiales', 'nombre_producto' => 'Tornillos Inoxidables', 'medida' => 'Kg'],
-            ['categoria' => 'Materiales', 'nombre_producto' => 'Cable Eléctrico', 'medida' => 'Metros'],
-            ['categoria' => 'Seguridad', 'nombre_producto' => 'Cascos de Seguridad', 'medida' => 'Piezas'],
-            ['categoria' => 'Seguridad', 'nombre_producto' => 'Chalecos Reflectivos', 'medida' => 'Piezas'],
-            ['categoria' => 'Lubricantes', 'nombre_producto' => 'Aceite Motor', 'medida' => 'Litros'],
-            ['categoria' => 'Lubricantes', 'nombre_producto' => 'Grasa Industrial', 'medida' => 'Kg'],
-            ['categoria' => 'Electrónicos', 'nombre_producto' => 'Multímetro Digital', 'medida' => 'Piezas'],
-            ['categoria' => 'Electrónicos', 'nombre_producto' => 'Lámpara LED', 'medida' => 'Piezas'],
-        ];
+        // // Crear productos de inventario de ejemplo
+        // $productos = [
+        //     ['categoria' => 'Herramientas', 'nombre_producto' => 'Martillo Industrial', 'medida' => 'Piezas'],
+        //     ['categoria' => 'Herramientas', 'nombre_producto' => 'Destornillador Phillips', 'medida' => 'Piezas'],
+        //     ['categoria' => 'Materiales', 'nombre_producto' => 'Tornillos Inoxidables', 'medida' => 'Kg'],
+        //     ['categoria' => 'Materiales', 'nombre_producto' => 'Cable Eléctrico', 'medida' => 'Metros'],
+        //     ['categoria' => 'Seguridad', 'nombre_producto' => 'Cascos de Seguridad', 'medida' => 'Piezas'],
+        //     ['categoria' => 'Seguridad', 'nombre_producto' => 'Chalecos Reflectivos', 'medida' => 'Piezas'],
+        //     ['categoria' => 'Lubricantes', 'nombre_producto' => 'Aceite Motor', 'medida' => 'Litros'],
+        //     ['categoria' => 'Lubricantes', 'nombre_producto' => 'Grasa Industrial', 'medida' => 'Kg'],
+        //     ['categoria' => 'Electrónicos', 'nombre_producto' => 'Multímetro Digital', 'medida' => 'Piezas'],
+        //     ['categoria' => 'Electrónicos', 'nombre_producto' => 'Lámpara LED', 'medida' => 'Piezas'],
+        // ];
 
-        foreach ($productos as $producto) {
-            Inventario::create($producto);
-        }
+        // foreach ($productos as $producto) {
+        //     Inventario::create($producto);
+        // }
     }
 }

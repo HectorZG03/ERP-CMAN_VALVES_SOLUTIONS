@@ -34,7 +34,7 @@ class RequisicionController extends Controller
         return view('requisiciones.create');
     }
 
-    public function store(Request $request)
+        public function store(Request $request)
     {
         $request->validate([
             'nombre_solicitante' => 'required|string|max:255',
@@ -51,7 +51,14 @@ class RequisicionController extends Controller
         Requisicion::create([
             'nombre_solicitante' => $request->nombre_solicitante,
             'departamento' => $request->departamento,
+            'proyecto' => $request->proyecto ?? 'N/A', // ✅ Si está vacío, guarda N/A
+            'sit' => $request->sit ?? 'N/A',
+            'partida' => $request->partida ?? 'N/A',
             'plataforma' => $request->plataforma,
+            'area' => $request->area ?? 'N/A',
+            'activo' => $request->activo ?? 'N/A',
+            'contrato' => $request->contrato ?? 'N/A',
+            'combenio' => $request->combenio ?? 'N/A',
             'embarcacion' => $request->embarcacion,
             'cantidad' => $request->cantidad,
             'unidad' => $request->unidad,

@@ -10,9 +10,17 @@ return new class extends Migration
     {
         Schema::create('requisiciones', function (Blueprint $table) {
             $table->id();
+            $table->string('folio')->unique()->nullable(); // ✅ Agregar nullable
             $table->string('nombre_solicitante');
             $table->string('departamento');
+            $table->string('proyecto');
+            $table->string('sit');
+            $table->string('partida');
             $table->string('plataforma');
+            $table->string('area');
+            $table->string('activo');
+            $table->string('contrato');
+            $table->string('combenio');
             $table->string('embarcacion');
             $table->integer('cantidad');
             $table->string('unidad');
