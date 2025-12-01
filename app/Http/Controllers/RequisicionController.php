@@ -130,19 +130,25 @@ public function exportExcel(Requisicion $requisicion)
     $sheet = $spreadsheet->getActiveSheet();
 
     // 🔹 Rellena los datos donde corresponda
-    $sheet->setCellValue('a1', $requisicion->user->name);
-    $sheet->setCellValue('d1', $requisicion->nombre_solicitante);
-    $sheet->setCellValue('e1', $requisicion->created_at->format('d/m/Y'));
-    $sheet->setCellValue('f1', $requisicion->created_at->format('d/m/Y'));
-    $sheet->setCellValue('h1', $requisicion->comentario ?? 'N/A');
+    $sheet->setCellValue('C10', $requisicion->user->name);
+    $sheet->setCellValue('F36', $requisicion->user->name);
+    // $sheet->setCellValue('k11', $requisicion->nombre_solicitante);
+    $sheet->setCellValue('C11', $requisicion->user->role);
+    $sheet->setCellValue('G5', $requisicion->created_at->format('d/m/Y'));
+    // $sheet->setCellValue('f1', $requisicion->created_at->format('d/m/Y'));
+    $sheet->setCellValue('A34', $requisicion->comentario ?? 'N/A');
 
-    $sheet->setCellValue('i1', $requisicion->proyecto ?? 'N/A');
-    $sheet->setCellValue('j1', $requisicion->sit ?? 'N/A');
-    $sheet->setCellValue('k1', $requisicion->partida ?? 'N/A');
-    $sheet->setCellValue('l1', $requisicion->plataforma ?? 'N/A');
-    $sheet->setCellValue('m1', $requisicion->embarcacion ?? 'N/A');
-    $sheet->setCellValue('n1', $requisicion->area ?? 'N/A');
-    $sheet->setCellValue('o1', $requisicion->activo ?? 'N/A');
+    $sheet->setCellValue('C12', $requisicion->proyecto ?? 'N/A');
+    $sheet->setCellValue('C13', $requisicion->sit ?? 'N/A');
+    $sheet->setCellValue('C14', $requisicion->partida ?? 'N/A');
+    $sheet->setCellValue('C15', $requisicion->plataforma ?? 'N/A');
+    $sheet->setCellValue('C16', $requisicion->embarcacion ?? 'N/A');
+    $sheet->setCellValue('C17', $requisicion->area ?? 'N/A');
+    $sheet->setCellValue('C18', $requisicion->activo ?? 'N/A');
+    $sheet->setCellValue('G6', $requisicion->folio);
+    
+
+
 
     // ✅ Opción 1: Mostrar todos los datos en una sola celda
     // $sheet->setCellValue('p1', 
@@ -154,17 +160,17 @@ public function exportExcel(Requisicion $requisicion)
     // );
 
      //✅ Opción 2: Mostrar cada dato en celdas separadas
-     $sheet->setCellValue('p1', $requisicion->contrato->empresa_nombre ?? 'N/A');
-     $sheet->setCellValue('q1', $requisicion->contrato->contrato ?? 'N/A');
-     $sheet->setCellValue('r1', $requisicion->contrato->convenio ?? 'N/A');
+    //  $sheet->setCellValue('p1', $requisicion->contrato->empresa_nombre ?? 'N/A');
+     $sheet->setCellValue('G7', $requisicion->contrato->contrato ?? 'N/A');
+     $sheet->setCellValue('G8', $requisicion->contrato->convenio ?? 'N/A');
 
     // Supongamos que tus productos comienzan en la fila 10:
-    $row = 16;
+    $row = 21;
 
     foreach ([$requisicion] as $item) {
-        $sheet->setCellValue('E' . $row, $item->cantidad ?? '-');
-        $sheet->setCellValue('F' . $row, $item->unidad ?? '-');
-        $sheet->setCellValue('G' . $row, $item->material ?? '-');
+        $sheet->setCellValue('A' . $row, $item->cantidad ?? '-');
+        $sheet->setCellValue('B' . $row, $item->unidad ?? '-');
+        $sheet->setCellValue('C' . $row, $item->material ?? '-');
         $row++;
     }   
 
