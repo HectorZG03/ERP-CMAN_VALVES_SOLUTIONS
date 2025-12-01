@@ -102,23 +102,7 @@
                                value="{{ old('activo') }}" placeholder="Número de activo o N/A">
                     </div>
 
-                    <div>
-                        <label for="contrato" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Contrato
-                        </label>
-                        <input type="text" name="contrato" id="contrato"
-                               class="mt-1 block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200"
-                               value="{{ old('contrato') }}" placeholder="Número de contrato o N/A">
-                    </div>
 
-                    <div>
-                        <label for="combenio" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Convenio
-                        </label>
-                        <input type="text" name="combenio" id="combenio"
-                               class="mt-1 block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200"
-                               value="{{ old('combenio') }}" placeholder="Número de convenio o N/A">
-                    </div>
 
                     <div>
                         <label for="plataforma" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -137,6 +121,32 @@
                                class="mt-1 block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200"
                                value="{{ old('embarcacion') }}" placeholder="Nombre del barco o N/A">
                     </div>
+
+
+                    {{-- parte de contrato --}} 
+
+                    <div>
+                        <label for="contrato_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Contrato / Empresa <span class="text-red-500">*</span>
+                        </label>
+
+                        <select name="contrato_id" id="contrato_id" required
+                                class="mt-1 block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200">
+
+                            <option value="">Selecciona un contrato</option>
+
+                            @foreach ($contratos as $c)
+                                <option value="{{ $c->id }}">
+                                    {{ $c->empresa_nombre }} — {{ $c->contrato }} — {{ $c->convenio }}
+                                </option>
+                            @endforeach
+                            
+                        </select>
+                    </div>
+
+
+
+
                 </div>
             </div>
 

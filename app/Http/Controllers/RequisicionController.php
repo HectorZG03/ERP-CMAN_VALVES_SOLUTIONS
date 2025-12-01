@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Requisicion;
+use App\Models\Contrato;
 
 
 
@@ -31,7 +32,11 @@ class RequisicionController extends Controller
 
     public function create()
     {
-        return view('requisiciones.create');
+
+        $contratos = Contrato::all();
+        return view('requisiciones.create', compact('contratos'));
+
+        // return view('requisiciones.create');
     }
 
         public function store(Request $request)
@@ -54,11 +59,11 @@ class RequisicionController extends Controller
             'proyecto' => $request->proyecto ?? 'N/A', // ✅ Si está vacío, guarda N/A
             'sit' => $request->sit ?? 'N/A',
             'partida' => $request->partida ?? 'N/A',
-            'plataforma' => $request->plataforma,
+            'plataforma' => $request->plataforma ?? 'N/A',
             'area' => $request->area ?? 'N/A',
             'activo' => $request->activo ?? 'N/A',
-            'contrato' => $request->contrato ?? 'N/A',
-            'combenio' => $request->combenio ?? 'N/A',
+            'contrato_id' => $request->contrato_id, // esta es la ruta a la relación contrato
+            
             'embarcacion' => $request->embarcacion,
             'cantidad' => $request->cantidad,
             'unidad' => $request->unidad,
@@ -112,9 +117,10 @@ class RequisicionController extends Controller
     // ESTO ES LA PARTE DE LA EXPORTACION A EXCEL
 
 
-    public function exportExcel(Requisicion $requisicion)
+public function exportExcel(Requisicion $requisicion)
 {
-    $requisicion->load(['user']);
+    // ✅ Agregar 'contrato' al load()
+    $requisicion->load(['user', 'contrato']);
 
     // Ruta a la plantilla
     $templatePath = storage_path('app/plantillas/Requisicion.xlsx');
@@ -124,32 +130,47 @@ class RequisicionController extends Controller
     $sheet = $spreadsheet->getActiveSheet();
 
     // 🔹 Rellena los datos donde corresponda
-    $sheet->setCellValue('H13', $requisicion->user->name);
-    $sheet->setCellValue('B46', $requisicion->user->name);
-    $sheet->setCellValue('B13', $requisicion->user->role);
-    $sheet->setCellValue('M13', $requisicion->nombre_solicitante);
-    $sheet->setCellValue('F22', $requisicion->created_at->format('d/m/Y'));
-    $sheet->setCellValue('P44', $requisicion->created_at->format('d/m/Y'));
-    $sheet->setCellValue('P45', $requisicion->estatus);
-    $sheet->setCellValue('F33', $requisicion->comentario ?? 'N/A');
+    $sheet->setCellValue('a1', $requisicion->user->name);
+    $sheet->setCellValue('d1', $requisicion->nombre_solicitante);
+    $sheet->setCellValue('e1', $requisicion->created_at->format('d/m/Y'));
+    $sheet->setCellValue('f1', $requisicion->created_at->format('d/m/Y'));
+    $sheet->setCellValue('h1', $requisicion->comentario ?? 'N/A');
 
-   
+    $sheet->setCellValue('i1', $requisicion->proyecto ?? 'N/A');
+    $sheet->setCellValue('j1', $requisicion->sit ?? 'N/A');
+    $sheet->setCellValue('k1', $requisicion->partida ?? 'N/A');
+    $sheet->setCellValue('l1', $requisicion->plataforma ?? 'N/A');
+    $sheet->setCellValue('m1', $requisicion->embarcacion ?? 'N/A');
+    $sheet->setCellValue('n1', $requisicion->area ?? 'N/A');
+    $sheet->setCellValue('o1', $requisicion->activo ?? 'N/A');
 
-    
+    // ✅ Opción 1: Mostrar todos los datos en una sola celda
+    // $sheet->setCellValue('p1', 
+    //     $requisicion->contrato 
+    //         ? $requisicion->contrato->empresa_nombre . ' — ' . 
+    //           $requisicion->contrato->contrato . ' — ' . 
+    //           $requisicion->contrato->convenio
+    //         : 'N/A'
+    // );
+
+     //✅ Opción 2: Mostrar cada dato en celdas separadas
+     $sheet->setCellValue('p1', $requisicion->contrato->empresa_nombre ?? 'N/A');
+     $sheet->setCellValue('q1', $requisicion->contrato->contrato ?? 'N/A');
+     $sheet->setCellValue('r1', $requisicion->contrato->convenio ?? 'N/A');
 
     // Supongamos que tus productos comienzan en la fila 10:
     $row = 16;
 
     foreach ([$requisicion] as $item) {
-    $sheet->setCellValue('E' . $row, $item->cantidad ?? '-');
-    $sheet->setCellValue('F' . $row, $item->unidad ?? '-');
-    $sheet->setCellValue('G' . $row, $item->material ?? '-');
-    $row++;
-        }   
+        $sheet->setCellValue('E' . $row, $item->cantidad ?? '-');
+        $sheet->setCellValue('F' . $row, $item->unidad ?? '-');
+        $sheet->setCellValue('G' . $row, $item->material ?? '-');
+        $row++;
+    }   
 
     // Descargar el archivo final
     $writer = new Xlsx($spreadsheet);
-    $filename = 'Requisicion.xlsx' . $requisicion->id . '.xlsx';
+    $filename = 'Requisicion_' . $requisicion->id . '.xlsx';
 
     return new StreamedResponse(function() use ($writer) {
         $writer->save('php://output');

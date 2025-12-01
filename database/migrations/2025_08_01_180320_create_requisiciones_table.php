@@ -19,8 +19,6 @@ return new class extends Migration
             $table->string('plataforma');
             $table->string('area');
             $table->string('activo');
-            $table->string('contrato');
-            $table->string('combenio');
             $table->string('embarcacion');
             $table->integer('cantidad');
             $table->string('unidad');

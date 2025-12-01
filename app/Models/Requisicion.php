@@ -24,8 +24,6 @@ class Requisicion extends Model
         'partida',
         'area',
         'activo',
-        'contrato',
-        'combenio',
         'cantidad',
         'unidad',
         'material',
@@ -33,6 +31,7 @@ class Requisicion extends Model
         'comentario',
         'estatus',
         'user_id',
+        'contrato_id',
     ];
 
     protected $attributes = [
@@ -91,4 +90,12 @@ class Requisicion extends Model
     {
         return $query->where('estatus', 'denegado');
     }
+
+public function contrato()
+{
+    return $this->belongsTo(Contrato::class);
+}
+
+
+
 }
