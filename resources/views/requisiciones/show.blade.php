@@ -13,11 +13,11 @@
         </a>
         
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-            Requisición de Compra #{{ $requisicion->id }}
+            Requisición #{{ $requisicion->folio ?? str_pad($requisicion->id, 4, '0', STR_PAD_LEFT) }}
         </h1>
         
         <!-- Estado de la requisición -->
-        <div class="ml-auto">
+        <div class="ml-auto flex items-center space-x-3">
             @if($requisicion->estatus === 'pendiente')
                 <span class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -41,64 +41,147 @@
                 </span>
             @endif
 
-
-
-
             <a href="{{ route('requisiciones.exportExcel', $requisicion) }}"
-            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
-            Exportar con Plantilla Excel
-        </a>
-
-
-
-
+               class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 text-white text-sm font-medium rounded-md transition-colors duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Exportar Excel
+            </a>
         </div>
     </div>
+
+    <!-- Resumen de la requisición -->
+    @if($requisicion->detalles && $requisicion->detalles->count() > 0)
+    <div class="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg p-6 border border-purple-200 dark:border-purple-800 transition-colors duration-200">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Resumen de la Requisición</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="text-center">
+                <div class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ $requisicion->total_materiales }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Materiales Diferentes</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $requisicion->total_unidades }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Total Unidades</div>
+            </div>
+            <div class="text-center">
+                <div class="text-2xl font-bold text-gray-600 dark:text-gray-400">{{ $requisicion->created_at->format('d/m/Y') }}</div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">Fecha Requisición</div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Contenido principal -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Información principal -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- Detalles del material -->
+            <!-- Materiales solicitados -->
             <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
                 <div class="px-4 py-5 sm:p-6">
                     <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
-                        Material Solicitado
+                        Materiales Solicitados
                     </h3>
                     
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-6 transition-colors duration-200">
-                        <div class="flex items-start space-x-4">
-                            <div class="flex-shrink-0">
-                                <div class="w-16 h-16 bg-purple-500 dark:bg-purple-600 rounded-lg flex items-center justify-center">
-                                    @if($requisicion->tipo_requerimiento === 'interno')
-                                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" clip-rule="evenodd"/>
-                                        </svg>
-                                    @else
-                                        <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0v-.5A1.5 1.5 0 0114.5 6c.526 0 .988-.27 1.256-.679a6.012 6.012 0 011.912 2.706A8.012 8.012 0 0110 16a8.012 8.012 0 01-7.668-8.027z" clip-rule="evenodd"/>
-                                        </svg>
-                                    @endif
+                    @if($requisicion->detalles && $requisicion->detalles->count() > 0)
+                        <div class="space-y-4">
+                            @foreach($requisicion->detalles as $index => $detalle)
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-colors duration-200">
+                                <div class="flex items-start space-x-4">
+                                    <!-- Ícono del material -->
+                                    <div class="flex-shrink-0">
+                                        <div class="w-12 h-12 bg-purple-500 dark:bg-purple-600 rounded-lg flex items-center justify-center">
+                                            <span class="text-white font-medium text-sm">
+                                                {{ $index + 1 }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Información del material -->
+                                    <div class="flex-1">
+                                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                            {{ $detalle->material }}
+                                        </h4>
+                                        
+                                        <div class="mt-3 grid grid-cols-2 md:grid-cols-3 gap-4">
+                                            <div>
+                                                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cantidad</dt>
+                                                <dd class="text-lg font-bold text-purple-600 dark:text-purple-400">
+                                                    {{ $detalle->cantidad }}
+                                                </dd>
+                                            </div>
+                                            <div>
+                                                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Unidad</dt>
+                                                <dd class="text-sm font-medium text-gray-900 dark:text-white">
+                                                    {{ $detalle->unidad }}
+                                                </dd>
+                                            </div>
+                                            <div>
+                                                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tipo</dt>
+                                                <dd class="text-sm font-medium text-gray-900 dark:text-white">
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $requisicion->tipo_requerimiento === 'interno' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' : 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' }}">
+                                                        {{ ucfirst($requisicion->tipo_requerimiento) }}
+                                                    </span>
+                                                </dd>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="flex-1">
-                                <h4 class="text-xl font-semibold text-gray-900 dark:text-white">
-                                    {{ $requisicion->material }}
-                                </h4>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    Tipo: {{ ucfirst($requisicion->tipo_requerimiento) }}
-                                </p>
-                                
-                                <div class="mt-4">
-                                    <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Cantidad Solicitada</dt>
-                                    <dd class="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                                        {{ $requisicion->cantidad }} {{ $requisicion->unidad }}
-                                    </dd>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
-                    </div>
+                    @else
+                        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                            <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            <p class="font-medium">No hay materiales en esta requisición</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Información del proyecto y contrato -->
+            <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                        Información del Proyecto
+                    </h3>
+                    
+                    <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Proyecto</dt>
+                            <dd class="text-sm text-gray-900 dark:text-white font-medium">{{ $requisicion->proyecto }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">SIT</dt>
+                            <dd class="text-sm text-gray-900 dark:text-white font-medium">{{ $requisicion->sit }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Partida</dt>
+                            <dd class="text-sm text-gray-900 dark:text-white font-medium">{{ $requisicion->partida }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Área</dt>
+                            <dd class="text-sm text-gray-900 dark:text-white font-medium">{{ $requisicion->area }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Activo</dt>
+                            <dd class="text-sm text-gray-900 dark:text-white font-medium">{{ $requisicion->activo }}</dd>
+                        </div>
+                        @if($requisicion->contrato)
+                        <div class="md:col-span-2">
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Contrato</dt>
+                            <dd class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3 text-sm text-gray-900 dark:text-white">
+                                <div class="font-semibold">{{ $requisicion->contrato->empresa_nombre }}</div>
+                                <div class="text-gray-600 dark:text-gray-400 mt-1">
+                                    {{ $requisicion->contrato->contrato }} — {{ $requisicion->contrato->convenio }}
+                                </div>
+                            </dd>
+                        </div>
+                        @endif
+                    </dl>
                 </div>
             </div>
 
@@ -216,6 +299,9 @@
                             <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
                                 {{ $requisicion->user->email }}
                             </p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">
+                                {{ ucfirst(str_replace('_', ' ', $requisicion->user->role)) }}
+                            </p>
                         @endif
                     </div>
                 </div>
@@ -302,9 +388,9 @@
                     
                     <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 transition-colors duration-200">
                         <div class="text-center">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">ID de Requisición</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Folio de Requisición</p>
                             <p class="text-2xl font-mono font-bold text-gray-900 dark:text-white">
-                                #{{ str_pad($requisicion->id, 6, '0', STR_PAD_LEFT) }}
+                                {{ $requisicion->folio ?? '#' . str_pad($requisicion->id, 6, '0', STR_PAD_LEFT) }}
                             </p>
                         </div>
                     </div>

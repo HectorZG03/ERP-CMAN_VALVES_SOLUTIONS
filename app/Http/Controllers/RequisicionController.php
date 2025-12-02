@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Requisicion;
+use App\Models\RequisicionDetalle;
 use App\Models\Contrato;
-
-
+use Illuminate\Support\Facades\DB;
 
 // PARTE PARA EXCEL
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -19,12 +19,12 @@ class RequisicionController extends Controller
     {
         $user = auth()->user();
         
-        // Los que pueden aprobar y el personal de inventario ven todas las requisiciones
         if ($user->canApproveRequests() || $user->canManageInventory()) {
-            $requisiciones = Requisicion::with('user')->paginate(15);
+            $requisiciones = Requisicion::with(['user', 'detalles'])->paginate(15);
         } else {
-            // Los demás usuarios solo ven sus propias requisiciones
-            $requisiciones = Requisicion::where('user_id', $user->id)->paginate(15);
+            $requisiciones = Requisicion::where('user_id', $user->id)
+                                       ->with(['user', 'detalles'])
+                                       ->paginate(15);
         }
         
         return view('requisiciones.index', compact('requisiciones'));
@@ -32,63 +32,82 @@ class RequisicionController extends Controller
 
     public function create()
     {
-
         $contratos = Contrato::all();
         return view('requisiciones.create', compact('contratos'));
-
-        // return view('requisiciones.create');
     }
 
-        public function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'nombre_solicitante' => 'required|string|max:255',
             'departamento' => 'required|string|max:255',
             'plataforma' => 'required|string|max:255',
             'embarcacion' => 'required|string|max:255',
-            'cantidad' => 'required|integer|min:1',
-            'unidad' => 'required|string|max:255',
-            'material' => 'required|string|max:255',
             'tipo_requerimiento' => 'required|in:interno,externo',
             'comentario' => 'required|string',
+            'materiales' => 'required|array|min:1',
+            'materiales.*.cantidad' => 'required|integer|min:1',
+            'materiales.*.unidad' => 'required|string|max:255',
+            'materiales.*.material' => 'required|string|max:255',
+        ], [
+            'materiales.required' => 'Debe agregar al menos un material a la requisición',
+            'materiales.*.cantidad.required' => 'La cantidad es obligatoria',
+            'materiales.*.cantidad.min' => 'La cantidad debe ser mayor a 0',
+            'materiales.*.unidad.required' => 'La unidad es obligatoria',
+            'materiales.*.material.required' => 'La descripción del material es obligatoria',
         ]);
 
-        Requisicion::create([
-            'nombre_solicitante' => $request->nombre_solicitante,
-            'departamento' => $request->departamento,
-            'proyecto' => $request->proyecto ?? 'N/A', // ✅ Si está vacío, guarda N/A
-            'sit' => $request->sit ?? 'N/A',
-            'partida' => $request->partida ?? 'N/A',
-            'plataforma' => $request->plataforma ?? 'N/A',
-            'area' => $request->area ?? 'N/A',
-            'activo' => $request->activo ?? 'N/A',
-            'contrato_id' => $request->contrato_id, // esta es la ruta a la relación contrato
+        DB::beginTransaction();
+        
+        try {
+            // Crear la requisición principal
+            $requisicion = Requisicion::create([
+                'nombre_solicitante' => $request->nombre_solicitante,
+                'departamento' => $request->departamento,
+                'proyecto' => $request->proyecto ?? 'N/A',
+                'sit' => $request->sit ?? 'N/A',
+                'partida' => $request->partida ?? 'N/A',
+                'plataforma' => $request->plataforma ?? 'N/A',
+                'area' => $request->area ?? 'N/A',
+                'activo' => $request->activo ?? 'N/A',
+                'contrato_id' => $request->contrato_id,
+                'embarcacion' => $request->embarcacion,
+                'tipo_requerimiento' => $request->tipo_requerimiento,
+                'comentario' => $request->comentario,
+                'user_id' => auth()->id(),
+            ]);
+
+            // Crear los detalles de la requisición
+            foreach ($request->materiales as $material) {
+                RequisicionDetalle::create([
+                    'requisicion_id' => $requisicion->id,
+                    'cantidad' => $material['cantidad'],
+                    'unidad' => $material['unidad'],
+                    'material' => $material['material'],
+                ]);
+            }
+
+            DB::commit();
             
-            'embarcacion' => $request->embarcacion,
-            'cantidad' => $request->cantidad,
-            'unidad' => $request->unidad,
-            'material' => $request->material,
-            'tipo_requerimiento' => $request->tipo_requerimiento,
-            'comentario' => $request->comentario,
-            'user_id' => auth()->id(),
-        ]);
-
-        return redirect()->route('requisiciones.index')->with('success', 'Requisición enviada correctamente');
+            return redirect()->route('requisiciones.index')->with('success', 'Requisición enviada correctamente');
+            
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
+        }
     }
 
-    // Método para ver los detalles de una requisición
     public function show(Requisicion $requisicion)
     {
         $user = auth()->user();
         
-        // Verificar permisos: puede ver si es el solicitante, puede aprobar, o maneja inventario
         if (!($requisicion->user_id == $user->id || 
               $user->canApproveRequests() || 
               $user->canManageInventory())) {
             abort(403, 'No tienes permisos para ver esta requisición');
         }
 
-        $requisicion->load('user');
+        $requisicion->load(['user', 'detalles', 'contrato']);
         
         return view('requisiciones.show', compact('requisicion'));
     }
@@ -108,81 +127,52 @@ class RequisicionController extends Controller
         return back()->with('success', 'Estatus de requisición actualizado');
     }
 
+    // EXPORTACIÓN A EXCEL
+    public function exportExcel(Requisicion $requisicion)
+    {
+        $requisicion->load(['user', 'contrato', 'detalles']);
 
+        $templatePath = storage_path('app/plantillas/Requisicion.xlsx');
+        $spreadsheet = IOFactory::load($templatePath);
+        $sheet = $spreadsheet->getActiveSheet();
 
+        // Todo en minúsculas → strtolower()  Todo en MAYUSCULAS → strtoupper()
+        // Primera letra de cada palabra en mayúscula → ucwords()
+        // Datos generales (convertidos a mayúsculas)
+        $sheet->setCellValue('C10', strtoupper($requisicion->user->name));
+        $sheet->setCellValue('C11', strtoupper($requisicion->user->role));
+        $sheet->setCellValue('C12', ucwords($requisicion->proyecto ?? 'N/A'));
+        $sheet->setCellValue('C13', strtoupper($requisicion->sit ?? 'N/A'));
+        $sheet->setCellValue('C14', strtoupper($requisicion->partida ?? 'N/A'));
+        $sheet->setCellValue('C15', strtoupper($requisicion->plataforma ?? 'N/A'));
+        $sheet->setCellValue('C16', strtoupper($requisicion->embarcacion ?? 'N/A'));
+        $sheet->setCellValue('C17', strtoupper($requisicion->area ?? 'N/A'));
+        $sheet->setCellValue('C18', strtoupper($requisicion->activo ?? 'N/A'));
 
+        $sheet->setCellValue('F36', $requisicion->user->name);
+        $sheet->setCellValue('G6', $requisicion->folio);
+        $sheet->setCellValue('G7', $requisicion->contrato->contrato ?? 'N/A');
+        $sheet->setCellValue('G8', $requisicion->contrato->convenio ?? 'N/A');
+        $sheet->setCellValue('G5', $requisicion->created_at->format('d/m/Y'));
+        $sheet->setCellValue('A34', $requisicion->comentario ?? 'N/A');
 
+        // ✅ Materiales (múltiples productos)
+        $row = 21;
+        foreach ($requisicion->detalles as $detalle) {
+            $sheet->setCellValue('A' . $row, $detalle->cantidad);
+            $sheet->setCellValue('B' . $row, $detalle->unidad);
+            $sheet->setCellValue('C' . $row, $detalle->material);
+            $row++;
+        }
 
+        $writer = new Xlsx($spreadsheet);
+        $filename = 'Requisicion_' . $requisicion->id . '.xlsx';
 
-    // ESTO ES LA PARTE DE LA EXPORTACION A EXCEL
-
-
-public function exportExcel(Requisicion $requisicion)
-{
-    // ✅ Agregar 'contrato' al load()
-    $requisicion->load(['user', 'contrato']);
-
-    // Ruta a la plantilla
-    $templatePath = storage_path('app/plantillas/Requisicion.xlsx');
-
-    // Cargar plantilla existente
-    $spreadsheet = IOFactory::load($templatePath);
-    $sheet = $spreadsheet->getActiveSheet();
-
-    // 🔹 Rellena los datos donde corresponda
-    $sheet->setCellValue('C10', $requisicion->user->name);
-    $sheet->setCellValue('F36', $requisicion->user->name);
-    // $sheet->setCellValue('k11', $requisicion->nombre_solicitante);
-    $sheet->setCellValue('C11', $requisicion->user->role);
-    $sheet->setCellValue('G5', $requisicion->created_at->format('d/m/Y'));
-    // $sheet->setCellValue('f1', $requisicion->created_at->format('d/m/Y'));
-    $sheet->setCellValue('A34', $requisicion->comentario ?? 'N/A');
-
-    $sheet->setCellValue('C12', $requisicion->proyecto ?? 'N/A');
-    $sheet->setCellValue('C13', $requisicion->sit ?? 'N/A');
-    $sheet->setCellValue('C14', $requisicion->partida ?? 'N/A');
-    $sheet->setCellValue('C15', $requisicion->plataforma ?? 'N/A');
-    $sheet->setCellValue('C16', $requisicion->embarcacion ?? 'N/A');
-    $sheet->setCellValue('C17', $requisicion->area ?? 'N/A');
-    $sheet->setCellValue('C18', $requisicion->activo ?? 'N/A');
-    $sheet->setCellValue('G6', $requisicion->folio);
-    
-
-
-
-    // ✅ Opción 1: Mostrar todos los datos en una sola celda
-    // $sheet->setCellValue('p1', 
-    //     $requisicion->contrato 
-    //         ? $requisicion->contrato->empresa_nombre . ' — ' . 
-    //           $requisicion->contrato->contrato . ' — ' . 
-    //           $requisicion->contrato->convenio
-    //         : 'N/A'
-    // );
-
-     //✅ Opción 2: Mostrar cada dato en celdas separadas
-    //  $sheet->setCellValue('p1', $requisicion->contrato->empresa_nombre ?? 'N/A');
-     $sheet->setCellValue('G7', $requisicion->contrato->contrato ?? 'N/A');
-     $sheet->setCellValue('G8', $requisicion->contrato->convenio ?? 'N/A');
-
-    // Supongamos que tus productos comienzan en la fila 10:
-    $row = 21;
-
-    foreach ([$requisicion] as $item) {
-        $sheet->setCellValue('A' . $row, $item->cantidad ?? '-');
-        $sheet->setCellValue('B' . $row, $item->unidad ?? '-');
-        $sheet->setCellValue('C' . $row, $item->material ?? '-');
-        $row++;
-    }   
-
-    // Descargar el archivo final
-    $writer = new Xlsx($spreadsheet);
-    $filename = 'Requisicion_' . $requisicion->id . '.xlsx';
-
-    return new StreamedResponse(function() use ($writer) {
-        $writer->save('php://output');
-    }, 200, [
-        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition' => 'attachment;filename="' . $filename . '"',
-    ]);
-}
+        return new StreamedResponse(function() use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment;filename="' . $filename . '"',
+        ]);
+    }
 }
