@@ -25,7 +25,9 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones',
+            'role' => 'required|in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones,hse,aux_hse',
+            'num_empleado' => 'required|string|max:50|unique:users,num_empleado',
+
         ]);
 
         User::create([
@@ -33,6 +35,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
+            'num_empleado' => $request->num_empleado,
         ]);
 
         return redirect()->route('users.index')->with('success', 'Usuario creado correctamente');
@@ -53,13 +56,15 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$user->id,
-            'role' => 'required|in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh',
+            'role' => 'required|in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh, operaciones,aux_operaciones,hse,aux_hse',
+            'num_empleado' => 'required|string|max:50|unique:users,num_empleado,'.$user->id,
         ]);
 
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
+            'num_empleado' => $request->num_empleado,
         ]);
 
         if ($request->password) {

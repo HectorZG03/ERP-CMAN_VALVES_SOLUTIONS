@@ -70,6 +70,24 @@
                 </select>
             </div>
 
+            <!-- operador y categoria -->
+
+            <div>
+                <label for="operador" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Operador
+                </label>
+                <input type="text" name="operador" id="operador"
+                    class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200">
+            </div>
+
+            <div>
+                <label for="categoria" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Categoría
+                </label>
+                <input type="text" name="categoria" id="categoria"
+                    class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200">
+            </div>
+
             
 
             <!-- Comentario -->

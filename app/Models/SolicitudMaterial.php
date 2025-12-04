@@ -16,6 +16,8 @@ class SolicitudMaterial extends Model
         'destino',
         'estatus',
         'comentario',
+        'operador',
+        'categoria',
     ];
 
     protected $casts = [

@@ -30,7 +30,7 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Rol</label>
+                    <label class="block text-sm font-medium text-gray-700">Rol y Número de Empleado</label>
                     <span class="mt-1 px-3 py-1 rounded-full text-sm font-medium
                         @if($user->role === 'direccion') bg-purple-100 text-purple-800
                         @elseif($user->role === 'ti') bg-blue-100 text-blue-800
@@ -38,7 +38,18 @@
                         @else bg-gray-100 text-gray-800 @endif">
                         {{ ucfirst(str_replace('_', ' ', $user->role)) }}
                     </span>
+
+                    <span class="mt-1 px-3 py-1 rounded-full text-sm font-medium
+                        @if($user->role === 'direccion') bg-purple-100 text-purple-800
+                        @elseif($user->role === 'ti') bg-blue-100 text-blue-800
+                        @elseif(str_contains($user->role, 'almacen')) bg-green-100 text-green-800
+                        @else bg-gray-100 text-gray-800 @endif">
+                        {{ $user->num_empleado }}
+                    </span>
                 </div>
+
+                
+                
             </div>
             
             <div class="space-y-4">

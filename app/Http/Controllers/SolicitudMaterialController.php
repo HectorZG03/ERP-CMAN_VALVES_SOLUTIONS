@@ -73,6 +73,8 @@ class SolicitudMaterialController extends Controller
                 'user_id' => auth()->id(),
                 'destino' => $request->destino,
                 'comentario' => $request->comentario,
+                'operador' => $request->operador ?? 'N/A',
+                'categoria' => $request->categoria ?? 'N/A',
                 'estatus' => 'pendiente',
             ]);
 
@@ -278,6 +280,10 @@ class SolicitudMaterialController extends Controller
     $sheet->setCellValue('F22', $solicitud->created_at->format('d/m/Y'));
     $sheet->setCellValue('Q58', $solicitud->created_at->format('d/m/Y'));
     $sheet->setCellValue('E47', $solicitud->comentario ?? 'N/A');
+    $sheet->setCellValue('F18', $solicitud->user->num_empleado ?? 'N/A');
+
+    $sheet->setCellValue('M14', $solicitud->operador ?? 'N/A');
+    $sheet->setCellValue('M16', $solicitud->categoria ?? 'N/A');
 
     // Supongamos que tus productos comienzan en la fila 10:
     $row = 27;

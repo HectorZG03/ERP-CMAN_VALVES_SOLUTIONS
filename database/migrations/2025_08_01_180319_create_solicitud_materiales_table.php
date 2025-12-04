@@ -16,6 +16,9 @@ return new class extends Migration
             $table->text('destino')->nullable();
             $table->enum('estatus', ['pendiente', 'aprobado', 'denegado'])->default('pendiente');
             $table->text('comentario')->nullable();
+            $table->text('operador')->nullable();
+            $table->text('categoria')->nullable();
+
             $table->timestamps();
         });
     }

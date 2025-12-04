@@ -57,6 +57,10 @@
                         <option value="aux_logistica" {{ $user->role === 'aux_logistica' ? 'selected' : '' }}>Auxiliar Logística</option>
                         <option value="rh" {{ $user->role === 'rh' ? 'selected' : '' }}>Recursos Humanos</option>
                         <option value="aux_rh" {{ $user->role === 'aux_rh' ? 'selected' : '' }}>Auxiliar RH</option>
+                        <option value="operaciones" {{ $user->role === 'operaciones' ? 'selected' : '' }}>Operaciones</option>
+                        <option value="aux_operaciones" {{ $user->role === 'aux_operaciones' ? 'selected' : '' }}>Auxiliar Operaciones</option>
+                        <option value="hse" {{ $user->role === 'hse' ? 'selected' : '' }}>HSE</option>
+                        <option value="aux_hse" {{ $user->role === 'aux_hse' ? 'selected' : '' }}>Auxiliar HSE</option>
                     </select>
                 </div>
 
@@ -76,6 +80,17 @@
                     <input type="password" name="password_confirmation" id="password_confirmation"
                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
+            </div>
+
+
+            <!-- NUMERO DE EMPLEADO -->
+            <div class="mt-6">
+                <label for="num_empleado" class="block text-sm font-medium text-gray-700">
+                    Número de Empleado
+                </label>
+                <input type="text" name="num_empleado" id="num_empleado" required
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                       value="{{ old('num_empleado', $user->num_empleado) }}">
             </div>
 
             <div class="mt-6 bg-yellow-50 p-4 rounded-lg">

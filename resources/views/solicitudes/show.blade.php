@@ -40,6 +40,16 @@
                     Solicitud Denegada
                 </span>
             @endif
+
+
+
+            <a href="{{ route('solicitudes.exportExcel', $solicitud) }}"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
+                Exportar con Plantilla Excel
+            </a>
+
+
+
         </div>
     </div>
 
@@ -179,6 +189,24 @@
                             <p class="text-sm">Los productos pueden haber sido eliminados del inventario</p>
                         </div>
                     @endif
+                </div>
+            </div>
+
+            <!-- operador y categoria -->
+            <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                        Información de Operador y Categoría
+                    </h3>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 transition-colors duration-200">
+                        <div class="text-center">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Operador</p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-white">
+                                {{ $solicitud->operador ?? 'N/A' }}
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -331,10 +359,7 @@
             </div>
 
 
-            <a href="{{ route('solicitudes.exportExcel', $solicitud) }}"
-   class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
-   Exportar con Plantilla Excel
-</a>
+            
 
 
             <!-- Destino -->

@@ -19,8 +19,9 @@ return new class extends Migration
                 'aux_calidad', 'aux_contabilidad', 'aux_estimaciones', 
                 'aux_finanzas', 'aux_logistica', 'aux_rh',
                 'calidad', 'contabilidad', 'estimaciones', 'finanzas', 
-                'logistica', 'rh', 'operaciones', 'aux_operaciones'
+                'logistica', 'rh', 'operaciones', 'aux_operaciones', 'hse', 'aux_hse'
             ])->default('aux_almacen');
+            $table->string('num_empleado')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
