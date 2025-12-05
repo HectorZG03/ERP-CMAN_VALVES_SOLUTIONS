@@ -381,6 +381,57 @@
                 </div>
             </div>
 
+            <!-- ✅ NUEVO: Información de Aprobaciones -->
+            <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                        Historial de Aprobaciones
+                    </h3>
+                    
+                    <dl class="space-y-4">
+                        <!-- Aprobación Finanzas -->
+                        <div class="border-l-4 {{ $requisicion->estatus_finanzas === 'aprobado' ? 'border-green-500' : ($requisicion->estatus_finanzas === 'denegado' ? 'border-red-500' : 'border-blue-500') }} pl-4">
+                            <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Finanzas</dt>
+                            <dd class="text-sm font-medium text-gray-900 dark:text-white mt-1">
+                                @if($requisicion->estatus_finanzas === 'aprobado')
+                                    ✓ Aprobado
+                                @elseif($requisicion->estatus_finanzas === 'denegado')
+                                    ✗ Denegado
+                                @else
+                                    ⏳ Pendiente
+                                @endif
+                            </dd>
+                            @if($requisicion->aprobadorFinanzas)
+                                <dd class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                    Por: {{ $requisicion->aprobadorFinanzas->name }}
+                                </dd>
+                                @if($requisicion->fecha_aprobacion_finanzas)
+                                    <dd class="text-xs text-gray-500 dark:text-gray-400">
+                                        {{ $requisicion->fecha_aprobacion_finanzas->format('d/m/Y H:i') }}
+                                    </dd>
+                                @endif
+                            @endif
+                        </div>
+
+                        <!-- Aprobación Dirección (solo si finanzas aprobó) -->
+                        @if($requisicion->estatus_finanzas === 'aprobado')
+                        <div class="border-l-4 {{ $requisicion->estatus === 'aprobado' ? 'border-green-500' : ($requisicion->estatus === 'denegado' ? 'border-red-500' : 'border-yellow-500') }} pl-4">
+                            <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Dirección</dt>
+                            <dd class="text-sm font-medium text-gray-900 dark:text-white mt-1">
+                                @if($requisicion->estatus === 'aprobado')
+                                    ✓ Aprobado
+                                @elseif($requisicion->estatus === 'denegado')
+                                    ✗ Denegado
+                                @else
+                                    ⏳ Pendiente
+                                @endif
+                            </dd>
+                        </div>
+                        @endif
+                    </dl>
+                </div>
+            </div>
+
             <!-- Información de fechas -->
             <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
                 <div class="px-4 py-5 sm:p-6">

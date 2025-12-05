@@ -3,7 +3,15 @@
 @section('content')
 <div class="space-y-6">
     <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Requisiciones de Compra</h1>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Requisiciones de Compra</h1>
+            <!-- ✅ Mostrar mensaje según el rol -->
+            @if(auth()->user()->canApproveFinanzas())
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Mostrando requisiciones pendientes de aprobación de finanzas</p>
+            @elseif(auth()->user()->canApproveRequests())
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Mostrando requisiciones aprobadas por finanzas</p>
+            @endif
+        </div>
         <a href="{{ route('requisiciones.create') }}" 
            class="bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
             Nueva Requisición
@@ -11,7 +19,7 @@
     </div>
 
     <!-- Mostrar filtros si es personal autorizado -->
-    @if(auth()->user()->canApproveRequests() || auth()->user()->canManageInventory())
+    @if(auth()->user()->canApproveRequests() || auth()->user()->canManageInventory() || auth()->user()->canApproveFinanzas())
     <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-4 transition-colors duration-200">
         <div class="flex flex-wrap gap-4 items-center justify-between">
             <div class="flex flex-wrap gap-4 items-center">
@@ -19,16 +27,18 @@
                 
                 <!-- Filtros por Estado -->
                 <div class="flex gap-2">
-                    <!-- Filtro Todos -->
+                    <!-- Filtro Todos (solo para almacén) -->
+                    @if(auth()->user()->canManageInventory())
                     <button type="button" data-status="all" 
                             class="status-filter active px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">
                         <span>Todas</span>
                         <span class="status-count ml-1" id="count-all">{{ $requisiciones->total() }}</span>
                     </button>
+                    @endif
 
                     <!-- Filtro Pendientes -->
                     <button type="button" data-status="pendiente" 
-                            class="status-filter px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 hover:text-yellow-800 dark:hover:text-yellow-300">
+                            class="status-filter {{ !auth()->user()->canManageInventory() ? 'active bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300' }} px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 hover:bg-yellow-100 dark:hover:bg-yellow-900/30 hover:text-yellow-800 dark:hover:text-yellow-300">
                         <span>Pendientes</span>
                         <span class="status-count ml-1" id="count-pendiente">0</span>
                     </button>
@@ -79,10 +89,13 @@
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Folio
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Fecha
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Material
+                                Materiales
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Solicitante
@@ -93,6 +106,12 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Tipo
                             </th>
+                            <!-- ✅ NUEVA COLUMNA: Estado Finanzas -->
+                            @if(auth()->user()->canManageInventory() || auth()->user()->canApproveRequests())
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                Finanzas
+                            </th>
+                            @endif
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Estatus
                             </th>
@@ -103,7 +122,12 @@
                     </thead>
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse($requisiciones as $requisicion)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200" data-status="{{ $requisicion->estatus }}">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200" 
+                            data-status="{{ $requisicion->estatus }}"
+                            data-estatus-finanzas="{{ $requisicion->estatus_finanzas }}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900 dark:text-white">
+                                {{ $requisicion->folio ?? '#' . str_pad($requisicion->id, 4, '0', STR_PAD_LEFT) }}
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                 @if($requisicion->created_at)
                                     {{ $requisicion->created_at->format('d/m/Y H:i') }}
@@ -113,10 +137,10 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ $requisicion->material }}
+                                    {{ $requisicion->total_materiales }} materiales
                                 </div>
                                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                                    <span class="font-medium">{{ $requisicion->cantidad }}</span> {{ $requisicion->unidad }}
+                                    <span class="font-medium">{{ $requisicion->total_unidades }}</span> unidades
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
@@ -153,6 +177,35 @@
                                     {{ ucfirst($requisicion->tipo_requerimiento) }}
                                 </span>
                             </td>
+                            
+                            <!-- ✅ NUEVA COLUMNA: Estado Finanzas -->
+                            @if(auth()->user()->canManageInventory() || auth()->user()->canApproveRequests())
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($requisicion->estatus_finanzas === 'pendiente')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Pendiente
+                                    </span>
+                                @elseif($requisicion->estatus_finanzas === 'aprobado')
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Aprobado
+                                    </span>
+                                @else
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Denegado
+                                    </span>
+                                @endif
+                            </td>
+                            @endif
+
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($requisicion->estatus === 'pendiente')
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
@@ -179,20 +232,48 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center space-x-2">
-                                    <!-- Botón Ver para personal de inventario -->
-                                    @if(auth()->user()->canManageInventory() || $requisicion->user_id == auth()->id() || auth()->user()->canApproveRequests())
-                                        <a href="{{ route('requisiciones.show', $requisicion) }}" 
-                                           class="inline-flex items-center px-2 py-1 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 text-purple-800 dark:text-purple-300 text-xs font-medium rounded-md transition-colors duration-200">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                                            </svg>
-                                            Ver
-                                        </a>
+                                    <!-- Botón Ver -->
+                                    <a href="{{ route('requisiciones.show', $requisicion) }}" 
+                                       class="inline-flex items-center px-2 py-1 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 text-purple-800 dark:text-purple-300 text-xs font-medium rounded-md transition-colors duration-200">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                                        </svg>
+                                        Ver
+                                    </a>
+
+                                    <!-- ✅ Botones para FINANZAS -->
+                                    @if(auth()->user()->canApproveFinanzas() && $requisicion->estatus_finanzas === 'pendiente')
+                                        <form method="POST" action="{{ route('requisiciones.updateEstatusFinanzas', $requisicion) }}" class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="estatus_finanzas" value="aprobado">
+                                            <button type="submit" 
+                                                    class="inline-flex items-center px-2 py-1 bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-800 dark:text-green-300 text-xs font-medium rounded-md transition-colors duration-200" 
+                                                    onclick="return confirm('¿Aprobar esta requisición desde finanzas?')">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                                </svg>
+                                                Aprobar
+                                            </button>
+                                        </form>
+                                        <form method="POST" action="{{ route('requisiciones.updateEstatusFinanzas', $requisicion) }}" class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="estatus_finanzas" value="denegado">
+                                            <button type="submit" 
+                                                    class="inline-flex items-center px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 text-xs font-medium rounded-md transition-colors duration-200"
+                                                    onclick="return confirm('¿Denegar esta requisición desde finanzas?')">
+                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                                </svg>
+                                                Denegar
+                                            </button>
+                                        </form>
                                     @endif
 
-                                    <!-- Botones de aprobar/denegar para quienes pueden aprobar -->
-                                    @if(auth()->user()->canApproveRequests() && $requisicion->estatus === 'pendiente')
+                                    <!-- ✅ Botones para DIRECCIÓN (solo si finanzas aprobó) -->
+                                    @if(auth()->user()->canApproveRequests() && $requisicion->estatus_finanzas === 'aprobado' && $requisicion->estatus === 'pendiente')
                                         <form method="POST" action="{{ route('requisiciones.updateEstatus', $requisicion) }}" class="inline">
                                             @csrf
                                             @method('PUT')
@@ -215,35 +296,26 @@
                                                     onclick="return confirm('¿Denegar esta requisición?')">
                                                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                                    </svg>
-                                                    Denegar
-                                                </button>
-                                            </form>
-                                    @elseif(!auth()->user()->canApproveRequests() && !auth()->user()->canManageInventory() && $requisicion->user_id != auth()->id())
-                                        <span class="text-gray-400 dark:text-gray-500 text-xs">Sin acciones</span>
+                                                </svg>
+                                                Denegar
+                                            </button>
+                                        </form>
                                     @endif
 
-
-
-                                    {{-- PDF --}}
-
-
-                                    {{-- Imprimir --}}
-                                    <div class="ml-2">
-                                        <a href="#" target="_blank" 
-                                           class="inline-flex items-center px-2 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-300 text-xs font-medium rounded-md transition-colors duration-200">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0014.414 6L10 1.586A2 2 0 008.586 1H6zM13 8V3.5L17.5 8H13z"/>
-                                            </svg>
-                                            PDF
-                                        </a>
-
+                                    <!-- Excel export -->
+                                    <a href="{{ route('requisiciones.exportExcel', $requisicion) }}" 
+                                       class="inline-flex items-center px-2 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-300 text-xs font-medium rounded-md transition-colors duration-200">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0014.414 6L10 1.586A2 2 0 008.586 1H6zM13 8V3.5L17.5 8H13z"/>
+                                        </svg>
+                                        Excel
+                                    </a>
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr id="no-results-row">
-                            <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                            <td colspan="9" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                                 <div class="flex flex-col items-center">
                                     <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -334,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const tableRows = document.querySelectorAll('tbody tr[data-status]');
     const noResultsRow = document.getElementById('no-results-row');
     
-    let currentStatusFilter = 'all';
+    let currentStatusFilter = @if(auth()->user()->canManageInventory()) 'all' @else 'pendiente' @endif;
     let currentSearchTerm = '';
 
     // Contar requisiciones por estado al cargar la página
@@ -453,4 +525,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-@endsection
+@endsectionC
