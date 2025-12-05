@@ -139,17 +139,36 @@ Route::prefix('prestamos')->name('prestamos.')->group(function () {
 
 
 
+    // ✅ NUEVA RUTA: Para que finanzas apruebe/deniegue
+Route::patch('/requisiciones/{requisicion}/estatus-finanzas', [RequisicionController::class, 'updateEstatusFinanzas'])
+    ->name('requisiciones.updateEstatusFinanzas')
+    ->middleware('auth');
+
+
+
+
+
     // parte del inventario
     
-    // API endpoints
-    Route::get('/api/inventario/search', [InventarioController::class, 'search']);
-    Route::get('/api/solicitudes/search', [SolicitudMaterialController::class, 'search']);
-
-    // Rutas de exportación para inventario
-    Route::get('/inventario-export/pdf', [InventarioController::class, 'exportPDF'])->name('inventario.export.pdf');
-    Route::get('/inventario-export/excel', [InventarioController::class, 'exportExcel'])->name('inventario.export.excel');
-    Route::get('/inventario-export/view-pdf', [InventarioController::class, 'viewPDF'])->name('inventario.view.pdf');
-
+   // Rutas de inventario
+    Route::prefix('inventario')->name('inventario.')->group(function () {
+    Route::get('/', [InventarioController::class, 'index'])->name('index');
+    Route::post('/search-ajax', [InventarioController::class, 'searchAjax'])->name('search.ajax');
+    Route::get('/create', [InventarioController::class, 'create'])->name('create');
+    Route::post('/', [InventarioController::class, 'store'])->name('store');
+    Route::get('/{inventario}', [InventarioController::class, 'show'])->name('show');
+    Route::get('/{inventario}/edit', [InventarioController::class, 'edit'])->name('edit');
+    Route::put('/{inventario}', [InventarioController::class, 'update'])->name('update');
+    Route::delete('/{inventario}', [InventarioController::class, 'destroy'])->name('destroy');
+    
+    // Rutas de exportación
+    Route::get('/export/pdf', [InventarioController::class, 'exportPDF'])->name('export.pdf');
+    Route::get('/export/excel', [InventarioController::class, 'exportExcel'])->name('export.excel');
+    Route::get('/view/pdf', [InventarioController::class, 'viewPDF'])->name('view.pdf');
+    
+    // Ruta para API si la necesitas
+    Route::get('/api/all', [InventarioController::class, 'getAll'])->name('api.all');
+});
 
 
     // PARTE DEL BOTON DEL EXCEL SOLICITUD DE MATERIAL

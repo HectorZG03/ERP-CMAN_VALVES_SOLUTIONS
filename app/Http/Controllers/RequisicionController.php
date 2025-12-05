@@ -19,9 +19,24 @@ class RequisicionController extends Controller
     {
         $user = auth()->user();
         
-        if ($user->canApproveRequests() || $user->canManageInventory()) {
+        // ✅ Si es de finanzas, mostrar solo las pendientes de su aprobación
+        if ($user->canApproveFinanzas()) {
+            $requisiciones = Requisicion::with(['user', 'detalles'])
+                                       ->where('estatus_finanzas', 'pendiente')
+                                       ->paginate(15);
+        }
+        // ✅ Si es director, mostrar solo las que YA fueron aprobadas por finanzas
+        elseif ($user->canApproveRequests()) {
+            $requisiciones = Requisicion::with(['user', 'detalles', 'aprobadorFinanzas'])
+                                       ->where('estatus_finanzas', 'aprobado')
+                                       ->paginate(15);
+        }
+        // ✅ Si es almacén, mostrar todas
+        elseif ($user->canManageInventory()) {
             $requisiciones = Requisicion::with(['user', 'detalles'])->paginate(15);
-        } else {
+        }
+        // ✅ Usuarios normales solo ven las suyas
+        else {
             $requisiciones = Requisicion::where('user_id', $user->id)
                                        ->with(['user', 'detalles'])
                                        ->paginate(15);
@@ -103,19 +118,50 @@ class RequisicionController extends Controller
         
         if (!($requisicion->user_id == $user->id || 
               $user->canApproveRequests() || 
+              $user->canApproveFinanzas() ||
               $user->canManageInventory())) {
             abort(403, 'No tienes permisos para ver esta requisición');
         }
 
-        $requisicion->load(['user', 'detalles', 'contrato']);
+        $requisicion->load(['user', 'detalles', 'contrato', 'aprobadorFinanzas']);
         
         return view('requisiciones.show', compact('requisicion'));
     }
 
+    // ✅ NUEVO: Aprobar/Denegar por FINANZAS
+    public function updateEstatusFinanzas(Request $request, Requisicion $requisicion)
+    {
+        if (!auth()->user()->canApproveFinanzas()) {
+            abort(403, 'No tienes permisos para aprobar en finanzas');
+        }
+
+        $request->validate([
+            'estatus_finanzas' => 'required|in:aprobado,denegado',
+        ]);
+
+        $requisicion->update([
+            'estatus_finanzas' => $request->estatus_finanzas,
+            'aprobado_por_finanzas_id' => auth()->id(),
+            'fecha_aprobacion_finanzas' => now(),
+        ]);
+
+        $mensaje = $request->estatus_finanzas === 'aprobado' 
+            ? 'Requisición aprobada por finanzas. Ahora está disponible para dirección.' 
+            : 'Requisición denegada por finanzas.';
+
+        return back()->with('success', $mensaje);
+    }
+
+    // ✅ MODIFICADO: Aprobar/Denegar por DIRECCIÓN (solo si finanzas ya aprobó)
     public function updateEstatus(Request $request, Requisicion $requisicion)
     {
         if (!auth()->user()->canApproveRequests()) {
-            abort(403);
+            abort(403, 'No tienes permisos para aprobar requisiciones');
+        }
+
+        // ✅ Verificar que finanzas haya aprobado primero
+        if ($requisicion->estatus_finanzas !== 'aprobado') {
+            return back()->with('error', 'Esta requisición aún no ha sido aprobada por finanzas.');
         }
 
         $request->validate([
@@ -124,7 +170,7 @@ class RequisicionController extends Controller
 
         $requisicion->update(['estatus' => $request->estatus]);
 
-        return back()->with('success', 'Estatus de requisición actualizado');
+        return back()->with('success', 'Estatus de requisición actualizado por dirección');
     }
 
     // EXPORTACIÓN A EXCEL
@@ -135,10 +181,6 @@ class RequisicionController extends Controller
         $templatePath = storage_path('app/plantillas/Requisicion.xlsx');
         $spreadsheet = IOFactory::load($templatePath);
         $sheet = $spreadsheet->getActiveSheet();
-
-        // Todo en minúsculas → strtolower()  Todo en MAYUSCULAS → strtoupper()
-        // Primera letra de cada palabra en mayúscula → ucwords()
-        // Datos generales (convertidos a mayúsculas)
         $sheet->setCellValue('C10', strtoupper($requisicion->user->name));
         $sheet->setCellValue('C11', strtoupper($requisicion->user->role));
         $sheet->setCellValue('C12', ucwords($requisicion->proyecto ?? 'N/A'));
@@ -148,7 +190,6 @@ class RequisicionController extends Controller
         $sheet->setCellValue('C16', strtoupper($requisicion->embarcacion ?? 'N/A'));
         $sheet->setCellValue('C17', strtoupper($requisicion->area ?? 'N/A'));
         $sheet->setCellValue('C18', strtoupper($requisicion->activo ?? 'N/A'));
-
         $sheet->setCellValue('F36', $requisicion->user->name);
         $sheet->setCellValue('G6', $requisicion->folio);
         $sheet->setCellValue('G7', $requisicion->contrato->contrato ?? 'N/A');
@@ -164,10 +205,8 @@ class RequisicionController extends Controller
             $sheet->setCellValue('C' . $row, $detalle->material);
             $row++;
         }
-
         $writer = new Xlsx($spreadsheet);
         $filename = 'Requisicion_' . $requisicion->id . '.xlsx';
-
         return new StreamedResponse(function() use ($writer) {
             $writer->save('php://output');
         }, 200, [

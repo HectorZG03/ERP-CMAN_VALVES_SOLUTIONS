@@ -36,6 +36,11 @@ class AuthServiceProvider extends ServiceProvider
             return $user->role === 'direccion';
         });
 
+        // ✅ NUEVO: Gate para aprobación de finanzas
+        Gate::define('approve-finanzas', function ($user) {
+            return in_array($user->role, ['finanzas', 'aux_finanzas']);
+        });
+
         // Gate adicional para debug
         Gate::define('debug-role', function ($user) {
             \Log::info('Usuario: ' . $user->name . ' - Rol: ' . $user->role);

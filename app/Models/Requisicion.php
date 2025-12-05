@@ -26,17 +26,22 @@ class Requisicion extends Model
         'tipo_requerimiento',
         'comentario',
         'estatus',
+        'estatus_finanzas',
+        'aprobado_por_finanzas_id',
+        'fecha_aprobacion_finanzas',
         'user_id',
         'contrato_id',
     ];
 
     protected $attributes = [
-        'estatus' => 'pendiente'
+        'estatus' => 'pendiente',
+        'estatus_finanzas' => 'pendiente'
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'fecha_aprobacion_finanzas' => 'datetime',
     ];
 
     // 🔹 GENERAR FOLIO AUTOMÁTICAMENTE
@@ -71,6 +76,12 @@ class Requisicion extends Model
         return $this->belongsTo(Contrato::class);
     }
 
+    // ✅ Relación con usuario que aprobó en finanzas
+    public function aprobadorFinanzas()
+    {
+        return $this->belongsTo(User::class, 'aprobado_por_finanzas_id');
+    }
+
     // ✅ Relación con los detalles (múltiples materiales)
     public function detalles()
     {
@@ -102,5 +113,27 @@ class Requisicion extends Model
     public function scopeDenegadas($query)
     {
         return $query->where('estatus', 'denegado');
+    }
+
+    // ✅ NUEVOS SCOPES PARA FINANZAS
+    public function scopePendientesFinanzas($query)
+    {
+        return $query->where('estatus_finanzas', 'pendiente');
+    }
+
+    public function scopeAprobadasPorFinanzas($query)
+    {
+        return $query->where('estatus_finanzas', 'aprobado');
+    }
+
+    public function scopeDenegadasPorFinanzas($query)
+    {
+        return $query->where('estatus_finanzas', 'denegado');
+    }
+
+    // ✅ Método para verificar si puede ser vista por dirección
+    public function puedeSerVistaPorDireccion()
+    {
+        return $this->estatus_finanzas === 'aprobado';
     }
 }

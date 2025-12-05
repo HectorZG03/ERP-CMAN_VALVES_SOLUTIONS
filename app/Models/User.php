@@ -36,19 +36,22 @@ class User extends Authenticatable
         return in_array($this->role, ['ti']);
     }
 
+    // ✅ NUEVO: Verificar si puede aprobar requisiciones en finanzas
+    public function canApproveFinanzas()
+    {
+        return in_array($this->role, ['finanzas', 'aux_finanzas']);
+    }
 
-    // esto es para ver si puede aprobar o no los préstamos
-
+    // esto es para ver si puede aprobar o no las requisiciones (DIRECTOR)
     public function canApproveRequests()
     {
-        return $this->role === 'direccion'; // Cambiado a 'administrador'
+        return $this->role === 'direccion';
     }
 
     public function canManageInventory()
     {
         return in_array($this->role, ['almacen', 'aux_almacen',]);
     }
-
 
     public function canManageInventoryadmin()
     {

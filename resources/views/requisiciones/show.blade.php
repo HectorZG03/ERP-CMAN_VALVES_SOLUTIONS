@@ -18,27 +18,54 @@
         
         <!-- Estado de la requisición -->
         <div class="ml-auto flex items-center space-x-3">
-            @if($requisicion->estatus === 'pendiente')
-                <span class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
+            <!-- ✅ Estado de FINANZAS -->
+            @if($requisicion->estatus_finanzas === 'pendiente')
+                <span class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
                     </svg>
-                    Pendiente de Aprobación
+                    Pendiente Finanzas
                 </span>
-            @elseif($requisicion->estatus === 'aprobado')
+            @elseif($requisicion->estatus_finanzas === 'aprobado')
                 <span class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                     </svg>
-                    Requisición Aprobada
+                    Aprobado Finanzas
                 </span>
             @else
                 <span class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-full bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
                     <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
                     </svg>
-                    Requisición Denegada
+                    Denegado Finanzas
                 </span>
+            @endif
+
+            <!-- ✅ Estado DIRECTOR (solo si finanzas aprobó) -->
+            @if($requisicion->estatus_finanzas === 'aprobado')
+                @if($requisicion->estatus === 'pendiente')
+                    <span class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                        </svg>
+                        Pendiente Dirección
+                    </span>
+                @elseif($requisicion->estatus === 'aprobado')
+                    <span class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-full bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        Aprobado Dirección
+                    </span>
+                @else
+                    <span class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-full bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                        Denegado Dirección
+                    </span>
+                @endif
             @endif
 
             <a href="{{ route('requisiciones.exportExcel', $requisicion) }}"
@@ -232,14 +259,61 @@
                 </div>
             </div>
 
-            <!-- Acciones para aprobar/denegar -->
-            @if(auth()->user()->canApproveRequests() && $requisicion->estatus === 'pendiente')
+            <!-- ✅ NUEVO: Acciones para FINANZAS -->
+            @if(auth()->user()->canApproveFinanzas() && $requisicion->estatus_finanzas === 'pendiente')
             <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
                 <div class="px-4 py-5 sm:p-6">
                     <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
-                        Acciones de Aprobación
+                        Aprobación de Finanzas
                     </h3>
                     
+                    <div class="flex space-x-4">
+                        <form method="POST" action="{{ route('requisiciones.updateEstatusFinanzas', $requisicion) }}" class="flex-1">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="estatus_finanzas" value="aprobado">
+                            <button type="submit" 
+                                    class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200" 
+                                    onclick="return confirm('¿Aprobar esta requisición desde finanzas?')">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                                Aprobar (Finanzas)
+                            </button>
+                        </form>
+                        
+                        <form method="POST" action="{{ route('requisiciones.updateEstatusFinanzas', $requisicion) }}" class="flex-1">
+                            @csrf
+                            @method('PATCH')
+                            <input type="hidden" name="estatus_finanzas" value="denegado">
+                            <button type="submit" 
+                                    class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
+                                    onclick="return confirm('¿Denegar esta requisición desde finanzas?')">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                </svg>
+                                Denegar (Finanzas)
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <!-- ✅ MODIFICADO: Acciones para DIRECCIÓN (solo si finanzas aprobó) -->
+            @if(auth()->user()->canApproveRequests() && $requisicion->estatus_finanzas === 'aprobado' && $requisicion->estatus === 'pendiente')
+            <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                        Aprobación de Dirección
+                    </h3>
+                    
+                    <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3 mb-4">
+                        <p class="text-sm text-blue-800 dark:text-blue-300">
+                            ✓ Esta requisición ya fue aprobada por finanzas y está lista para su revisión final.
+                        </p>
+                    </div>
+
                     <div class="flex space-x-4">
                         <form method="POST" action="{{ route('requisiciones.updateEstatus', $requisicion) }}" class="flex-1">
                             @csrf
