@@ -41,9 +41,9 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Fecha
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Producto
-                            </th>
+                            </th> --}}
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Cliente
                             </th>
@@ -71,7 +71,7 @@
                                     <span class="text-gray-400 dark:text-gray-500">N/A</span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            {{-- <td class="px-6 py-4 whitespace-nowrap">
                                 @if($salida->inventario)
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">
                                         {{ $salida->inventario->nombre_producto }}
@@ -87,7 +87,7 @@
                                         ID: {{ $salida->inventario_id }}
                                     </div>
                                 @endif
-                            </td>
+                            </td> --}}
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($salida->cliente)
                                     <div class="flex items-center">

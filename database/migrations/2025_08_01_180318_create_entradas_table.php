@@ -10,13 +10,18 @@ return new class extends Migration
     {
         Schema::create('entradas', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('inventario_id')->constrained('inventarios');
+            $table->string('numero_factura')->unique()->nullable();
             $table->foreignId('proveedor_id')->constrained('proveedores');
-            $table->integer('cantidad');
-            $table->decimal('precio_unitario', 10, 2);
-            $table->decimal('precio_total', 10, 2);
-            $table->decimal('iva', 10, 2);
-            $table->decimal('total_con_iva', 10, 2);
+            $table->text('observaciones')->nullable();
+            $table->date('fecha_entrada');
+            
+            // Campos calculados automáticamente
+            $table->integer('cantidad_total')->default(0);
+            $table->decimal('precio_unitario_promedio', 10, 2)->default(0);
+            $table->decimal('precio_total', 10, 2)->default(0);
+            $table->decimal('iva', 10, 2)->default(0);
+            $table->decimal('total_con_iva', 10, 2)->default(0);
+            
             $table->foreignId('user_id')->constrained('users');
             $table->timestamps();
         });

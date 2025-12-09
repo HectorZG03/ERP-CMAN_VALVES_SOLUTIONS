@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Entrada;
+use App\Models\EntradaDetalle;
 use App\Models\Inventario;
 use App\Models\Proveedor;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -12,7 +13,10 @@ class EntradaController extends Controller
 {
     public function index()
     {
-        $entradas = Entrada::with(['inventario', 'proveedor', 'user'])->paginate(15);
+        $entradas = Entrada::with(['proveedor', 'user', 'detalles.inventario'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+        
         return view('entradas.index', compact('entradas'));
     }
 
@@ -20,79 +24,126 @@ class EntradaController extends Controller
     {
         $inventarios = Inventario::all();
         $proveedores = Proveedor::all();
-        return view('entradas.create', compact('inventarios', 'proveedores'));
+        
+        $entradaReciente = session('entrada_reciente', null);
+        
+        return view('entradas.create', compact('inventarios', 'proveedores', 'entradaReciente'));
     }
 
     public function store(Request $request)
     {
+        // Validación de los datos
         $request->validate([
-            'inventario_id' => 'required|exists:inventarios,id',
             'proveedor_id' => 'required|exists:proveedores,id',
-            'cantidad' => 'required|integer|min:1',
-            'precio_unitario' => 'required|numeric|min:0',
+            'fecha_entrada' => 'required|date',
+            'observaciones' => 'nullable|string|max:500',
+            'materiales' => 'required|array|min:1',
+            'materiales.*.inventario_id' => 'required|exists:inventarios,id',
+            'materiales.*.cantidad' => 'required|integer|min:1',
+            'materiales.*.precio_unitario' => 'required|numeric|min:0',
         ]);
 
-        $inventario = Inventario::find($request->inventario_id);
-        $precio_total = $request->cantidad * $request->precio_unitario;
-        $iva = $precio_total * 0.16;
-        $total_con_iva = $precio_total + $iva;
+        $productosValidos = [];
 
-        // Crear entrada
+        // Validar y preparar datos
+        foreach ($request->materiales as $index => $material) {
+            $inventario = Inventario::find($material['inventario_id']);
+            
+            if (!$inventario) {
+                continue; // Saltar si el inventario no existe
+            }
+
+            $precioUnitario = $material['precio_unitario'];
+            
+            $productosValidos[] = [
+                'inventario_id' => $material['inventario_id'],
+                'cantidad' => $material['cantidad'],
+                'precio_unitario' => $precioUnitario,
+            ];
+        }
+
+        if (empty($productosValidos)) {
+            return back()->withErrors(['materiales' => 'Debe agregar al menos un material válido']);
+        }
+
+        // Crear entrada (cabecera)
         $entrada = Entrada::create([
-            'inventario_id' => $request->inventario_id,
             'proveedor_id' => $request->proveedor_id,
-            'cantidad' => $request->cantidad,
-            'precio_unitario' => $request->precio_unitario,
-            'precio_total' => $precio_total,
-            'iva' => $iva,
-            'total_con_iva' => $total_con_iva,
+            'fecha_entrada' => $request->fecha_entrada,
+            'observaciones' => $request->observaciones,
             'user_id' => auth()->id(),
         ]);
 
-        // Actualizar inventario
-        $inventario->existencia += $request->cantidad;
-        $inventario->precio_total += $precio_total;
-        $inventario->save();
+        // Crear detalles
+        foreach ($productosValidos as $producto) {
+            EntradaDetalle::create([
+                'entrada_id' => $entrada->id,
+                'inventario_id' => $producto['inventario_id'],
+                'cantidad' => $producto['cantidad'],
+                'precio_unitario' => $producto['precio_unitario'],
+            ]);
+        }
 
-        return redirect()->route('entradas.index')->with('success', 'Entrada registrada correctamente');
+        // Los totales se calculan automáticamente en el modelo
+        
+        // Guardar en sesión
+        session()->flash('entrada_reciente', [
+            'id' => $entrada->id,
+            'numero_factura' => $entrada->numero_factura,
+            'fecha' => $entrada->created_at->format('d/m/Y H:i'),
+            'proveedor_nombre' => $entrada->proveedor->proveedor,
+            'cantidad_productos' => $entrada->cantidad_productos,
+            'cantidad_total' => $entrada->cantidad_total,
+            'subtotal' => $entrada->precio_total,
+            'iva' => $entrada->iva,
+            'total' => $entrada->total_con_iva,
+        ]);
+
+        return redirect()->route('entradas.show', $entrada)
+            ->with('success', 'Entrada registrada correctamente');
     }
 
     public function show(Entrada $entrada)
     {
-        // Cargar todas las relaciones necesarias
-        $entrada->load(['inventario', 'proveedor', 'user']);
+        $entrada->load(['proveedor', 'user', 'detalles.inventario']);
         
         return view('entradas.show', compact('entrada'));
     }
 
-    // Método para generar PDF de la entrada
+    public function destroy(Entrada $entrada)
+    {
+        if ($entrada->created_at->diffInHours(now()) > 24) {
+            return redirect()->route('entradas.show', $entrada)
+                ->with('error', 'No se puede eliminar una entrada después de 24 horas');
+        }
+
+        // Eliminar detalles primero (esto revertirá el inventario automáticamente)
+        $entrada->detalles()->delete();
+        $entrada->delete();
+        
+        return redirect()->route('entradas.index')
+            ->with('success', 'Entrada eliminada correctamente');
+    }
+
     public function generatePDF(Entrada $entrada)
     {
-        // Cargar todas las relaciones necesarias
-        $entrada->load(['inventario', 'proveedor', 'user']);
+        $entrada->load(['proveedor', 'user', 'detalles.inventario']);
         
-        // Crear el PDF con los datos
         $pdf = PDF::loadView('entradas.pdf', compact('entrada'));
-        
-        // Configurar tamaño de página
         $pdf->setPaper('A4', 'portrait');
         
-        // Definir nombre del archivo
-        $filename = 'entrada_' . str_pad($entrada->id, 6, '0', STR_PAD_LEFT) . '_' . date('Y-m-d') . '.pdf';
+        $filename = 'entrada_' . $entrada->numero_factura . '_' . date('Y-m-d') . '.pdf';
         
-        // Descargar el PDF
         return $pdf->download($filename);
     }
 
-    // Método alternativo para ver el PDF en el navegador
     public function viewPDF(Entrada $entrada)
     {
-        $entrada->load(['inventario', 'proveedor', 'user']);
+        $entrada->load(['proveedor', 'user', 'detalles.inventario']);
         
         $pdf = PDF::loadView('entradas.pdf', compact('entrada'));
         $pdf->setPaper('A4', 'portrait');
         
-        // Mostrar en el navegador en lugar de descargar
-        return $pdf->stream('entrada_' . $entrada->id . '.pdf');
+        return $pdf->stream('entrada_' . $entrada->numero_factura . '.pdf');
     }
 }

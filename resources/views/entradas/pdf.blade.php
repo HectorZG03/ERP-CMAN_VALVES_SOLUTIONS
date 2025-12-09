@@ -6,344 +6,361 @@
     <title>Entrada de Material #{{ str_pad($entrada->id, 6, '0', STR_PAD_LEFT) }}</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             font-size: 12px;
-            line-height: 1.6;
+            line-height: 1.4;
             color: #333;
             margin: 0;
             padding: 20px;
+            background-color: #fff;
         }
         
-        .header {
+        /* Encabezado de empresa */
+        .company-header {
             text-align: center;
-            border-bottom: 3px solid #059669;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .header h1 {
-            color: #059669;
-            font-size: 24px;
-            margin: 0;
-            font-weight: bold;
-        }
-        
-        .header h2 {
-            color: #666;
-            font-size: 16px;
-            margin: 5px 0;
-            font-weight: normal;
-        }
-        
-        .section {
             margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #059669;
         }
         
-        .section h3 {
-            background-color: #f8f9fa;
-            padding: 8px 12px;
-            margin: 0 0 15px 0;
-            border-left: 4px solid #059669;
-            font-size: 14px;
-            color: #059669;
+        .company-name {
+            font-size: 24px;
             font-weight: bold;
+            color: #059669;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
-        .row {
+        .company-tagline {
+            font-size: 14px;
+            color: #666;
+            margin: 5px 0 15px 0;
+        }
+        
+        .company-info {
+            font-size: 11px;
+            color: #555;
+            margin-top: 10px;
+        }
+        
+        /* Información del documento */
+        .document-info {
+            margin-bottom: 25px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+        }
+        
+        .document-title {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #1f2937;
+            margin: 0 0 15px 0;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .info-item {
             display: flex;
-            margin-bottom: 8px;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px dotted #ddd;
         }
         
-        .col-label {
-            width: 30%;
+        .info-label {
             font-weight: bold;
             color: #555;
         }
         
-        .col-value {
-            width: 70%;
+        .info-value {
             color: #333;
         }
         
-        .financial-table {
+        /* Tabla de producto */
+        .products-section {
+            margin: 25px 0;
+        }
+        
+        .section-title {
+            background-color: #059669;
+            color: white;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 4px 4px 0 0;
+            margin: 0;
+        }
+        
+        .products-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 0;
         }
         
-        .financial-table th,
-        .financial-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
+        .products-table th {
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            padding: 8px 10px;
             text-align: left;
-        }
-        
-        .financial-table th {
-            background-color: #f8f9fa;
             font-weight: bold;
-            color: #059669;
+            color: #374151;
+            font-size: 11px;
         }
         
-        .financial-table .total-row {
-            background-color: #f0f9ff;
+        .products-table td {
+            border: 1px solid #d1d5db;
+            padding: 8px 10px;
+            font-size: 11px;
+        }
+        
+        /* Totales */
+        .totals-section {
+            margin-top: 30px;
+            width: 100%;
+        }
+        
+        .totals-table {
+            width: 50%;
+            margin-left: auto;
+            border-collapse: collapse;
+        }
+        
+        .totals-table td {
+            padding: 8px 10px;
+            border: 1px solid #d1d5db;
+            text-align: right;
+        }
+        
+        .totals-label {
+            font-weight: bold;
+            background-color: #f3f4f6;
+        }
+        
+        .subtotal-row {
             font-weight: bold;
         }
         
-        .financial-table .final-total {
+        .iva-row {
+            font-weight: bold;
+        }
+        
+        .total-row {
+            font-weight: bold;
             background-color: #dcfce7;
-            font-weight: bold;
-            font-size: 14px;
+            color: #065f46;
+            font-size: 13px;
         }
         
-        .footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-            font-size: 10px;
-            color: #666;
-            text-align: center;
-        }
-        
-        .signature-section {
+        /* Firmas */
+        .signatures-section {
             margin-top: 50px;
             display: flex;
             justify-content: space-between;
+            page-break-inside: avoid;
         }
         
         .signature-box {
             width: 45%;
             text-align: center;
+            padding-top: 40px;
         }
         
         .signature-line {
             border-bottom: 1px solid #333;
-            margin-bottom: 5px;
-            height: 50px;
+            width: 80%;
+            margin: 0 auto 5px auto;
+            height: 40px;
         }
         
-        .company-info {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
-        }
-        
-        .company-info h3 {
-            margin: 0;
-            color: #059669;
-            font-size: 18px;
-        }
-        
-        .company-info p {
-            margin: 2px 0;
+        .signature-label {
             font-size: 11px;
-            color: #666;
+            color: #555;
+            margin-top: 5px;
         }
         
-        .inventory-impact {
-            background-color: #dcfce7;
-            padding: 10px;
-            border-left: 4px solid #059669;
-            margin: 15px 0;
+        .signature-name {
+            font-weight: bold;
+            margin-top: 5px;
         }
         
-        .inventory-impact h4 {
-            margin: 0;
-            color: #059669;
-            font-size: 12px;
+        /* Pie de página */
+        .footer {
+            margin-top: 60px;
+            padding-top: 15px;
+            border-top: 1px solid #e5e7eb;
+            text-align: center;
+            font-size: 10px;
+            color: #6b7280;
         }
         
         @media print {
-            body { margin: 0; padding: 15px; }
-            .header { page-break-inside: avoid; }
-            .section { page-break-inside: avoid; }
+            body { 
+                margin: 0; 
+                padding: 15px; 
+                font-size: 11px;
+            }
+            .signatures-section { page-break-inside: avoid; }
+            .totals-section { page-break-inside: avoid; }
+        }
+        
+        /* Estilo para números */
+        .number {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .currency {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* Impacto en inventario */
+        .inventory-impact {
+            background-color: #dcfce7;
+            padding: 10px 15px;
+            border: 1px solid #059669;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 11px;
+        }
+        
+        .inventory-impact strong {
+            color: #065f46;
         }
     </style>
 </head>
 <body>
-    <!-- Información de la Empresa -->
-    <div class="company-info">
-        <h3>CMAN VALVES SOLUTIONS</h3>
-        <p>Sistema de Control de Inventario</p>
-        <p>Fecha de generación: {{ date('d/m/Y H:i:s') }}</p>
-    </div>
-
-    <!-- Header -->
-    <div class="header">
-        <h1>ENTRADA DE MATERIAL</h1>
-        <h2>#{{ str_pad($entrada->id, 6, '0', STR_PAD_LEFT) }}</h2>
-    </div>
-
-    <!-- Información General -->
-    <div class="section">
-        <h3>INFORMACIÓN GENERAL</h3>
-        <div class="row">
-            <div class="col-label">Fecha de Entrada:</div>
-            <div class="col-value">
-                {{ $entrada->created_at ? $entrada->created_at->format('d/m/Y H:i:s') : 'No disponible' }}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-label">Registrado por:</div>
-            <div class="col-value">
-                {{ $entrada->user ? $entrada->user->name : 'Usuario no disponible' }} 
-                ({{ $entrada->user ? $entrada->user->email : 'N/A' }})
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-label">ID de Transacción:</div>
-            <div class="col-value">#{{ str_pad($entrada->id, 6, '0', STR_PAD_LEFT) }}</div>
+    <!-- Encabezado de la empresa -->
+    <div class="company-header">
+        <h1 class="company-name">CMAN VALVES SOLUTIONS</h1>
+        <p class="company-tagline">Sistema de Control de Inventario</p>
+        <div class="company-info">
+            <p>Documento generado: {{ date('d/m/Y H:i:s') }}</p>
         </div>
     </div>
 
-    <!-- Información del Proveedor -->
-    <div class="section">
-        <h3>INFORMACIÓN DEL PROVEEDOR</h3>
-        <div class="row">
-            <div class="col-label">Nombre:</div>
-            <div class="col-value">
-                {{ $entrada->proveedor ? $entrada->proveedor->proveedor : 'Proveedor no disponible' }}
+    <!-- Información del documento -->
+    <div class="document-info">
+        <h2 class="document-title">ENTRADA DE MATERIAL</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Número de Entrada:</span>
+                <span class="info-value">#{{ str_pad($entrada->id, 6, '0', STR_PAD_LEFT) }}</span>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-label">Contacto:</div>
-            <div class="col-value">
-                {{ $entrada->proveedor && $entrada->proveedor->contacto ? $entrada->proveedor->contacto : 'No disponible' }}
+            <div class="info-item">
+                <span class="info-label">Fecha de Entrada:</span>
+                <span class="info-value">
+                    {{ $entrada->created_at ? $entrada->created_at->format('d/m/Y H:i:s') : 'N/A' }}
+                </span>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-label">Email:</div>
-            <div class="col-value">
-                {{ $entrada->proveedor && $entrada->proveedor->email ? $entrada->proveedor->email : 'No disponible' }}
+            <div class="info-item">
+                <span class="info-label">Registrado por:</span>
+                <span class="info-value">{{ $entrada->user->name ?? 'N/A' }}</span>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-label">Teléfono:</div>
-            <div class="col-value">
-                {{ $entrada->proveedor && $entrada->proveedor->telefono ? $entrada->proveedor->telefono : 'No disponible' }}
+            <div class="info-item">
+                <span class="info-label">Proveedor:</span>
+                <span class="info-value">{{ $entrada->proveedor->proveedor ?? 'N/A' }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Contacto:</span>
+                <span class="info-value">{{ $entrada->proveedor->contacto ?? 'N/A' }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Teléfono:</span>
+                <span class="info-value">{{ $entrada->proveedor->telefono ?? 'N/A' }}</span>
             </div>
         </div>
     </div>
 
-    <!-- Información del Producto -->
-    <div class="section">
-        <h3>PRODUCTO RECIBIDO</h3>
-        <div class="row">
-            <div class="col-label">Nombre del Producto:</div>
-            <div class="col-value">
-                {{ $entrada->inventario ? $entrada->inventario->nombre_producto : 'Producto no disponible' }}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-label">Categoría:</div>
-            <div class="col-value">
-                {{ $entrada->inventario ? $entrada->inventario->categoria : 'No disponible' }}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-label">Cantidad Recibida:</div>
-            <div class="col-value">
-                {{ $entrada->cantidad }} 
-                {{ $entrada->inventario ? $entrada->inventario->medida : 'unidades' }}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-label">Precio Unitario:</div>
-            <div class="col-value">${{ number_format($entrada->precio_unitario, 2) }}</div>
-        </div>
-    </div>
-
-    <!-- Impacto en Inventario -->
+    <!-- Impacto en inventario -->
     <div class="inventory-impact">
-        <h4>IMPACTO EN INVENTARIO</h4>
-        <p>Se agregaron <strong>{{ $entrada->cantidad }} 
-        {{ $entrada->inventario ? $entrada->inventario->medida : 'unidades' }}</strong> 
-        al inventario de {{ $entrada->inventario ? $entrada->inventario->nombre_producto : 'este producto' }}.</p>
+        <strong>IMPACTO EN INVENTARIO:</strong> Se agregaron {{ $entrada->cantidad }} 
+        {{ $entrada->inventario->medida ?? 'unidades' }} al inventario de 
+        <strong>{{ $entrada->inventario->nombre_producto ?? 'producto' }}</strong>.
         @if($entrada->inventario)
-        <p>Existencia actual: <strong>{{ $entrada->inventario->existencia }} {{ $entrada->inventario->medida }}</strong></p>
+        Existencia actual: <strong>{{ $entrada->inventario->existencia }} {{ $entrada->inventario->medida }}</strong>
         @endif
     </div>
 
-    <!-- Detalles Financieros -->
-    <div class="section">
-        <h3>DETALLES FINANCIEROS</h3>
-        
-        <table class="financial-table">
+    <!-- Tabla de producto -->
+    <div class="products-section">
+        <h3 class="section-title">DETALLE DEL PRODUCTO</h3>
+        <table class="products-table">
             <thead>
                 <tr>
-                    <th>Concepto</th>
-                    <th>Cantidad</th>
-                    <th>Precio Unit.</th>
-                    <th>Importe</th>
+                    <th width="40%">PRODUCTO</th>
+                    <th width="15%" class="number">CANTIDAD</th>
+                    <th width="15%" class="currency">PRECIO UNIT.</th>
+                    <th width="15%" class="currency">SUBTOTAL</th>
+                    <th width="15%" class="currency">TOTAL</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>{{ $entrada->inventario ? $entrada->inventario->nombre_producto : 'Producto' }}</td>
-                    <td>{{ $entrada->cantidad }}</td>
-                    <td>${{ number_format($entrada->precio_unitario, 2) }}</td>
-                    <td>${{ number_format($entrada->precio_total, 2) }}</td>
-                </tr>
-                <tr class="total-row">
-                    <td colspan="3" style="text-align: right;"><strong>Subtotal:</strong></td>
-                    <td><strong>${{ number_format($entrada->precio_total, 2) }}</strong></td>
-                </tr>
-                <tr class="total-row">
-                    <td colspan="3" style="text-align: right;"><strong>IVA (16%):</strong></td>
-                    <td><strong>${{ number_format($entrada->iva, 2) }}</strong></td>
-                </tr>
-                <tr class="final-total">
-                    <td colspan="3" style="text-align: right; font-size: 14px;"><strong>TOTAL PAGADO:</strong></td>
-                    <td style="font-size: 14px;"><strong>${{ number_format($entrada->total_con_iva, 2) }}</strong></td>
+                    <td>
+                        <strong>{{ $entrada->inventario->nombre_producto ?? 'Producto' }}</strong><br>
+                        <small>{{ $entrada->inventario->categoria ?? 'Sin categoría' }}</small>
+                    </td>
+                    <td class="number">
+                        {{ $entrada->cantidad }} 
+                        {{ $entrada->inventario->medida ?? 'unid' }}
+                    </td>
+                    <td class="currency">${{ number_format($entrada->precio_unitario, 2) }}</td>
+                    <td class="currency">${{ number_format($entrada->precio_total, 2) }}</td>
+                    <td class="currency">${{ number_format($entrada->total_con_iva, 2) }}</td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    <!-- Sección de Firmas -->
-    <div class="signature-section">
+    <!-- Totales -->
+    <div class="totals-section">
+        <table class="totals-table">
+            <tr class="subtotal-row">
+                <td class="totals-label">Subtotal:</td>
+                <td class="currency">${{ number_format($entrada->precio_total, 2) }}</td>
+            </tr>
+            <tr class="iva-row">
+                <td class="totals-label">IVA (16%):</td>
+                <td class="currency">${{ number_format($entrada->iva, 2) }}</td>
+            </tr>
+            <tr class="total-row">
+                <td class="totals-label">TOTAL:</td>
+                <td class="currency">${{ number_format($entrada->total_con_iva, 2) }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Firmas -->
+    <div class="signatures-section">
         <div class="signature-box">
             <div class="signature-line"></div>
-            <p><strong>Recibido por:</strong></p>
-            <p>{{ $entrada->user ? $entrada->user->name : 'N/A' }}</p>
-            <p>{{ $entrada->created_at ? $entrada->created_at->format('d/m/Y') : 'N/A' }}</p>
+            <div class="signature-label">ENTREGADO POR</div>
+            <div class="signature-name">{{ $entrada->proveedor->proveedor ?? 'Proveedor' }}</div>
+            <div class="signature-label">Proveedor</div>
         </div>
         
         <div class="signature-box">
             <div class="signature-line"></div>
-            <p><strong>Entregado por:</strong></p>
-            <p>{{ $entrada->proveedor ? $entrada->proveedor->proveedor : 'N/A' }}</p>
-            <p>Fecha: _________________</p>
+            <div class="signature-label">RECIBIDO POR</div>
+            <div class="signature-name">{{ $entrada->user->name ?? 'N/A' }}</div>
+            <div class="signature-label">CMAN VALVES SOLUTIONS</div>
         </div>
     </div>
 
-    <!-- Información adicional -->
-    <div class="section">
-        <h3>INFORMACIÓN ADICIONAL</h3>
-        <div class="row">
-            <div class="col-label">Tipo de Transacción:</div>
-            <div class="col-value">Entrada de Material / Compra</div>
-        </div>
-        <div class="row">
-            <div class="col-label">Estado:</div>
-            <div class="col-value">Procesada y aplicada al inventario</div>
-        </div>
-        <div class="row">
-            <div class="col-label">Método de Pago:</div>
-            <div class="col-value">____________________</div>
-        </div>
-        <div class="row">
-            <div class="col-label">Observaciones:</div>
-            <div class="col-value">____________________</div>
-        </div>
-    </div>
-
-    <!-- Footer -->
+    <!-- Pie de página -->
     <div class="footer">
-        <p>Este documento fue generado automáticamente por el Sistema de Control de Inventario</p>
-        <p>CMAN VALVES SOLUTIONS | {{ date('Y') }}</p>
-        <p>Documento generado el {{ date('d/m/Y') }} a las {{ date('H:i:s') }}</p>
+        <p>Documento generado automáticamente por el Sistema de Control de Inventario de CMAN VALVES SOLUTIONS</p>
+        <p>Este documento es válido como comprobante de entrada de materiales</p>
+        <p>Impreso el {{ date('d/m/Y') }} a las {{ date('H:i:s') }}</p>
     </div>
 </body>
 </html>
