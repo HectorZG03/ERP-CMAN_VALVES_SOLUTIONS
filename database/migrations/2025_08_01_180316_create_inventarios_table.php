@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('nombre_producto');
             $table->string('economico');
             $table->string('medida');
+            $table->string('ubicacion');
             $table->integer('existencia')->default(0);
             $table->decimal('precio_total', 10, 2)->default(0);
             $table->timestamps();

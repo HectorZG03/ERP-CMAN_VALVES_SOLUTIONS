@@ -115,9 +115,17 @@ class InventarioController extends Controller
             'nombre_producto' => 'required|string|max:255',
             'economico' => 'required|string|max:255',
             'medida' => 'required|string|max:255',
+            'ubicacion' => 'nullable|string|max:255',
         ]);
 
-        Inventario::create($request->all());
+        // Crear el registro con ubicación por defecto si está vacía
+        Inventario::create([
+            'categoria' => $request->categoria,
+            'nombre_producto' => $request->nombre_producto,
+            'economico' => $request->economico,
+            'medida' => $request->medida,
+            'ubicacion' => $request->ubicacion ?? 'N/A', // ← Esto es lo importante
+        ]);
 
         return redirect()->route('inventario.index')->with('success', 'Producto agregado al inventario');
     }
@@ -145,9 +153,17 @@ class InventarioController extends Controller
             'nombre_producto' => 'required|string|max:255',
             'economico' => 'required|string|max:255',
             'medida' => 'required|string|max:255',
+            'ubicacion' => 'nullable|string|max:255',
         ]);
 
-        $inventario->update($request->all());
+        // Actualizar con ubicación por defecto si está vacía
+        $inventario->update([
+            'categoria' => $request->categoria,
+            'nombre_producto' => $request->nombre_producto,
+            'economico' => $request->economico,
+            'medida' => $request->medida,
+            'ubicacion' => $request->ubicacion ?? 'N/A',
+        ]);
 
         return redirect()->route('inventario.index')->with('success', 'Producto actualizado');
     }

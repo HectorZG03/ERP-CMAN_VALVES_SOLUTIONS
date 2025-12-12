@@ -131,6 +131,35 @@
                 </div>
             </div>
 
+
+            {{-- Ubicacin --}}
+
+             <div class="mb-6">
+                <label for="ubicacion" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Ubicación
+                </label>
+                <input type="text" 
+                    name="ubicacion" 
+                    id="ubicacion" 
+                    class="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm 
+                            bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                            placeholder-gray-400 dark:placeholder-gray-500
+                            focus:ring-blue-500 focus:border-blue-500 
+                            transition-colors duration-200"
+                    value="{{ old('ubicacion', $inventario->ubicacion) }}" 
+                    placeholder="Ingrese ubicación o déjelo como N/A">
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Deje este campo vacío o escriba "N/A" si no aplica
+                </p>
+            </div>
+                @error('ubicacion')
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                @enderror
+
+
+
+            
+
             <!-- Advertencia sobre cambios -->
             <div class="mt-6 bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
                 <div class="flex items-start">

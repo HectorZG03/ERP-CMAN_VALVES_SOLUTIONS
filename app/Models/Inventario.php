@@ -14,6 +14,7 @@ class Inventario extends Model
         'nombre_producto',
         'economico',
         'medida',
+        'ubicacion',
         'existencia',
         'precio_total',
     ];

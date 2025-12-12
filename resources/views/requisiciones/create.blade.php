@@ -30,24 +30,18 @@
                     </div>
 
                     <div>
-                        <label for="departamento" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Departamento <span class="text-red-500">*</span>
-                        </label>
-                        <select name="departamento" id="departamento" required
-                                class="mt-1 block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200">
-                            <option value="">Seleccionar departamento</option>
-                            <option value="Almacén">Almacén</option>
-                            <option value="Calidad">Calidad</option>
-                            <option value="Contabilidad">Contabilidad</option>
-                            <option value="Estimaciones">Estimaciones</option>
-                            <option value="Finanzas">Finanzas</option>
-                            <option value="Logística">Logística</option>
-                            <option value="Recursos Humanos">Recursos Humanos</option>
-                            <option value="TI">Tecnología</option>
-                            <option value="Dirección">Dirección</option>
-                            <option value="Operaciones">Operaciones</option>
-                        </select>
-                    </div>
+    <label for="departamento" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        Departamento <span class="text-red-500">*</span>
+    </label>
+    <input type="text" 
+           id="departamento"
+           class="mt-1 block w-full bg-gray-100 dark:bg-gray-600 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-gray-900 dark:text-white transition-colors duration-200 uppercase font-semibold"
+           value="{{ old('departamento', auth()->user()->departamento ?? auth()->user()->role) }}"
+           readonly
+           style="text-transform: uppercase; letter-spacing: 0.05em;">
+    <input type="hidden" name="departamento" 
+           value="{{ old('departamento', auth()->user()->departamento ?? auth()->user()->role) }}">
+</div>
                 </div>
             </div>
 
@@ -104,18 +98,18 @@
 
                     <div>
                         <label for="plataforma" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Plataforma <span class="text-red-500">*</span>
+                            Plataforma
                         </label>
-                        <input type="text" name="plataforma" id="plataforma" required
+                        <input type="text" name="plataforma" id="plataforma" 
                                class="mt-1 block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200"
-                               value="{{ old('plataforma') }}" placeholder="Ej: Plataforma A, Oficinas, etc.">
+                               value="{{ old('plataforma') }}" placeholder="Ej: Plataforma A, Oficinas, etc. O N/A">
                     </div>
 
                     <div>
                         <label for="embarcacion" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Embarcación/Barco <span class="text-red-500">*</span>
+                            Embarcación/Barco 
                         </label>
-                        <input type="text" name="embarcacion" id="embarcacion" required
+                        <input type="text" name="embarcacion" id="embarcacion" 
                                class="mt-1 block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200"
                                value="{{ old('embarcacion') }}" placeholder="Nombre del barco o N/A">
                     </div>
