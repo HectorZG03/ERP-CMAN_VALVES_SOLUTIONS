@@ -7,7 +7,7 @@
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Requisiciones de Compra</h1>
             <!-- ✅ Mostrar mensaje según el rol -->
             @if(auth()->user()->canApproveFinanzas())
-                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Mostrando requisiciones pendientes de aprobación de finanzas</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Mostrando todas las requisiciones - Puedes filtrar por estado</p>
             @elseif(auth()->user()->canApproveRequests())
                 <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Mostrando requisiciones aprobadas por finanzas</p>
             @endif
@@ -23,9 +23,47 @@
     <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg p-4 transition-colors duration-200">
         <div class="flex flex-wrap gap-4 items-center justify-between">
             <div class="flex flex-wrap gap-4 items-center">
-                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Vista:</span>
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    @if(auth()->user()->canApproveFinanzas())
+                        Filtrar por estado en Finanzas:
+                    @else
+                        Vista:
+                    @endif
+                </span>
                 
-                <!-- Filtros por Estado -->
+                <!-- ✅ Filtros ESPECIALES para FINANZAS -->
+                @if(auth()->user()->canApproveFinanzas())
+                <div class="flex gap-2">
+                    <!-- Filtro Todas -->
+                    <button type="button" data-finanzas-status="all" 
+                            class="finanzas-filter active px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">
+                        <span>Todas</span>
+                        <span class="status-count ml-1" id="count-finanzas-all">{{ $requisiciones->total() }}</span>
+                    </button>
+
+                    <!-- Filtro Pendientes Finanzas -->
+                    <button type="button" data-finanzas-status="pendiente" 
+                            class="finanzas-filter px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:text-blue-800 dark:hover:text-blue-300">
+                        <span>⏳ Pendientes</span>
+                        <span class="status-count ml-1" id="count-finanzas-pendiente">0</span>
+                    </button>
+
+                    <!-- Filtro Aprobadas Finanzas -->
+                    <button type="button" data-finanzas-status="aprobado" 
+                            class="finanzas-filter px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-green-100 dark:hover:bg-green-900/30 hover:text-green-800 dark:hover:text-green-300">
+                        <span>✓ Aprobadas</span>
+                        <span class="status-count ml-1" id="count-finanzas-aprobado">0</span>
+                    </button>
+
+                    <!-- Filtro Denegadas Finanzas -->
+                    <button type="button" data-finanzas-status="denegado" 
+                            class="finanzas-filter px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-800 dark:hover:text-red-300">
+                        <span>✗ Denegadas</span>
+                        <span class="status-count ml-1" id="count-finanzas-denegado">0</span>
+                    </button>
+                </div>
+                @else
+                <!-- Filtros normales para otros roles -->
                 <div class="flex gap-2">
                     <!-- Filtro Todos (solo para almacén) -->
                     @if(auth()->user()->canManageInventory())
@@ -57,6 +95,7 @@
                         <span class="status-count ml-1" id="count-denegado">0</span>
                     </button>
                 </div>
+                @endif
             </div>
             
             <div class="flex items-center gap-4">
@@ -103,9 +142,9 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Departamento
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Tipo
-                            </th>
+                            </th> --}}
                             <!-- ✅ NUEVA COLUMNA: Estado Finanzas -->
                             @if(auth()->user()->canManageInventory() || auth()->user()->canApproveRequests())
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -162,7 +201,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                 {{ $requisicion->departamento }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            {{-- <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                     {{ $requisicion->tipo_requerimiento === 'interno' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' : 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' }}">
                                     @if($requisicion->tipo_requerimiento === 'interno')
@@ -176,7 +215,7 @@
                                     @endif
                                     {{ ucfirst($requisicion->tipo_requerimiento) }}
                                 </span>
-                            </td>
+                            </td> --}}
                             
                             <!-- ✅ NUEVA COLUMNA: Estado Finanzas -->
                             @if(auth()->user()->canManageInventory() || auth()->user()->canApproveRequests())
@@ -242,7 +281,7 @@
                                         Ver
                                     </a>
 
-                                    <!-- ✅ Botones para FINANZAS -->
+                                    <!-- ✅ Botones para FINANZAS (solo si está pendiente) -->
                                     @if(auth()->user()->canApproveFinanzas() && $requisicion->estatus_finanzas === 'pendiente')
                                         <form method="POST" action="{{ route('requisiciones.updateEstatusFinanzas', $requisicion) }}" class="inline">
                                             @csrf
@@ -270,6 +309,12 @@
                                                 Denegar
                                             </button>
                                         </form>
+                                    @elseif(auth()->user()->canApproveFinanzas() && $requisicion->estatus_finanzas !== 'pendiente')
+                                        <!-- Mostrar estado actual si ya fue procesada -->
+                                        <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md
+                                            {{ $requisicion->estatus_finanzas === 'aprobado' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300' }}">
+                                            {{ $requisicion->estatus_finanzas === 'aprobado' ? '✓ Ya aprobada' : '✗ Ya denegada' }}
+                                        </span>
                                     @endif
 
                                     <!-- ✅ Botones para DIRECCIÓN (solo si finanzas aprobó) -->
@@ -403,35 +448,66 @@
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('search');
     const statusFilters = document.querySelectorAll('.status-filter');
+    const finanzasFilters = document.querySelectorAll('.finanzas-filter');
     const tableRows = document.querySelectorAll('tbody tr[data-status]');
     const noResultsRow = document.getElementById('no-results-row');
     
-    let currentStatusFilter = @if(auth()->user()->canManageInventory()) 'all' @else 'pendiente' @endif;
+    const isFinanzas = {{ auth()->user()->canApproveFinanzas() ? 'true' : 'false' }};
+    const isAlmacen = {{ auth()->user()->canManageInventory() ? 'true' : 'false' }};
+    
+    let currentStatusFilter = isAlmacen ? 'all' : 'pendiente';
+    let currentFinanzasFilter = 'all';
     let currentSearchTerm = '';
 
     // Contar requisiciones por estado al cargar la página
     function updateStatusCounts() {
-        const counts = {
-            pendiente: 0,
-            aprobado: 0,
-            denegado: 0,
-            all: tableRows.length
-        };
+        if (isFinanzas) {
+            // Contadores para finanzas
+            const counts = {
+                pendiente: 0,
+                aprobado: 0,
+                denegado: 0,
+                all: tableRows.length
+            };
 
-        tableRows.forEach(row => {
-            const status = row.getAttribute('data-status');
-            if (counts.hasOwnProperty(status)) {
-                counts[status]++;
-            }
-        });
+            tableRows.forEach(row => {
+                const estatusFinanzas = row.getAttribute('data-estatus-finanzas');
+                if (counts.hasOwnProperty(estatusFinanzas)) {
+                    counts[estatusFinanzas]++;
+                }
+            });
 
-        // Actualizar contadores en la interfaz
-        Object.keys(counts).forEach(status => {
-            const countElement = document.getElementById(`count-${status}`);
-            if (countElement) {
-                countElement.textContent = counts[status];
-            }
-        });
+            // Actualizar contadores en la interfaz
+            Object.keys(counts).forEach(status => {
+                const countElement = document.getElementById(`count-finanzas-${status}`);
+                if (countElement) {
+                    countElement.textContent = counts[status];
+                }
+            });
+        } else {
+            // Contadores normales para otros roles
+            const counts = {
+                pendiente: 0,
+                aprobado: 0,
+                denegado: 0,
+                all: tableRows.length
+            };
+
+            tableRows.forEach(row => {
+                const status = row.getAttribute('data-status');
+                if (counts.hasOwnProperty(status)) {
+                    counts[status]++;
+                }
+            });
+
+            // Actualizar contadores en la interfaz
+            Object.keys(counts).forEach(status => {
+                const countElement = document.getElementById(`count-${status}`);
+                if (countElement) {
+                    countElement.textContent = counts[status];
+                }
+            });
+        }
     }
 
     // Función para aplicar filtros
@@ -441,9 +517,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
         tableRows.forEach(row => {
             const status = row.getAttribute('data-status');
+            const estatusFinanzas = row.getAttribute('data-estatus-finanzas');
             const text = row.textContent.toLowerCase();
             
-            const statusMatch = currentStatusFilter === 'all' || status === currentStatusFilter;
+            let statusMatch = true;
+            
+            // Determinar si coincide con el filtro según el rol
+            if (isFinanzas) {
+                statusMatch = currentFinanzasFilter === 'all' || estatusFinanzas === currentFinanzasFilter;
+            } else {
+                statusMatch = currentStatusFilter === 'all' || status === currentStatusFilter;
+            }
+            
             const searchMatch = currentSearchTerm === '' || text.includes(currentSearchTerm);
             
             if (statusMatch && searchMatch) {
@@ -464,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 noResultsRow.querySelector('h3').textContent = 'No se encontraron requisiciones';
                 noResultsRow.querySelector('p').textContent = currentSearchTerm 
                     ? `No hay requisiciones que coincidan con "${currentSearchTerm}" y el filtro seleccionado.`
-                    : `No hay requisiciones con el estado "${getStatusLabel(currentStatusFilter)}".`;
+                    : `No hay requisiciones con el estado seleccionado.`;
             } else {
                 noResultsRow.style.display = 'none';
             }
@@ -477,17 +562,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Obtener etiqueta del estado
-    function getStatusLabel(status) {
-        const labels = {
-            'all': 'Todas',
-            'pendiente': 'Pendientes',
-            'aprobado': 'Aprobados',
-            'denegado': 'Denegados'
-        };
-        return labels[status] || status;
-    }
-
     // Event listener para búsqueda
     if (searchInput) {
         searchInput.addEventListener('keyup', function () {
@@ -496,7 +570,30 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Event listeners para filtros de estado
+    // Event listeners para filtros de FINANZAS
+    finanzasFilters.forEach(filter => {
+        filter.addEventListener('click', function () {
+            // Remover clase active de todos los filtros
+            finanzasFilters.forEach(f => {
+                f.classList.remove('active');
+                f.classList.remove('bg-purple-100', 'dark:bg-purple-900/30', 'text-purple-800', 'dark:text-purple-300');
+                f.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+            });
+
+            // Agregar clase active al filtro seleccionado
+            this.classList.add('active');
+            this.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-700', 'dark:text-gray-300');
+            this.classList.add('bg-purple-100', 'dark:bg-purple-900/30', 'text-purple-800', 'dark:text-purple-300');
+
+            // Actualizar filtro actual
+            currentFinanzasFilter = this.getAttribute('data-finanzas-status');
+
+            // Aplicar filtros
+            applyFilters();
+        });
+    });
+
+    // Event listeners para filtros de estado normales
     statusFilters.forEach(filter => {
         filter.addEventListener('click', function () {
             // Remover clase active de todos los filtros

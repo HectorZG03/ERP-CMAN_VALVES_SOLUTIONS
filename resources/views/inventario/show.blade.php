@@ -72,15 +72,12 @@
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Unidad de Medida</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-white font-medium">
-                                            {{ $inventario->medida }}                                         
-                                            
+                                            {{ $inventario->medida }}
                                         </dd>
-                                        {{-- economico --}}
-
-                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Economico</dt>
+                                        
+                                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 mt-2">Económico</dt>
                                         <dd class="mt-1 text-sm text-gray-900 dark:text-white font-medium">
                                             {{ $inventario->economico ?? 'N/A' }}
-       
                                         </dd>
                                     </div>
                                 </div>
@@ -176,51 +173,88 @@
                     </h3>
                     
                     <div class="space-y-4">
-                        @if($inventario->entradas && $inventario->entradas->count() > 0)
-                            @foreach($inventario->entradas->take(3) as $entrada)
-                            <div class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/>
-                                        </svg>
+                        @if(isset($entradasDetalles) && $entradasDetalles->count() > 0)
+                            @foreach($entradasDetalles->take(3) as $detalle)
+                                @if($detalle->entrada)
+                                <div class="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/>
+                                            </svg>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-green-800 dark:text-green-300">
+                                                Entrada #{{ $detalle->entrada->numero_factura ?? $detalle->entrada->id }}
+                                            </p>
+                                            <p class="text-xs text-green-600 dark:text-green-400">
+                                                {{ $detalle->created_at->format('d/m/Y H:i') }}
+                                            </p>
+                                            @if($detalle->entrada->proveedor)
+                                            <p class="text-xs text-green-600 dark:text-green-400 mt-1">
+                                                Proveedor: {{ $detalle->entrada->proveedor->proveedor }}
+                                            </p>
+                                            @endif
+                                        </div>
                                     </div>
-                                    <div class="ml-3">
-                                        <p class="text-sm font-medium text-green-800 dark:text-green-300">Entrada</p>
-                                        <p class="text-xs text-green-600 dark:text-green-400">{{ $entrada->created_at->format('d/m/Y H:i') }}</p>
+                                    <div class="text-right">
+                                        <p class="text-sm font-semibold text-green-800 dark:text-green-300">
+                                            +{{ $detalle->cantidad }} {{ $inventario->medida }}
+                                        </p>
+                                        <p class="text-xs text-green-600 dark:text-green-400">
+                                            ${{ number_format($detalle->total_con_iva, 2) }}
+                                        </p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            Unit: ${{ number_format($detalle->precio_unitario, 2) }}
+                                        </p>
                                     </div>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-sm font-semibold text-green-800 dark:text-green-300">+{{ $entrada->cantidad }} {{ $inventario->medida }}</p>
-                                    <p class="text-xs text-green-600 dark:text-green-400">${{ number_format($entrada->total_con_iva, 2) }}</p>
-                                </div>
-                            </div>
+                                @endif
                             @endforeach
                         @endif
 
-                        @if($inventario->salidas && $inventario->salidas->count() > 0)
-                            @foreach($inventario->salidas->take(3) as $salida)
-                            <div class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H3"/>
-                                        </svg>
+                        @if(isset($salidasDetalles) && $salidasDetalles->count() > 0)
+                            @foreach($salidasDetalles->take(3) as $detalle)
+                                @if($detalle->salida)
+                                <div class="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0">
+                                            <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H3"/>
+                                            </svg>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm font-medium text-red-800 dark:text-red-300">
+                                                Salida #{{ $detalle->salida->numero_factura ?? $detalle->salida->id }}
+                                            </p>
+                                            <p class="text-xs text-red-600 dark:text-red-400">
+                                                {{ $detalle->created_at->format('d/m/Y H:i') }}
+                                            </p>
+                                            @if($detalle->salida->cliente)
+                                            <p class="text-xs text-red-600 dark:text-red-400 mt-1">
+                                                Cliente: {{ $detalle->salida->cliente->nombre }}
+                                            </p>
+                                            @endif
+                                        </div>
                                     </div>
-                                    <div class="ml-3">
-                                        <p class="text-sm font-medium text-red-800 dark:text-red-300">Salida</p>
-                                        <p class="text-xs text-red-600 dark:text-red-400">{{ $salida->created_at->format('d/m/Y H:i') }}</p>
+                                    <div class="text-right">
+                                        <p class="text-sm font-semibold text-red-800 dark:text-red-300">
+                                            -{{ $detalle->cantidad }} {{ $inventario->medida }}
+                                        </p>
+                                        <p class="text-xs text-red-600 dark:text-red-400">
+                                            ${{ number_format($detalle->total_con_iva, 2) }}
+                                        </p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            Unit: ${{ number_format($detalle->precio_unitario, 2) }}
+                                        </p>
                                     </div>
                                 </div>
-                                <div class="text-right">
-                                    <p class="text-sm font-semibold text-red-800 dark:text-red-300">-{{ $salida->cantidad }} {{ $inventario->medida }}</p>
-                                    <p class="text-xs text-red-600 dark:text-red-400">${{ number_format($salida->total_con_iva, 2) }}</p>
-                                </div>
-                            </div>
+                                @endif
                             @endforeach
                         @endif
 
-                        @if((!$inventario->entradas || $inventario->entradas->count() == 0) && (!$inventario->salidas || $inventario->salidas->count() == 0))
+                        @if((!isset($entradasDetalles) || $entradasDetalles->count() == 0) && 
+                            (!isset($salidasDetalles) || $salidasDetalles->count() == 0))
                         <div class="text-center py-6">
                             <svg class="mx-auto h-8 w-8 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -273,6 +307,13 @@
                                 {{ $inventario->medida }}
                             </dd>
                         </div>
+
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Ubicación</dt>
+                            <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+                                {{ $inventario->ubicacion ?? 'N/A' }}
+                            </dd>
+                        </div>
                     </dl>
                 </div>
             </div>
@@ -323,21 +364,21 @@
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-500 dark:text-gray-400">Total Entradas:</span>
                             <span class="text-sm font-semibold text-green-600 dark:text-green-400">
-                                {{ $inventario->entradas ? $inventario->entradas->count() : 0 }}
+                                {{ isset($entradasDetalles) ? $entradasDetalles->count() : 0 }}
                             </span>
                         </div>
                         
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-500 dark:text-gray-400">Total Salidas:</span>
                             <span class="text-sm font-semibold text-red-600 dark:text-red-400">
-                                {{ $inventario->salidas ? $inventario->salidas->count() : 0 }}
+                                {{ isset($salidasDetalles) ? $salidasDetalles->count() : 0 }}
                             </span>
                         </div>
                         
                         <div class="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-600">
                             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Movimientos Totales:</span>
                             <span class="text-sm font-bold text-blue-600 dark:text-blue-400">
-                                {{ ($inventario->entradas ? $inventario->entradas->count() : 0) + ($inventario->salidas ? $inventario->salidas->count() : 0) }}
+                                {{ (isset($entradasDetalles) ? $entradasDetalles->count() : 0) + (isset($salidasDetalles) ? $salidasDetalles->count() : 0) }}
                             </span>
                         </div>
                     </div>

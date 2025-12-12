@@ -7,6 +7,8 @@ use App\Models\Inventario;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\InventarioExport;
+use App\Models\EntradaDetalle;
+use App\Models\SalidaDetalle;
 
 class InventarioController extends Controller
 {
@@ -131,15 +133,67 @@ class InventarioController extends Controller
     }
 
     public function show(Inventario $inventario)
-    {
-        $inventario->load(['entradas' => function($query) {
-            $query->latest()->take(5);
-        }, 'salidas' => function($query) {
-            $query->latest()->take(5);
-        }]);
-        
-        return view('inventario.show', compact('inventario'));
-    }
+{
+    // Obtener y formatear entradas
+    $entradasDetalles = EntradaDetalle::with(['entrada' => function($query) {
+        $query->with(['proveedor', 'user']);
+    }])
+    ->where('inventario_id', $inventario->id)
+    ->orderBy('created_at', 'desc')
+    ->take(5)
+    ->get()
+    ->map(function ($detalle) use ($inventario) {
+        return [
+            'id' => $detalle->entrada->id ?? null,
+            'numero_factura' => $detalle->entrada->numero_factura ?? 'N/A',
+            'proveedor' => $detalle->entrada->proveedor->proveedor ?? 'N/A',
+            'usuario' => $detalle->entrada->user->name ?? 'N/A',
+            'cantidad' => $detalle->cantidad,
+            'precio_unitario' => $detalle->precio_unitario,
+            'precio_total' => $detalle->precio_total,
+            'iva' => $detalle->iva,
+            'total_con_iva' => $detalle->total_con_iva,
+            'fecha' => $detalle->created_at,
+            'observaciones' => $detalle->entrada->observaciones ?? 'Sin observaciones',
+            'tipo' => 'entrada',
+            'medida' => $inventario->medida,
+        ];
+    });
+
+    // Obtener y formatear salidas
+    $salidasDetalles = SalidaDetalle::with(['salida' => function($query) {
+        $query->with(['cliente', 'user']);
+    }])
+    ->where('inventario_id', $inventario->id)
+    ->orderBy('created_at', 'desc')
+    ->take(5)
+    ->get()
+    ->map(function ($detalle) use ($inventario) {
+        return [
+            'id' => $detalle->salida->id ?? null,
+            'numero_factura' => $detalle->salida->numero_factura ?? 'N/A',
+            'cliente' => $detalle->salida->cliente->nombre ?? 'N/A',
+            'area_cliente' => $detalle->salida->cliente->area ?? 'N/A',
+            'usuario' => $detalle->salida->user->name ?? 'N/A',
+            'cantidad' => $detalle->cantidad,
+            'precio_unitario' => $detalle->precio_unitario,
+            'precio_total' => $detalle->precio_total,
+            'iva' => $detalle->iva,
+            'total_con_iva' => $detalle->total_con_iva,
+            'fecha' => $detalle->created_at,
+            'observaciones' => $detalle->salida->observaciones ?? 'Sin observaciones',
+            'tipo' => 'salida',
+            'medida' => $inventario->medida,
+        ];
+    });
+
+    // Combinar y ordenar por fecha
+    $movimientos = $entradasDetalles->merge($salidasDetalles)
+        ->sortByDesc('fecha')
+        ->take(10); // Mostrar los 10 movimientos más recientes
+
+    return view('inventario.show', compact('inventario', 'movimientos'));
+}
 
     public function edit(Inventario $inventario)
     {

@@ -19,26 +19,30 @@ class RequisicionController extends Controller
     {
         $user = auth()->user();
         
-        // ✅ Si es de finanzas, mostrar solo las pendientes de su aprobación
+        // ✅ Si es de finanzas, mostrar TODAS las requisiciones (para que puedan ver su historial)
         if ($user->canApproveFinanzas()) {
-            $requisiciones = Requisicion::with(['user', 'detalles'])
-                                       ->where('estatus_finanzas', 'pendiente')
+            $requisiciones = Requisicion::with(['user', 'detalles', 'aprobadorFinanzas'])
+                                       ->orderBy('created_at', 'desc')
                                        ->paginate(15);
         }
         // ✅ Si es director, mostrar solo las que YA fueron aprobadas por finanzas
         elseif ($user->canApproveRequests()) {
             $requisiciones = Requisicion::with(['user', 'detalles', 'aprobadorFinanzas'])
                                        ->where('estatus_finanzas', 'aprobado')
+                                       ->orderBy('created_at', 'desc')
                                        ->paginate(15);
         }
         // ✅ Si es almacén, mostrar todas
         elseif ($user->canManageInventory()) {
-            $requisiciones = Requisicion::with(['user', 'detalles'])->paginate(15);
+            $requisiciones = Requisicion::with(['user', 'detalles'])
+                                       ->orderBy('created_at', 'desc')
+                                       ->paginate(15);
         }
         // ✅ Usuarios normales solo ven las suyas
         else {
             $requisiciones = Requisicion::where('user_id', $user->id)
                                        ->with(['user', 'detalles'])
+                                       ->orderBy('created_at', 'desc')
                                        ->paginate(15);
         }
         
@@ -56,8 +60,8 @@ class RequisicionController extends Controller
         $request->validate([
             'nombre_solicitante' => 'required|string|max:255',
             'departamento' => 'required|string|max:255',
-            // 'plataforma' => 'required|string|max:255',
-            // 'embarcacion' => 'required|string|max:255',
+            'plataforma' => 'required|string|max:255',
+            'embarcacion' => 'required|string|max:255',
             'tipo_requerimiento' => 'required|in:interno,externo',
             'comentario' => 'required|string',
             'materiales' => 'required|array|min:1',
@@ -86,7 +90,7 @@ class RequisicionController extends Controller
                 'area' => $request->area ?? 'N/A',
                 'activo' => $request->activo ?? 'N/A',
                 'contrato_id' => $request->contrato_id,
-                'embarcacion' => $request->embarcacion ?? 'N/A',
+                'embarcacion' => $request->embarcacion,
                 'tipo_requerimiento' => $request->tipo_requerimiento,
                 'comentario' => $request->comentario,
                 'user_id' => auth()->id(),

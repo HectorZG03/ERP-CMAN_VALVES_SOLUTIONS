@@ -6,7 +6,6 @@
     <title>Inventario - {{ $fechaGeneracion->format('d/m/Y') }}</title>
     <style>
 
-
 .kpi-bar {
     display: flex;
     justify-content: space-between;
@@ -37,113 +36,129 @@
     font-size: 12px;
 }
 
+body {
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    color: #333;
+    margin: 0;
+    padding: 15px;
+}
+.header {
+    text-align: center;
+    border-bottom: 2px solid #3B82F6;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+.header h1 {
+    margin: 0;
+    font-size: 18px;
+    color: #3B82F6;
+}
+.company-info {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 9px;
+    color: #666;
+}
+.summary-stats {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.stat-box {
+    flex: 1;
+    background: #f8f9fa;
+    border-left: 4px solid #3B82F6;
+    padding: 8px;
+    text-align: center;
+    border-radius: 4px;
+}
+.stat-box h4 {
+    margin: 0;
+    font-size: 9px;
+    color: #666;
+    text-transform: uppercase;
+}
+.stat-box p {
+    margin: 3px 0 0;
+    font-size: 14px;
+    font-weight: bold;
+}
+.section-title {
+    background: #3B82F6;
+    color: #fff;
+    padding: 6px 10px;
+    margin: 20px 0 10px;
+    font-size: 11px;
+    font-weight: bold;
+}
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 15px;
+}
+.inventory-table th,
+.inventory-table td {
+    border: 1px solid #ddd;
+    padding: 5px;
+    font-size: 9px;
+}
+.inventory-table th {
+    background: #f1f5f9;
+    color: #3B82F6;
+    text-transform: uppercase;
+    font-size: 8px;
+}
+.stock-high { color: #059669; font-weight: bold; }
+.stock-low { color: #D97706; font-weight: bold; }
+.stock-empty { color: #DC2626; font-weight: bold; }
 
+.categoria-badge {
+    background: #DBEAFE;
+    color: #1E40AF;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 8px;
+    font-weight: bold;
+}
 
+.estado-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 8px;
+    font-weight: bold;
+    color: #fff;
+}
+.estado-normal { background: #059669; }
+.estado-bajo { background: #D97706; }
+.estado-agotado { background: #DC2626; }
 
+.estado-badge .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #fff;
+}
 
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 10px;
-            color: #333;
-            margin: 0;
-            padding: 15px;
-        }
-        .header {
-            text-align: center;
-            border-bottom: 2px solid #3B82F6;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 18px;
-            color: #3B82F6;
-        }
-        .company-info {
-            text-align: center;
-            margin-bottom: 15px;
-            font-size: 9px;
-            color: #666;
-        }
-        .summary-stats {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .stat-box {
-            flex: 1;
-            background: #f8f9fa;
-            border-left: 4px solid #3B82F6;
-            padding: 8px;
-            text-align: center;
-            border-radius: 4px;
-        }
-        .stat-box h4 {
-            margin: 0;
-            font-size: 9px;
-            color: #666;
-            text-transform: uppercase;
-        }
-        .stat-box p {
-            margin: 3px 0 0;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .section-title {
-            background: #3B82F6;
-            color: #fff;
-            padding: 6px 10px;
-            margin: 20px 0 10px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-        .inventory-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-        .inventory-table th, 
-        .inventory-table td {
-            border: 1px solid #ddd;
-            padding: 5px;
-            font-size: 9px;
-        }
-        .inventory-table th {
-            background: #f1f5f9;
-            color: #3B82F6;
-            text-transform: uppercase;
-            font-size: 8px;
-        }
-        .stock-high { color: #059669; font-weight: bold; }
-        .stock-low { color: #D97706; font-weight: bold; }
-        .stock-empty { color: #DC2626; font-weight: bold; }
-        .categoria-badge {
-            background: #DBEAFE;
-            color: #1E40AF;
-            padding: 2px 6px;
-            border-radius: 12px;
-            font-size: 8px;
-            font-weight: bold;
-        }
-        .footer {
-            margin-top: 25px;
-            border-top: 1px solid #ddd;
-            padding-top: 10px;
-            text-align: center;
-            font-size: 8px;
-            color: #666;
-        }
-    </style>
+.footer {
+    margin-top: 25px;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+    text-align: center;
+    font-size: 8px;
+    color: #666;
+}
+</style>
 </head>
 <body>
-    <!-- Encabezado -->
     <div class="header">
         <h1>INVENTARIO COMPLETO</h1>
         <p class="company-info">CMAN VALVES SOLUTIONS - {{ $fechaGeneracion->format('d/m/Y H:i') }}</p>
     </div>
 
-    <!-- KPIs -->
-<!-- Indicadores Clave -->
     <div class="kpi-bar">
         <div class="kpi-item">
             <span class="kpi-label">Total Productos</span>
@@ -163,8 +178,6 @@
         </div>
     </div>
 
-
-    <!-- Inventario -->
     <div class="section-title">INVENTARIO DETALLADO</div>
     <table class="inventory-table">
         <thead>
@@ -172,6 +185,7 @@
                 <th>ID</th>
                 <th>Producto</th>
                 <th>Categoría</th>
+                <th>Ubicación</th>
                 <th>Medida</th>
                 <th>Existencia</th>
                 <th>Precio Unit.</th>
@@ -185,6 +199,7 @@
                 <td style="font-family: monospace;">#{{ str_pad($inventario->id,4,'0',STR_PAD_LEFT) }}</td>
                 <td style="font-weight: bold;">{{ $inventario->nombre_producto }}</td>
                 <td><span class="categoria-badge">{{ $inventario->categoria }}</span></td>
+                <td>{{ $inventario->ubicacion ?? 'N/A' }}</td>
                 <td>{{ $inventario->medida }}</td>
                 <td class="
                     @if($inventario->existencia > 10) stock-high
@@ -196,11 +211,11 @@
                 <td style="font-weight:bold">${{ number_format($inventario->precio_total,2) }}</td>
                 <td>
                     @if($inventario->existencia > 10)
-                        <span style="color:#059669;">●</span> Normal
+                        <span class="estado-badge estado-normal"><span class="dot"></span> Normal</span>
                     @elseif($inventario->existencia > 0)
-                        <span style="color:#D97706;">●</span> Bajo
+                        <span class="estado-badge estado-bajo"><span class="dot"></span> Bajo</span>
                     @else
-                        <span style="color:#DC2626;">●</span> Agotado
+                        <span class="estado-badge estado-agotado"><span class="dot"></span> Agotado</span>
                     @endif
                 </td>
             </tr>
@@ -208,7 +223,6 @@
         </tbody>
     </table>
 
-    <!-- Footer -->
     <div class="footer">
         <p>CMAN VALVES SOLUTIONS | {{ date('Y') }}</p>
         <p>Reporte generado automáticamente - Uso interno</p>

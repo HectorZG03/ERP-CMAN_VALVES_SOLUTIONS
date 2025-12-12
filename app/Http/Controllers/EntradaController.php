@@ -34,7 +34,6 @@ class EntradaController extends Controller
     {
         // Validación de los datos
         $request->validate([
-            'inventario_id' => 'required|exists:inventarios,id', //elimnar si da error en el inventraio el ver
             'proveedor_id' => 'required|exists:proveedores,id',
             'fecha_entrada' => 'required|date',
             'observaciones' => 'nullable|string|max:500',
