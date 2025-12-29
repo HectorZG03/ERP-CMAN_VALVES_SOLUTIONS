@@ -67,6 +67,8 @@
                     <option value="Capitan America" {{ old('ubicacion_id') == 'Capitan America' ? 'selected' : '' }}>BMS Capitan America</option>
                     <option value="Base Operativa" {{ old('ubicacion_id') == 'Base Operativa' ? 'selected' : '' }}>Base Operativa</option>
                     <option value="BMS MAYA" {{ old('ubicacion_id') == 'BMS MAYA' ? 'selected' : '' }}>BMS Maya</option>
+                    <option value="BMS IRON HORSE" {{ old('ubicacion_id') == 'BMS IRON HORSE' ? 'selected' : '' }}>BMS Iron Horse</option>
+                    <option value="BMS GRAND CANYON" {{ old('ubicacion_id') == 'BMS GRAND CANYON' ? 'selected' : '' }}>BMS Grand Canyon</option>
                 </select>
             </div>
 

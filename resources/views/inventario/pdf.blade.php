@@ -133,7 +133,7 @@ body {
     color: #fff;
 }
 .estado-normal { background: #059669; }
-.estado-bajo { background: #D97706; }
+.estado-bajo { background: #f4f734; }
 .estado-agotado { background: #DC2626; }
 
 .estado-badge .dot {
