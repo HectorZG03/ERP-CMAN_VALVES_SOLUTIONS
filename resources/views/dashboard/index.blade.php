@@ -121,6 +121,7 @@
     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
         <h2 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Acciones Rápidas</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {{-- ALMACÉN --}}
             @if($user->canManageInventory())
                 <a href="{{ route('entradas.create') }}" 
                    class="bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 p-4 rounded-lg border border-blue-200 dark:border-blue-700 transition-colors group">
@@ -153,6 +154,7 @@
                 </a>
             @endif
             
+            {{-- PARA TODOS --}}
             <a href="{{ route('solicitudes.create') }}" 
                class="bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/40 p-4 rounded-lg border border-yellow-200 dark:border-yellow-700 transition-colors group">
                 <div class="flex items-center">
@@ -182,13 +184,77 @@
                     </div>
                 </div>
             </a>
+
+            {{-- ✅ RECURSOS HUMANOS --}}
+            @if($user->canManagePersonal())
+                <a href="{{ route('personal.create') }}" 
+                   class="bg-cyan-50 dark:bg-cyan-900/20 hover:bg-cyan-100 dark:hover:bg-cyan-900/40 p-4 rounded-lg border border-cyan-200 dark:border-cyan-700 transition-colors group">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-cyan-500 dark:bg-cyan-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-cyan-700 dark:text-cyan-300 font-semibold">Alta Personal</div>
+                            <div class="text-cyan-600 dark:text-cyan-400 text-sm">Nuevo colaborador</div>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('bajas.create') }}" 
+                   class="bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/40 p-4 rounded-lg border border-orange-200 dark:border-orange-700 transition-colors group">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-orange-500 dark:bg-orange-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-orange-700 dark:text-orange-300 font-semibold">Baja Personal</div>
+                            <div class="text-orange-600 dark:text-orange-400 text-sm">Registrar baja</div>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="{{ route('cambios.create') }}" 
+                   class="bg-pink-50 dark:bg-pink-900/20 hover:bg-pink-100 dark:hover:bg-pink-900/40 p-4 rounded-lg border border-pink-200 dark:border-pink-700 transition-colors group">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-pink-500 dark:bg-pink-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-pink-700 dark:text-pink-300 font-semibold">Cambio Puesto</div>
+                            <div class="text-pink-600 dark:text-pink-400 text-sm">Cambiar puesto/sueldo</div>
+                        </div>
+                    </div>
+                </a>
+            @endif
+
+            {{-- ✅ HSE --}}
+            @if($user->canManageValeEPP())
+                <a href="{{ route('valepp.create') }}" 
+                   class="bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 p-4 rounded-lg border border-emerald-200 dark:border-emerald-700 transition-colors group">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-emerald-500 dark:bg-emerald-600 rounded-lg flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="text-emerald-700 dark:text-emerald-300 font-semibold">Nuevo Vale EPP</div>
+                            <div class="text-emerald-600 dark:text-emerald-400 text-sm">Equipo de protección</div>
+                        </div>
+                    </div>
+                </a>
+            @endif
         </div>
     </div>
 
     <!-- Últimas Actividades -->
-
     @if($user->canManageInventory())
-
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Productos con Bajo Stock -->
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700 transition-colors duration-200">
@@ -228,7 +294,6 @@
             </div>
             <div class="space-y-3">
                 @php
-                    // Usar la nueva estructura de consulta
                     $ultimasSolicitudes = \App\Models\SolicitudMaterial::with(['detalles.inventario', 'user'])
                         ->latest()
                         ->limit(5)
@@ -245,7 +310,6 @@
                             <div>
                                 @if($solicitud->detalles && $solicitud->detalles->count() > 0)
                                     @if($solicitud->detalles->count() == 1)
-                                        {{-- Una sola solicitud --}}
                                         <div class="font-medium text-gray-900 dark:text-white">
                                             {{ $solicitud->detalles->first()->inventario->nombre_producto ?? 'Producto no disponible' }}
                                         </div>
@@ -253,7 +317,6 @@
                                             {{ $solicitud->user->name }} - {{ $solicitud->detalles->first()->cantidad_solicitada }} unidades
                                         </div>
                                     @else
-                                        {{-- Múltiples productos --}}
                                         <div class="font-medium text-gray-900 dark:text-white">
                                             Solicitud múltiple ({{ $solicitud->detalles->count() }} productos)
                                         </div>
@@ -262,7 +325,6 @@
                                         </div>
                                     @endif
                                 @elseif($solicitud->inventario)
-                                    {{-- Compatibilidad con estructura antigua --}}
                                     <div class="font-medium text-gray-900 dark:text-white">
                                         {{ $solicitud->inventario->nombre_producto }}
                                     </div>
@@ -270,7 +332,6 @@
                                         {{ $solicitud->user->name }} - {{ $solicitud->cantidad_solicitada }} unidades
                                     </div>
                                 @else
-                                    {{-- Sin productos (solicitud corrupta) --}}
                                     <div class="font-medium text-red-500 dark:text-red-400">Solicitud sin productos</div>
                                     <div class="text-sm text-gray-500 dark:text-gray-400">{{ $solicitud->user->name }}</div>
                                 @endif
@@ -295,8 +356,8 @@
             </div>
         </div>
     </div>
-</div>
     @endif
+</div>
 
 <!-- Estilos adicionales para mejorar la interactividad -->
 <style>

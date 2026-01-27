@@ -49,4 +49,14 @@ class Inventario extends Model
     {
         return $this->existencia > 0 ? $this->precio_total / $this->existencia : 0;
     }
+
+
+    
+    // Nueva relación con Valepp
+    public function valeppDetalles()
+    {
+        return $this->hasMany(ValeppDetalle::class, 'inventario_id');
+    }
+
+
 }

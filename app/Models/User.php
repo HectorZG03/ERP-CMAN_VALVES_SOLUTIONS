@@ -36,21 +36,39 @@ class User extends Authenticatable
         return in_array($this->role, ['ti']);
     }
 
-    // ✅ NUEVO: Verificar si puede aprobar requisiciones en finanzas
+    // ✅ Verificar si puede aprobar requisiciones en finanzas
     public function canApproveFinanzas()
     {
         return in_array($this->role, ['finanzas', 'aux_finanzas']);
     }
 
-    // esto es para ver si puede aprobar o no las requisiciones (DIRECTOR)
+    // Esto es para ver si puede aprobar o no las requisiciones (DIRECTOR)
     public function canApproveRequests()
     {
         return $this->role === 'direccion';
     }
 
+    // ✅ CORREGIDO: Solo RH y Auxiliar RH
+    /**
+     * Verifica si el usuario puede gestionar personal (RH)
+     */
+    public function canManagePersonal()
+    {
+        return in_array($this->role, ['rh', 'aux_rh']);
+    }
+
+    // ✅ CORREGIDO: Solo HSE y Auxiliar HSE
+    /**
+     * Verifica si el usuario puede gestionar Vale EPP (HSE)
+     */
+    public function canManageValeEPP()
+    {
+        return in_array($this->role, ['hse', 'aux_hse']);
+    }
+
     public function canManageInventory()
     {
-        return in_array($this->role, ['almacen', 'aux_almacen',]);
+        return in_array($this->role, ['almacen', 'aux_almacen']);
     }
 
     public function canManageInventoryadmin()

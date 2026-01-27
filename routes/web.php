@@ -13,6 +13,13 @@ use App\Http\Controllers\RequisicionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PrestamoMaterialController;
 
+
+use App\Http\Controllers\PersonalController;
+use App\Http\Controllers\BajaColaboradorController;
+use App\Http\Controllers\CambioPuestoSueldoController;
+use App\Http\Controllers\ValeppController;
+
+
 Route::get('/', function () {
     return redirect('/dashboard');
 });
@@ -36,6 +43,10 @@ Route::middleware(['auth'])->group(function () {
             'canManageInventory' => $user->canManageInventory(),
             'canManageInventoryadmin' => $user->canManageInventoryadmin(),
             'canManageUsers' => $user->canManageUsers(),
+
+            'canManageValeEPP' => $user->canManageValeEPP(),
+            'canManagePersonal' => $user->canManagePersonal(),
+            
             'canApproveRequests' => $user->canApproveRequests(),
             'all_roles_in_db' => \App\Models\User::pluck('role')->unique()->values(),
         ]);
@@ -183,4 +194,44 @@ Route::patch('/requisiciones/{requisicion}/estatus-finanzas', [RequisicionContro
     Route::get('/requisiciones/{requisicion}/excel', [RequisicionController::class, 'exportExcel'])
     ->name('requisiciones.exportExcel');
 
+
 });
+
+
+
+
+
+
+
+
+// 🔒 Rutas Protegidas para RH (Personal, Bajas, Cambios)
+Route::middleware(['auth', 'rh.access'])->group(function () {
+    // Rutas de Personal
+    Route::resource('personal', PersonalController::class);
+    Route::get('personal/buscar/ajax', [PersonalController::class, 'buscar'])->name('personal.buscar');
+    Route::get('personal/datos/{id}', [PersonalController::class, 'getDatos'])->name('personal.getDatos');
+    Route::get('personal/export/pdf', [PersonalController::class, 'exportPDF'])->name('personal.exportPDF');
+
+    // Rutas de Bajas de Colaboradores
+    Route::resource('bajas', BajaColaboradorController::class);
+    Route::get('bajas/export/pdf', [BajaColaboradorController::class, 'exportPDF'])->name('bajas.exportPDF');
+    Route::get('bajas/{baja}/individual-pdf', [BajaColaboradorController::class, 'exportIndividualPDF'])
+    ->name('bajas.individual-pdf');
+
+    // Rutas de Cambios de Puesto y Sueldo
+    Route::resource('cambios', CambioPuestoSueldoController::class);
+    Route::get('cambios/historial/{personal_id}', [CambioPuestoSueldoController::class, 'historial'])->name('cambios.historial');
+    Route::get('cambios/export/pdf', [CambioPuestoSueldoController::class, 'exportPDF'])->name('cambios.exportPDF');
+});
+
+// 🔒 Rutas Protegidas para HSE (Vale EPP)
+Route::middleware(['auth', 'hse.access'])->group(function () {
+    Route::resource('valepp', ValeppController::class);
+    Route::post('valepp/{valepp}/aprobar', [ValeppController::class, 'aprobar'])->name('valepp.aprobar');
+    Route::post('valepp/{valepp}/entregar', [ValeppController::class, 'entregar'])->name('valepp.entregar');
+    Route::get('valepp/{valepp}/pdf', [ValeppController::class, 'exportPDF'])->name('valepp.exportPDF');
+});
+
+
+
+
