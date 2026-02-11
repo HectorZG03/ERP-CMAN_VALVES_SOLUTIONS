@@ -7,11 +7,12 @@ use App\Models\SolicitudMaterial;
 use App\Models\SolicitudMaterialDetalle;
 use App\Models\Inventario;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Storage;
 
 // PARTE PARA EXCEL
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SolicitudMaterialController extends Controller
@@ -118,7 +119,6 @@ class SolicitudMaterialController extends Controller
     }
 
 
-
     // este no descuenta el inventario
      public function updateEstatus(Request $request, SolicitudMaterial $solicitud)
      {
@@ -134,7 +134,6 @@ class SolicitudMaterialController extends Controller
 
          return back()->with('success', 'Estatus actualizado');
      }
-
 
 
     // CON ESTE  SI DESCUESTA EL INVENTARIO
@@ -189,7 +188,6 @@ class SolicitudMaterialController extends Controller
     //         return back()->withErrors(['error' => $e->getMessage()]);
     //     }
     // }
-
 
 
     // Buscar solicitudes por número de folio, destino o estatus
@@ -258,61 +256,107 @@ class SolicitudMaterialController extends Controller
 
 
 
-
-    // ESTO ES LA PARTE DE LA EXPORTACION A EXCEL
-
-
+    // ✅ EXPORTACIÓN A EXCEL CON IMÁGENES CORRECTAS
     public function exportExcel(SolicitudMaterial $solicitud)
-{
-    $solicitud->load(['detalles.inventario', 'user']);
+    {
+        $solicitud->load(['detalles.inventario', 'user']);
 
-    // Ruta a la plantilla
-    $templatePath = storage_path('app/plantillas/SolicitudMateriales365.xlsx');
+        // Ruta a la plantilla
+        $templatePath = storage_path('app/plantillas/SolicitudMateriales365.xlsx');
 
-    // Cargar plantilla existente
-    $spreadsheet = IOFactory::load($templatePath);
-    $sheet = $spreadsheet->getActiveSheet();
+        // Cargar plantilla existente
+        $spreadsheet = IOFactory::load($templatePath);
+        $sheet = $spreadsheet->getActiveSheet();
 
-    // 🔹 Rellena los datos donde corresponda
-    $sheet->setCellValue('F16', $solicitud->user->name);
-    $sheet->setCellValue('F14', $solicitud->user->role);
-    $sheet->setCellValue('F20', $solicitud->destino);
-    $sheet->setCellValue('F22', $solicitud->created_at->format('d/m/Y'));
-    $sheet->setCellValue('Q58', $solicitud->created_at->format('d/m/Y'));
-    $sheet->setCellValue('E47', $solicitud->comentario ?? 'N/A');
-    $sheet->setCellValue('F18', $solicitud->user->num_empleado ?? 'N/A');
+        // 🔹 Rellena los datos donde corresponda
+        $sheet->setCellValue('F16', $solicitud->user->name);
+        $sheet->setCellValue('F14', $solicitud->user->role);
+        $sheet->setCellValue('F20', $solicitud->destino);
+        $sheet->setCellValue('F22', $solicitud->created_at->format('d/m/Y'));
+        $sheet->setCellValue('Q58', $solicitud->created_at->format('d/m/Y'));
+        $sheet->setCellValue('E47', $solicitud->comentario ?? 'N/A');
+        $sheet->setCellValue('F18', $solicitud->user->num_empleado ?? 'N/A');
 
-    $sheet->setCellValue('M14', $solicitud->operador ?? 'N/A');
-    $sheet->setCellValue('M16', $solicitud->categoria ?? 'N/A');
+        $sheet->setCellValue('M14', $solicitud->operador ?? 'N/A');
+        $sheet->setCellValue('M16', $solicitud->categoria ?? 'N/A');
 
-    // Supongamos que tus productos comienzan en la fila 10:
-    $row = 27;
-    foreach ($solicitud->detalles as $detalle) {
-        $sheet->setCellValue('D' . $row, $detalle->cantidad_solicitada);
-        $sheet->setCellValue('E' . $row, $detalle->inventario->medida ?? '-');
-        $sheet->setCellValue('F' . $row, $detalle->inventario->nombre_producto ?? 'N/A');
-        
-        
-        
-        // $sheet->setCellValue('B' . $row, $detalle->inventario->categoria ?? '-');
-        // $sheet->setCellValue('E' . $row, $detalle->precio_unitario);
-        $row++;
+        // ✅ INSERTAR FIRMA COMO IMAGEN (NO COMO TEXTO)
+        if ($solicitud->user->signature) {
+            // Obtener la ruta completa de la imagen
+            $signaturePath = storage_path('app/public/' . $solicitud->user->signature);
+            
+            // Verificar que el archivo existe
+            if (file_exists($signaturePath)) {
+                // Crear objeto Drawing para la firma
+                $drawing = new Drawing();
+                $drawing->setName('Firma');
+                $drawing->setDescription('Firma del usuario');
+                $drawing->setPath($signaturePath);
+                
+                // Posicionar la imagen en la celda B53
+                $drawing->setCoordinates('O53');
+
+
+                //  Ajuste fino de posición
+                $drawing->setOffsetX(50); // derecha
+                $drawing->setOffsetY(-60); // abajo
+
+            
+                
+                // Ajustar tamaño (opcional - ajusta según tu plantilla)
+                $drawing->setHeight(100); // altura en píxeles
+                $drawing->setWidth(220); // ancho en píxeles (descomentar si necesitas)
+                
+                // Agregar la imagen a la hoja
+                $drawing->setWorksheet($sheet);
+            } else {
+                // Si no existe la imagen, poner texto alternativo
+                $sheet->setCellValue('O53', 'Sin firma');
+            }
+        } else {
+            $sheet->setCellValue('O53', 'Sin firma');
+        }
+
+        // ✅ INSERTAR FOTO DE PERFIL COMO IMAGEN (OPCIONAL)
+        // if ($solicitud->user->profile_photo) {
+        //     $photoPath = storage_path('app/public/' . $solicitud->user->profile_photo);
+            
+        //     if (file_exists($photoPath)) {
+        //         $photoDrawing = new Drawing();
+        //         $photoDrawing->setName('Foto de Perfil');
+        //         $photoDrawing->setDescription('Foto del usuario');
+        //         $photoDrawing->setPath($photoPath);
+                
+        //         // Posicionar donde quieras la foto (por ejemplo F26)
+        //         $photoDrawing->setCoordinates('F26');
+                
+        //         // Ajustar tamaño
+        //         $photoDrawing->setHeight(100);
+                
+        //         // Agregar la imagen a la hoja
+        //         $photoDrawing->setWorksheet($sheet);
+        //     }
+        // }
+
+        // // Productos - comenzando en la fila 27
+        // $row = 27;
+        // foreach ($solicitud->detalles as $detalle) {
+        //     $sheet->setCellValue('D' . $row, $detalle->cantidad_solicitada);
+        //     $sheet->setCellValue('E' . $row, $detalle->inventario->medida ?? '-');
+        //     $sheet->setCellValue('F' . $row, $detalle->inventario->nombre_producto ?? 'N/A');
+        //     $row++;
+        // }
+
+        //  // Descargar el archivo final
+         $writer = new Xlsx($spreadsheet);
+         $filename = 'Solicitud_Materiales_' . $solicitud->id . '.xlsx';
+
+         return new StreamedResponse(function() use ($writer) {
+             $writer->save('php://output');
+         }, 200, [
+             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+             'Content-Disposition' => 'attachment;filename="' . $filename . '"',
+             'Cache-Control' => 'max-age=0',
+         ]);
     }
-
-    // Descargar el archivo final
-    $writer = new Xlsx($spreadsheet);
-    $filename = 'Solicitud_Materiales' . $solicitud->id . '.xlsx';
-
-    return new StreamedResponse(function() use ($writer) {
-        $writer->save('php://output');
-    }, 200, [
-        'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'Content-Disposition' => 'attachment;filename="' . $filename . '"',
-    ]);
 }
-
-
-
-}
-
-  

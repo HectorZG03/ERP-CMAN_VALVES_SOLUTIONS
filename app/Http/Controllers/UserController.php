@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -27,16 +28,31 @@ class UserController extends Controller
             'password' => 'required|string|min:6|confirmed',
             'role' => 'required|in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones,hse,aux_hse',
             'num_empleado' => 'required|string|max:50|unique:users,num_empleado',
-
+            'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        User::create([
+        $data = [
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
             'num_empleado' => $request->num_empleado,
-        ]);
+        ];
+
+        // Manejar la firma
+        if ($request->hasFile('signature')) {
+            $signaturePath = $request->file('signature')->store('signatures', 'public');
+            $data['signature'] = $signaturePath;
+        }
+
+        // Manejar la foto de perfil
+        if ($request->hasFile('profile_photo')) {
+            $photoPath = $request->file('profile_photo')->store('profile_photos', 'public');
+            $data['profile_photo'] = $photoPath;
+        }
+
+        User::create($data);
 
         return redirect()->route('users.index')->with('success', 'Usuario creado correctamente');
     }
@@ -56,16 +72,40 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$user->id,
-            'role' => 'required|in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh, operaciones,aux_operaciones,hse,aux_hse',
+            'role' => 'required|in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones,hse,aux_hse',
             'num_empleado' => 'required|string|max:50|unique:users,num_empleado,'.$user->id,
+            'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $user->update([
+        $data = [
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
             'num_empleado' => $request->num_empleado,
-        ]);
+        ];
+
+        // Manejar la firma
+        if ($request->hasFile('signature')) {
+            // Eliminar la firma anterior si existe
+            if ($user->signature) {
+                Storage::disk('public')->delete($user->signature);
+            }
+            $signaturePath = $request->file('signature')->store('signatures', 'public');
+            $data['signature'] = $signaturePath;
+        }
+
+        // Manejar la foto de perfil
+        if ($request->hasFile('profile_photo')) {
+            // Eliminar la foto anterior si existe
+            if ($user->profile_photo) {
+                Storage::disk('public')->delete($user->profile_photo);
+            }
+            $photoPath = $request->file('profile_photo')->store('profile_photos', 'public');
+            $data['profile_photo'] = $photoPath;
+        }
+
+        $user->update($data);
 
         if ($request->password) {
             $request->validate(['password' => 'string|min:6|confirmed']);
@@ -79,6 +119,14 @@ class UserController extends Controller
     {
         if ($user->id === auth()->id()) {
             return back()->withErrors(['error' => 'No puedes eliminar tu propio usuario']);
+        }
+
+        // Eliminar las imágenes antes de eliminar el usuario
+        if ($user->signature) {
+            Storage::disk('public')->delete($user->signature);
+        }
+        if ($user->profile_photo) {
+            Storage::disk('public')->delete($user->profile_photo);
         }
 
         $user->delete();

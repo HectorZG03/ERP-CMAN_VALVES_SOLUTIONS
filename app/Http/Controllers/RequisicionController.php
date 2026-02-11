@@ -8,44 +8,53 @@ use App\Models\RequisicionDetalle;
 use App\Models\Contrato;
 use Illuminate\Support\Facades\DB;
 
-// PARTE PARA EXCEL
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 class RequisicionController extends Controller
 {
+
+    private function obtenerImagenEstatus($estatus, $tipo = 'direccion')
+    {
+        if ($estatus === 'aprobado') {
+            return $tipo === 'finanzas'
+                ? public_path('storage/admin/02.png')
+                : public_path('storage/admin/01.png');
+        }
+
+        if ($estatus === 'denegado') {
+            return public_path('storage/admin/03.png');
+        }
+
+        return public_path('storage/admin/04.png');
+    }
+
     public function index()
     {
         $user = auth()->user();
-        
-        // ✅ Si es de finanzas, mostrar TODAS las requisiciones (para que puedan ver su historial)
+
         if ($user->canApproveFinanzas()) {
             $requisiciones = Requisicion::with(['user', 'detalles', 'aprobadorFinanzas'])
-                                       ->orderBy('created_at', 'desc')
-                                       ->paginate(15);
-        }
-        // ✅ Si es director, mostrar solo las que YA fueron aprobadas por finanzas
-        elseif ($user->canApproveRequests()) {
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
+        } elseif ($user->canApproveRequests()) {
             $requisiciones = Requisicion::with(['user', 'detalles', 'aprobadorFinanzas'])
-                                       ->where('estatus_finanzas', 'aprobado')
-                                       ->orderBy('created_at', 'desc')
-                                       ->paginate(15);
-        }
-        // ✅ Si es almacén, mostrar todas
-        elseif ($user->canManageInventory()) {
+                ->where('estatus_finanzas', 'aprobado')
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
+        } elseif ($user->canManageInventory()) {
             $requisiciones = Requisicion::with(['user', 'detalles'])
-                                       ->orderBy('created_at', 'desc')
-                                       ->paginate(15);
-        }
-        // ✅ Usuarios normales solo ven las suyas
-        else {
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
+        } else {
             $requisiciones = Requisicion::where('user_id', $user->id)
-                                       ->with(['user', 'detalles'])
-                                       ->orderBy('created_at', 'desc')
-                                       ->paginate(15);
+                ->with(['user', 'detalles'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
         }
-        
+
         return view('requisiciones.index', compact('requisiciones'));
     }
 
@@ -68,18 +77,12 @@ class RequisicionController extends Controller
             'materiales.*.cantidad' => 'required|integer|min:1',
             'materiales.*.unidad' => 'required|string|max:255',
             'materiales.*.material' => 'required|string|max:255',
-        ], [
-            'materiales.required' => 'Debe agregar al menos un material a la requisición',
-            'materiales.*.cantidad.required' => 'La cantidad es obligatoria',
-            'materiales.*.cantidad.min' => 'La cantidad debe ser mayor a 0',
-            'materiales.*.unidad.required' => 'La unidad es obligatoria',
-            'materiales.*.material.required' => 'La descripción del material es obligatoria',
         ]);
 
         DB::beginTransaction();
-        
+
         try {
-            // Crear la requisición principal
+
             $requisicion = Requisicion::create([
                 'nombre_solicitante' => $request->nombre_solicitante,
                 'departamento' => $request->departamento,
@@ -96,7 +99,6 @@ class RequisicionController extends Controller
                 'user_id' => auth()->id(),
             ]);
 
-            // Crear los detalles de la requisición
             foreach ($request->materiales as $material) {
                 RequisicionDetalle::create([
                     'requisicion_id' => $requisicion->id,
@@ -107,37 +109,32 @@ class RequisicionController extends Controller
             }
 
             DB::commit();
-            
             return redirect()->route('requisiciones.index')->with('success', 'Requisición enviada correctamente');
-            
+
         } catch (\Exception $e) {
             DB::rollback();
-            return back()->withErrors(['error' => $e->getMessage()])->withInput();
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
     public function show(Requisicion $requisicion)
     {
         $user = auth()->user();
-        
-        if (!($requisicion->user_id == $user->id || 
-              $user->canApproveRequests() || 
-              $user->canApproveFinanzas() ||
-              $user->canManageInventory())) {
-            abort(403, 'No tienes permisos para ver esta requisición');
+
+        if (!($requisicion->user_id == $user->id ||
+            $user->canApproveRequests() ||
+            $user->canApproveFinanzas() ||
+            $user->canManageInventory())) {
+            abort(403);
         }
 
         $requisicion->load(['user', 'detalles', 'contrato', 'aprobadorFinanzas']);
-        
         return view('requisiciones.show', compact('requisicion'));
     }
 
-    // ✅ NUEVO: Aprobar/Denegar por FINANZAS
     public function updateEstatusFinanzas(Request $request, Requisicion $requisicion)
     {
-        if (!auth()->user()->canApproveFinanzas()) {
-            abort(403, 'No tienes permisos para aprobar en finanzas');
-        }
+        if (!auth()->user()->canApproveFinanzas()) abort(403);
 
         $request->validate([
             'estatus_finanzas' => 'required|in:aprobado,denegado',
@@ -149,23 +146,15 @@ class RequisicionController extends Controller
             'fecha_aprobacion_finanzas' => now(),
         ]);
 
-        $mensaje = $request->estatus_finanzas === 'aprobado' 
-            ? 'Requisición aprobada por finanzas. Ahora está disponible para dirección.' 
-            : 'Requisición denegada por finanzas.';
-
-        return back()->with('success', $mensaje);
+        return back()->with('success', 'Estatus finanzas actualizado');
     }
 
-    // ✅ MODIFICADO: Aprobar/Denegar por DIRECCIÓN (solo si finanzas ya aprobó)
     public function updateEstatus(Request $request, Requisicion $requisicion)
     {
-        if (!auth()->user()->canApproveRequests()) {
-            abort(403, 'No tienes permisos para aprobar requisiciones');
-        }
+        if (!auth()->user()->canApproveRequests()) abort(403);
 
-        // ✅ Verificar que finanzas haya aprobado primero
         if ($requisicion->estatus_finanzas !== 'aprobado') {
-            return back()->with('error', 'Esta requisición aún no ha sido aprobada por finanzas.');
+            return back()->with('error', 'Aún no aprobado por finanzas');
         }
 
         $request->validate([
@@ -174,20 +163,26 @@ class RequisicionController extends Controller
 
         $requisicion->update(['estatus' => $request->estatus]);
 
-        return back()->with('success', 'Estatus de requisición actualizado por dirección');
+        return back()->with('success', 'Estatus actualizado');
     }
 
-    // EXPORTACIÓN A EXCEL
+
+    // ===============================
+    //  EXPORTACIÓN A EXCEL 
+    // ===============================
     public function exportExcel(Requisicion $requisicion)
     {
-        $requisicion->load(['user', 'contrato', 'detalles']);
+        $requisicion->load(['user','contrato','detalles']);
 
         $templatePath = storage_path('app/plantillas/Requisicion.xlsx');
         $spreadsheet = IOFactory::load($templatePath);
         $sheet = $spreadsheet->getActiveSheet();
+
         $sheet->setCellValue('C10', strtoupper($requisicion->user->name));
         $sheet->setCellValue('C11', strtoupper($requisicion->user->role));
-        $sheet->setCellValue('C12', ucwords($requisicion->proyecto ?? 'N/A'));
+        $sheet->setCellValue('G5', $requisicion->created_at->format('d/m/Y'));
+        $sheet->setCellValue('A34', $requisicion->comentario ?? 'N/A');
+         $sheet->setCellValue('C12', ucwords($requisicion->proyecto ?? 'N/A'));
         $sheet->setCellValue('C13', strtoupper($requisicion->sit ?? 'N/A'));
         $sheet->setCellValue('C14', strtoupper($requisicion->partida ?? 'N/A'));
         $sheet->setCellValue('C15', strtoupper($requisicion->plataforma ?? 'N/A'));
@@ -198,7 +193,7 @@ class RequisicionController extends Controller
         $sheet->setCellValue('G6', $requisicion->folio);
         $sheet->setCellValue('G7', $requisicion->contrato->contrato ?? 'N/A');
         $sheet->setCellValue('G8', $requisicion->contrato->convenio ?? 'N/A');
-        $sheet->setCellValue('G5', $requisicion->created_at->format('d/m/Y'));
+        $sheet->setCellValue('G5', $requisicion->created_at->format('d/m/Y)'));
         $sheet->setCellValue('A34', $requisicion->comentario ?? 'N/A');
 
         // ✅ Materiales (múltiples productos)
@@ -209,13 +204,73 @@ class RequisicionController extends Controller
             $sheet->setCellValue('C' . $row, $detalle->material);
             $row++;
         }
+
+        // ================= FIRMA =================
+        if ($requisicion->user->signature) {
+
+            $signaturePath = storage_path('app/public/'.$requisicion->user->signature);
+
+            if (file_exists($signaturePath)) {
+
+                $drawing = new Drawing();
+                $drawing->setPath($signaturePath);
+                $drawing->setCoordinates('G35');
+                $drawing->setOffsetX(-40);// derecha
+                $drawing->setOffsetY(-60);// abajo
+                $drawing->setHeight(100);// altura en píxeles
+                $drawing->setWidth(220);// ancho en píxeles (descomentar si necesitas)
+                $drawing->setWorksheet($sheet);
+            }
+        }
+
+        // ================= ESTATUS DIRECCION =================
+        $imgEstatus = $this->obtenerImagenEstatus($requisicion->estatus,'direccion');
+
+        if(file_exists($imgEstatus)){
+            $draw1 = new Drawing();
+            $draw1->setPath($imgEstatus);
+            $draw1->setCoordinates('B40');
+            $draw1->setOffsetY(-60); // abajo
+            $draw1->setOffsetX(-50); // derecha
+
+            $draw1->setHeight(100); // altura en píxeles
+            $draw1->setWidth(220); // ancho en píxeles (descomentar si necesitas)
+
+            $draw1->setWorksheet($sheet);
+        }
+
+        // ================= ESTATUS FINANZAS =================
+        $imgFinanzas = $this->obtenerImagenEstatus($requisicion->estatus_finanzas,'finanzas');
+
+        if(file_exists($imgFinanzas)){
+            $draw2 = new Drawing();
+            $draw2->setPath($imgFinanzas);
+            $draw2->setCoordinates('G40');
+            $draw2->setOffsetY(-60); // abajo
+            $draw2->setOffsetX(-50); // derecha
+            $draw2->setHeight(100); // altura en píxeles
+            $draw2->setWidth(220); // ancho en píxeles (descomentar si necesitas)
+  
+            $draw2->setWorksheet($sheet);
+        }
+
+        // ================= MATERIALES =================
+        $row = 21;
+        foreach ($requisicion->detalles as $detalle) {
+            $sheet->setCellValue('A'.$row, $detalle->cantidad);
+            $sheet->setCellValue('B'.$row, $detalle->unidad);
+            $sheet->setCellValue('C'.$row, $detalle->material);
+            $row++;
+        }
+
         $writer = new Xlsx($spreadsheet);
-        $filename = 'Requisicion_' . $requisicion->id . '.xlsx';
-        return new StreamedResponse(function() use ($writer) {
+        $filename = 'Requisicion_'.$requisicion->id.'.xlsx';
+
+        return new StreamedResponse(function() use ($writer){
             $writer->save('php://output');
-        }, 200, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment;filename="' . $filename . '"',
+        },200,[
+            'Content-Type'=>'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition'=>'attachment;filename="'.$filename.'"',
         ]);
     }
 }

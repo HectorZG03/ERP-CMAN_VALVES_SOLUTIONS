@@ -16,6 +16,8 @@ class User extends Authenticatable
         'password',
         'role',
         'num_empleado',
+        'signature',
+        'profile_photo',
     ];
 
     protected $hidden = [
@@ -157,4 +159,26 @@ class User extends Authenticatable
 
         return true;
     }
+
+
+
+    /**
+     * Obtener la URL de la firma
+     */
+    public function getSignatureUrlAttribute()
+    {
+        return $this->signature ? asset('storage/' . $this->signature) : null;
+    }
+
+    /**
+     * Obtener la URL de la foto de perfil
+     */
+    public function getProfilePhotoUrlAttribute()
+    {
+        return $this->profile_photo ? asset('storage/' . $this->profile_photo) : asset('images/default-avatar.png');
+    }
+
+
+
+
 }
