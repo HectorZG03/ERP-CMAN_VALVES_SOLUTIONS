@@ -21,41 +21,42 @@ class UserController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones,hse,aux_hse',
-            'num_empleado' => 'required|string|max:50|unique:users,num_empleado',
-            'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+{
+    $messages = [
+        'name.required' => 'El nombre es obligatorio',
+        'email.required' => 'El correo electrónico es obligatorio',
+        'email.email' => 'El correo debe ser una dirección válida',
+        'email.unique' => 'Este correo ya está registrado',
+        'password.required' => 'La contraseña es obligatoria',
+        'password.min' => 'La contraseña debe tener al menos 6 caracteres',
+        'password.confirmed' => 'Las contraseñas no coinciden',
+        'role.required' => 'Debes seleccionar un rol',
+        'role.in' => 'El rol seleccionado no es válido',
+        'num_empleado.required' => 'El número de empleado es obligatorio',
+        'num_empleado.unique' => 'Este número de empleado ya está registrado',
+        'signature.image' => 'La firma debe ser una imagen',
+        'signature.mimes' => 'La firma debe ser un archivo jpeg, png, jpg o gif',
+        'signature.max' => 'La firma no debe pesar más de 2MB',
+        'profile_photo.image' => 'La foto de perfil debe ser una imagen',
+        'profile_photo.mimes' => 'La foto debe ser un archivo jpeg, png, jpg o gif',
+        'profile_photo.max' => 'La foto no debe pesar más de 2MB',
+    ];
 
-        $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'num_empleado' => $request->num_empleado,
-        ];
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|string|min:6|confirmed',
+        'role' => 'required|in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones,hse,aux_hse',
+        'num_empleado' => 'required|string|max:50|unique:users,num_empleado',
+        'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ], $messages);
 
-        // Manejar la firma
-        if ($request->hasFile('signature')) {
-            $signaturePath = $request->file('signature')->store('signatures', 'public');
-            $data['signature'] = $signaturePath;
-        }
 
-        // Manejar la foto de perfil
-        if ($request->hasFile('profile_photo')) {
-            $photoPath = $request->file('profile_photo')->store('profile_photos', 'public');
-            $data['profile_photo'] = $photoPath;
-        }
+}
 
-        User::create($data);
 
-        return redirect()->route('users.index')->with('success', 'Usuario creado correctamente');
-    }
+
 
     public function show(User $user)
     {
@@ -68,68 +69,77 @@ class UserController extends Controller
     }
 
     public function update(Request $request, User $user)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.$user->id,
-            'role' => 'required|in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones,hse,aux_hse',
-            'num_empleado' => 'required|string|max:50|unique:users,num_empleado,'.$user->id,
-            'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+{
+    // Preparar reglas de validación dinámicamente
+    $rules = [
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email,'.$user->id,
+        'role' => 'required|in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones,hse,aux_hse',
+        'num_empleado' => 'required|string|max:50|unique:users,num_empleado,'.$user->id,
+        'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ];
 
-        $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
-            'num_empleado' => $request->num_empleado,
-        ];
-
-        // Manejar la firma
-        if ($request->hasFile('signature')) {
-            // Eliminar la firma anterior si existe
-            if ($user->signature) {
-                Storage::disk('public')->delete($user->signature);
-            }
-            $signaturePath = $request->file('signature')->store('signatures', 'public');
-            $data['signature'] = $signaturePath;
-        }
-
-        // Manejar la foto de perfil
-        if ($request->hasFile('profile_photo')) {
-            // Eliminar la foto anterior si existe
-            if ($user->profile_photo) {
-                Storage::disk('public')->delete($user->profile_photo);
-            }
-            $photoPath = $request->file('profile_photo')->store('profile_photos', 'public');
-            $data['profile_photo'] = $photoPath;
-        }
-
-        $user->update($data);
-
-        if ($request->password) {
-            $request->validate(['password' => 'string|min:6|confirmed']);
-            $user->update(['password' => Hash::make($request->password)]);
-        }
-
-        return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente');
+    // Solo validar password si se proporcionó uno nuevo
+    if ($request->filled('password')) {
+        $rules['password'] = 'required|string|min:6|confirmed';
     }
 
-    public function destroy(User $user)
-    {
-        if ($user->id === auth()->id()) {
-            return back()->withErrors(['error' => 'No puedes eliminar tu propio usuario']);
-        }
+    // Mensajes personalizados en español
+    $messages = [
+        'name.required' => 'El nombre es obligatorio',
+        'email.required' => 'El correo electrónico es obligatorio',
+        'email.email' => 'El correo debe ser una dirección válida',
+        'email.unique' => 'Este correo ya está registrado',
+        'role.required' => 'Debes seleccionar un rol',
+        'role.in' => 'El rol seleccionado no es válido',
+        'num_empleado.required' => 'El número de empleado es obligatorio',
+        'num_empleado.unique' => 'Este número de empleado ya está registrado',
+        'password.required' => 'La contraseña es obligatoria',
+        'password.min' => 'La contraseña debe tener al menos 6 caracteres',
+        'password.confirmed' => 'Las contraseñas no coinciden',
+        'signature.image' => 'La firma debe ser una imagen',
+        'signature.mimes' => 'La firma debe ser un archivo jpeg, png, jpg o gif',
+        'signature.max' => 'La firma no debe pesar más de 2MB',
+        'profile_photo.image' => 'La foto de perfil debe ser una imagen',
+        'profile_photo.mimes' => 'La foto debe ser un archivo jpeg, png, jpg o gif',
+        'profile_photo.max' => 'La foto no debe pesar más de 2MB',
+    ];
 
-        // Eliminar las imágenes antes de eliminar el usuario
+    $request->validate($rules, $messages);
+
+    $data = [
+        'name' => $request->name,
+        'email' => $request->email,
+        'role' => $request->role,
+        'num_empleado' => $request->num_empleado,
+    ];
+
+    // Actualizar password solo si se proporcionó
+    if ($request->filled('password')) {
+        $data['password'] = Hash::make($request->password);
+    }
+
+    // Manejar la firma
+    if ($request->hasFile('signature')) {
         if ($user->signature) {
             Storage::disk('public')->delete($user->signature);
         }
+        $signaturePath = $request->file('signature')->store('signatures', 'public');
+        $data['signature'] = $signaturePath;
+    }
+
+    // Manejar la foto de perfil
+    if ($request->hasFile('profile_photo')) {
         if ($user->profile_photo) {
             Storage::disk('public')->delete($user->profile_photo);
         }
-
-        $user->delete();
-        return redirect()->route('users.index')->with('success', 'Usuario eliminado');
+        $photoPath = $request->file('profile_photo')->store('profile_photos', 'public');
+        $data['profile_photo'] = $photoPath;
     }
+
+    $user->update($data);
+
+    return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente');
+}
 }

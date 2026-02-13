@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Personal;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class PersonalController extends Controller
 {
@@ -26,9 +27,12 @@ class PersonalController extends Controller
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->where('nombre_completo', 'like', "%{$search}%")
+                  ->orWhere('employee_id', 'like', "%{$search}%")
                   ->orWhere('area', 'like', "%{$search}%")
                   ->orWhere('departamento', 'like', "%{$search}%")
-                  ->orWhere('grado', 'like', "%{$search}%");
+                  ->orWhere('grado', 'like', "%{$search}%")
+                  ->orWhere('curp', 'like', "%{$search}%")
+                  ->orWhere('rfc', 'like', "%{$search}%");
             });
         }
         
@@ -58,16 +62,54 @@ class PersonalController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
+            // Campos obligatorios
             'nombre_completo' => 'required|string|max:255',
             'area' => 'required|string|max:255',
             'departamento' => 'required|string|max:255',
             'fecha_ingreso' => 'required|date',
-            'sueldo' => 'required|numeric|min:0',
+            'sexo' => 'required|in:Masculino,Femenino,Otro',
+            
+            // Campos opcionales - Información Personal
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'employee_id' => 'nullable|string|max:50',
+            'edad' => 'nullable|integer|min:18|max:100',
+            'nacionalidad' => 'nullable|string|max:100',
+            'fecha_nacimiento' => 'nullable|date|before:today',
+            
+            'estado_civil' => 'nullable|string|max:50',
+            'grupo_sanguineo' => 'nullable|string|max:10',
+            
+            // Campos opcionales - Documentos
+            'curp' => 'nullable|string|max:18',
+            'rfc' => 'nullable|string|max:13',
+            'nss' => 'nullable|string|max:11',
+            'clave_interbancaria' => 'nullable|string|max:18',
+            
+            // Campos opcionales - Contacto
+            'direccion' => 'nullable|string|max:500',
+            'correo_electronico' => 'nullable|email|max:255',
+            'numero_telefonico' => 'nullable|string|max:20',
+            
+            // Campos opcionales - Emergencia
+            'nombre_contacto_emergencia' => 'nullable|string|max:255',
+            'numero_telefonico_emergencia' => 'nullable|string|max:20',
+            
+            // Campos opcionales - Otros
             'grado' => 'nullable|string|max:255',
+            'sueldo' => 'nullable|numeric|min:0',
+            'bonos' => 'nullable|numeric|min:0',
+            'enfermedad_alergia' => 'nullable|string|max:1000',
         ]);
 
-        Personal::create($request->all());
+        // Manejar la carga de foto
+        if ($request->hasFile('foto')) {
+            $fotoPath = $request->file('foto')->store('personal/fotos', 'public');
+            $validated['foto'] = $fotoPath;
+        }
+
+        // Crear el registro
+        Personal::create($validated);
 
         return redirect()->route('personal.index')
             ->with('success', 'Colaborador agregado exitosamente');
@@ -95,16 +137,56 @@ class PersonalController extends Controller
 
     public function update(Request $request, Personal $personal)
     {
-        $request->validate([
+        $validated = $request->validate([
+            // Campos obligatorios
             'nombre_completo' => 'required|string|max:255',
             'area' => 'required|string|max:255',
             'departamento' => 'required|string|max:255',
             'fecha_ingreso' => 'required|date',
-            'sueldo' => 'required|numeric|min:0',
+            
+            // Campos opcionales - Información Personal
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'employee_id' => 'nullable|string|max:50',
+            'edad' => 'nullable|integer|min:18|max:100',
+            'nacionalidad' => 'nullable|string|max:100',
+            'fecha_nacimiento' => 'nullable|date|before:today',
+            'sexo' => 'nullable|in:Masculino,Femenino,Otro',
+            'estado_civil' => 'nullable|string|max:50',
+            'grupo_sanguineo' => 'nullable|string|max:10',
+            
+            // Campos opcionales - Documentos
+            'curp' => 'nullable|string|max:18',
+            'rfc' => 'nullable|string|max:13',
+            'nss' => 'nullable|string|max:11',
+            'clave_interbancaria' => 'nullable|string|max:18',
+            
+            // Campos opcionales - Contacto
+            'direccion' => 'nullable|string|max:500',
+            'correo_electronico' => 'nullable|email|max:255',
+            'numero_telefonico' => 'nullable|string|max:20',
+            
+            // Campos opcionales - Emergencia
+            'nombre_contacto_emergencia' => 'nullable|string|max:255',
+            'numero_telefonico_emergencia' => 'nullable|string|max:20',
+            
+            // Campos opcionales - Otros
             'grado' => 'nullable|string|max:255',
+            'sueldo' => 'nullable|numeric|min:0',
+            'bonos' => 'nullable|numeric|min:0',
+            'enfermedad_alergia' => 'nullable|string|max:1000',
         ]);
 
-        $personal->update($request->all());
+        // Manejar la carga de nueva foto
+        if ($request->hasFile('foto')) {
+            // Eliminar foto anterior si existe
+            if ($personal->foto && $personal->foto !== 'N/A' && Storage::disk('public')->exists($personal->foto)) {
+                Storage::disk('public')->delete($personal->foto);
+            }
+            $fotoPath = $request->file('foto')->store('personal/fotos', 'public');
+            $validated['foto'] = $fotoPath;
+        }
+
+        $personal->update($validated);
 
         return redirect()->route('personal.index')
             ->with('success', 'Colaborador actualizado exitosamente');
@@ -113,6 +195,11 @@ class PersonalController extends Controller
     public function destroy(Personal $personal)
     {
         try {
+            // Eliminar foto si existe
+            if ($personal->foto && $personal->foto !== 'N/A' && Storage::disk('public')->exists($personal->foto)) {
+                Storage::disk('public')->delete($personal->foto);
+            }
+            
             $personal->delete();
             return redirect()->route('personal.index')
                 ->with('success', 'Colaborador eliminado exitosamente');
@@ -129,6 +216,7 @@ class PersonalController extends Controller
         
         $personal = Personal::activo()
             ->where('nombre_completo', 'like', "%{$search}%")
+            ->orWhere('employee_id', 'like', "%{$search}%")
             ->orWhere('area', 'like', "%{$search}%")
             ->limit(10)
             ->get();

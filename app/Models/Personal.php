@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Personal extends Model
 {
@@ -13,17 +14,36 @@ class Personal extends Model
 
     protected $fillable = [
         'nombre_completo',
+        'foto',
+        'employee_id',
+        'edad',
+        'nacionalidad',
+        'fecha_nacimiento',
+        'sexo',
+        'estado_civil',
+        'grupo_sanguineo',
+        'curp',
+        'rfc',
+        'nss',
+        'clave_interbancaria',
+        'direccion',
+        'correo_electronico',
+        'numero_telefonico',
+        'nombre_contacto_emergencia',
+        'numero_telefonico_emergencia',
         'area',
         'departamento',
         'fecha_ingreso',
         'sueldo',
+        'bonos',
         'grado',
         'estatus',
+        'enfermedad_alergia',
     ];
 
     protected $casts = [
         'fecha_ingreso' => 'date',
-        'sueldo' => 'decimal:2',
+        'fecha_nacimiento' => 'date',
     ];
 
     // Relaciones
@@ -64,5 +84,34 @@ class Personal extends Model
     public function scopeBaja($query)
     {
         return $query->where('estatus', 'baja');
+    }
+
+    // Accessor para calcular edad automáticamente si hay fecha de nacimiento
+    public function getEdadCalculadaAttribute()
+    {
+        if ($this->fecha_nacimiento && $this->fecha_nacimiento !== 'N/A') {
+            return Carbon::parse($this->fecha_nacimiento)->age;
+        }
+        return $this->edad ?? 'N/A';
+    }
+
+    // Mutator para asegurar que los valores vacíos se guarden como N/A
+    public function setAttribute($key, $value)
+    {
+        // Lista de campos que deben convertirse a N/A si están vacíos
+        $naFields = [
+            'foto','employee_id','nacionalidad','estado_civil',
+            'grupo_sanguineo','curp','rfc','nss','clave_interbancaria',
+            'direccion','correo_electronico','numero_telefonico',
+            'nombre_contacto_emergencia','numero_telefonico_emergencia',
+            'enfermedad_alergia','grado'
+        ];
+
+
+        if (in_array($key, $naFields) && (empty($value) || $value === null)) {
+            $value = 'N/A';
+        }
+
+        parent::setAttribute($key, $value);
     }
 }

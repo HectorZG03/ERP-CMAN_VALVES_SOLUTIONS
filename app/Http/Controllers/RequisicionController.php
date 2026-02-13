@@ -65,57 +65,76 @@ class RequisicionController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'nombre_solicitante' => 'required|string|max:255',
-            'departamento' => 'required|string|max:255',
-            'plataforma' => 'required|string|max:255',
-            'embarcacion' => 'required|string|max:255',
-            'tipo_requerimiento' => 'required|in:interno,externo',
-            'comentario' => 'required|string',
-            'materiales' => 'required|array|min:1',
-            'materiales.*.cantidad' => 'required|integer|min:1',
-            'materiales.*.unidad' => 'required|string|max:255',
-            'materiales.*.material' => 'required|string|max:255',
+{
+    // Mensajes personalizados en español
+    $messages = [
+        'nombre_solicitante.required' => 'El nombre del solicitante es obligatorio',
+        'departamento.required' => 'El departamento es obligatorio',
+        'tipo_requerimiento.required' => 'Debes seleccionar un tipo de requerimiento',
+        'tipo_requerimiento.in' => 'El tipo de requerimiento debe ser interno o externo',
+        'comentario.required' => 'Debes proporcionar un comentario o justificación',
+        'materiales.required' => 'Debes agregar al menos un material',
+        'materiales.min' => 'Debes agregar al menos un material',
+        'materiales.*.cantidad.required' => 'La cantidad es obligatoria',
+        'materiales.*.cantidad.integer' => 'La cantidad debe ser un número entero',
+        'materiales.*.cantidad.min' => 'La cantidad debe ser al menos 1',
+        'materiales.*.unidad.required' => 'La unidad es obligatoria',
+        'materiales.*.material.required' => 'La descripción del material es obligatoria',
+        'contrato_id.required' => 'Debes seleccionar un contrato',
+    ];
+
+    $request->validate([
+        'nombre_solicitante' => 'required|string|max:255',
+        'departamento' => 'required|string|max:255',
+        // ✅ PLATAFORMA Y EMBARCACIÓN AHORA SON OPCIONALES (nullable)
+        'plataforma' => 'nullable|string|max:255',
+        'embarcacion' => 'nullable|string|max:255',
+        'tipo_requerimiento' => 'required|in:interno,externo',
+        'comentario' => 'required|string',
+        'contrato_id' => 'required|exists:contratos,id',
+        'materiales' => 'required|array|min:1',
+        'materiales.*.cantidad' => 'required|integer|min:1',
+        'materiales.*.unidad' => 'required|string|max:255',
+        'materiales.*.material' => 'required|string|max:255',
+    ], $messages);
+
+    DB::beginTransaction();
+
+    try {
+        $requisicion = Requisicion::create([
+            'nombre_solicitante' => $request->nombre_solicitante,
+            'departamento' => $request->departamento,
+            'proyecto' => $request->proyecto ?? 'N/A',
+            'sit' => $request->sit ?? 'N/A',
+            'partida' => $request->partida ?? 'N/A',
+            // ✅ Si plataforma o embarcación vienen vacíos, se guardan como N/A
+            'plataforma' => $request->plataforma ?: 'N/A',
+            'area' => $request->area ?? 'N/A',
+            'activo' => $request->activo ?? 'N/A',
+            'contrato_id' => $request->contrato_id,
+            'embarcacion' => $request->embarcacion ?: 'N/A',
+            'tipo_requerimiento' => $request->tipo_requerimiento,
+            'comentario' => $request->comentario,
+            'user_id' => auth()->id(),
         ]);
 
-        DB::beginTransaction();
-
-        try {
-
-            $requisicion = Requisicion::create([
-                'nombre_solicitante' => $request->nombre_solicitante,
-                'departamento' => $request->departamento,
-                'proyecto' => $request->proyecto ?? 'N/A',
-                'sit' => $request->sit ?? 'N/A',
-                'partida' => $request->partida ?? 'N/A',
-                'plataforma' => $request->plataforma ?? 'N/A',
-                'area' => $request->area ?? 'N/A',
-                'activo' => $request->activo ?? 'N/A',
-                'contrato_id' => $request->contrato_id,
-                'embarcacion' => $request->embarcacion,
-                'tipo_requerimiento' => $request->tipo_requerimiento,
-                'comentario' => $request->comentario,
-                'user_id' => auth()->id(),
+        foreach ($request->materiales as $material) {
+            RequisicionDetalle::create([
+                'requisicion_id' => $requisicion->id,
+                'cantidad' => $material['cantidad'],
+                'unidad' => $material['unidad'],
+                'material' => $material['material'],
             ]);
-
-            foreach ($request->materiales as $material) {
-                RequisicionDetalle::create([
-                    'requisicion_id' => $requisicion->id,
-                    'cantidad' => $material['cantidad'],
-                    'unidad' => $material['unidad'],
-                    'material' => $material['material'],
-                ]);
-            }
-
-            DB::commit();
-            return redirect()->route('requisiciones.index')->with('success', 'Requisición enviada correctamente');
-
-        } catch (\Exception $e) {
-            DB::rollback();
-            return back()->withErrors(['error' => $e->getMessage()]);
         }
+
+        DB::commit();
+        return redirect()->route('requisiciones.index')->with('success', 'Requisición enviada correctamente');
+
+    } catch (\Exception $e) {
+        DB::rollback();
+        return back()->withErrors(['error' => 'Error al crear la requisición: ' . $e->getMessage()])->withInput();
     }
+}
 
     public function show(Requisicion $requisicion)
     {
