@@ -39,6 +39,7 @@ class Personal extends Model
         'grado',
         'estatus',
         'enfermedad_alergia',
+        'division',
     ];
 
     protected $casts = [

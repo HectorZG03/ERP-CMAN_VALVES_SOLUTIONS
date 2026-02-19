@@ -14,6 +14,7 @@ return new class extends Migration
             $table->foreignId('personal_id')->constrained('personal')->onDelete('cascade');
             $table->date('fecha_solicitud');
             $table->enum('estatus', ['pendiente', 'aprobado', 'entregado', 'rechazado'])->default('pendiente');
+            $table->text('embarcacion')->nullable();
             $table->text('observaciones')->nullable();
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamps();

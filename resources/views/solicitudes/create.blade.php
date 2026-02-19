@@ -72,9 +72,46 @@
                 </select>
             </div>
 
+            
+            {{-- parte que solo vera HSE parte de id_personal --}}
+
+            {{-- aqui quieor q meteas lo de el select para la lista de personal --}}
+
+           {{-- Select de Operador (Personal) --}}
+            <div class="mb-6">
+                <label for="personal_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Operador / Personal Asignado <span class="text-gray-400 text-xs">(Opcional)</span>
+                </label>
+                <select name="personal_id" id="personal_id"
+                        class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                            focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400
+                            text-gray-900 dark:text-white transition-colors duration-200">
+                    <option value="">— N/A —</option>
+                    @foreach($personal as $p)
+                        <option value="{{ $p->id }}" {{ old('personal_id') == $p->id ? 'selected' : '' }}>
+                            {{ $p->nombre_completo }}
+                            @if($p->employee_id && $p->employee_id !== 'N/A') ({{ $p->employee_id }}) @endif
+                            @if($p->area) — {{ $p->area }} @endif
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Puedes dejar el input de operador como texto libre o eliminarlo --}}
+            {{-- <div class="mb-4">
+                <label for="operador" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Observación de Operador (Opcional)
+                </label>
+                <input type="text" name="operador" id="operador"
+                    class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                            focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400
+                            text-gray-900 dark:text-white transition-colors duration-200"
+                    placeholder="N/A" value="{{ old('operador') }}">
+            </div> --}}
+
             <!-- operador y categoria -->
 
-            <div>
+            {{-- <div>
                 <label for="operador" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Operador (Opcional)
                 </label>
@@ -88,7 +125,7 @@
                 </label>
                 <input type="text" name="categoria" id="categoria"
                     class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200 " placeholder=" N/A">
-            </div>
+            </div> --}}
 
             
 

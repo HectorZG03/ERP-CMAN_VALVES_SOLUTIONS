@@ -267,6 +267,13 @@
                             <dd class="text-sm font-medium text-gray-900 dark:text-white">${{ number_format($personal->bonos, 2) }}</dd>
                         </div>
                         @endif
+
+                        @if($personal->division && $personal->division !== 'N/A')
+                        <div>
+                            <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">División</dt>
+                            <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ ucfirst($personal->division) }}</dd>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>

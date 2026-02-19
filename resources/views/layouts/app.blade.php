@@ -97,6 +97,32 @@
                            class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('prestamos.*') ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' : '' }}">
                             Préstamos
                         </a>
+
+                        {{-- epp --}}
+
+                        @if (auth()->user()->canManageValeEPP())
+                            <a href="{{ route('valepp.index') }}"
+                               class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('valepp.*') ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' : '' }}">
+                                Vales de EPP
+                            </a>
+                        @endif
+
+                        {{-- rh alta de peronal y bajas , camnbios de puesto y sueldo --}}
+
+                        @if (auth()->user()->canManagePersonal())
+                            <a href="{{ route('personal.index') }}"
+                               class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('personal.*') ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' : '' }}">
+                                Personal
+                            </a>                            
+                            <a href="{{ route('bajas.index') }}"
+                               class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('bajas.*') ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' : '' }}">
+                                Bajas
+                            </a>
+                            <a href="{{ route('cambios.index') }}"
+                               class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('cambios.*') ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' : '' }}">
+                                Cambios
+                            </a>
+                        @endif
                         
                         @if(auth()->user()->canManageUsers())
                             <a href="{{ route('users.index') }}" 

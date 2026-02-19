@@ -13,12 +13,19 @@ class SolicitudMaterial extends Model
 
     protected $fillable = [
         'user_id',
+        'personal_id',
         'destino',
         'estatus',
         'comentario',
         'operador',
         'categoria',
     ];
+
+    // Relación con el operador (personal)
+        public function operadorPersonal()
+        {
+            return $this->belongsTo(\App\Models\Personal::class, 'personal_id');
+        }
 
     protected $casts = [
         'created_at' => 'datetime',

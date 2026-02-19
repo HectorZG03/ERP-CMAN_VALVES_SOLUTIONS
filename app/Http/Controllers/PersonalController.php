@@ -69,6 +69,7 @@ class PersonalController extends Controller
             'departamento' => 'required|string|max:255',
             'fecha_ingreso' => 'required|date',
             'sexo' => 'required|in:Masculino,Femenino,Otro',
+            'division' => 'required|in:Operativa,Administrativa',
             
             // Campos opcionales - Información Personal
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
@@ -151,6 +152,9 @@ class PersonalController extends Controller
             'nacionalidad' => 'nullable|string|max:100',
             'fecha_nacimiento' => 'nullable|date|before:today',
             'sexo' => 'nullable|in:Masculino,Femenino,Otro',
+            'division' => 'required|in:Operativa,Administrativa',
+
+            'estado_civil' => 'nullable|Operativo,Administrativo,N/A',
             'estado_civil' => 'nullable|string|max:50',
             'grupo_sanguineo' => 'nullable|string|max:10',
             

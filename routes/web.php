@@ -230,6 +230,7 @@ Route::middleware(['auth', 'hse.access'])->group(function () {
     Route::post('valepp/{valepp}/aprobar', [ValeppController::class, 'aprobar'])->name('valepp.aprobar');
     Route::post('valepp/{valepp}/entregar', [ValeppController::class, 'entregar'])->name('valepp.entregar');
     Route::get('valepp/{valepp}/pdf', [ValeppController::class, 'exportPDF'])->name('valepp.exportPDF');
+    Route::get('valepp/{valepp}/export/excel', [ValeppController::class, 'exportExcel'])->name('valepp.exportExcel');
 });
 
 

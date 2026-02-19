@@ -15,6 +15,9 @@ return new class extends Migration
             $table->string('nombre_completo')->nullable();
             $table->decimal('sueldo',10,2)->nullable();
 
+            // Dividion (Operativa o Administrativa)
+            $table->enum('division', ['Operativa','Administrativa'])->default('Operativa');
+
             // Información Personal
             $table->string('foto')->nullable();
             $table->string('employee_id')->nullable(); // CMAN-AMD-001

@@ -11,6 +11,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 
+
+
+// PARTE PARA EXCEL
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+
 class ValeppController extends Controller
 {
     public function index(Request $request)
@@ -65,6 +74,7 @@ class ValeppController extends Controller
             'personal_id' => 'required|exists:personal,id',
             'fecha_solicitud' => 'required|date',
             'observaciones' => 'nullable|string',
+            'embarcacion' => 'nullable|string',
             'inventario_id' => 'required|array|min:1',
             'inventario_id.*' => 'required|exists:inventarios,id',
             'cantidad' => 'required|array|min:1',
@@ -90,6 +100,7 @@ class ValeppController extends Controller
                 'personal_id' => $request->personal_id,
                 'fecha_solicitud' => $request->fecha_solicitud,
                 'observaciones' => $request->observaciones,
+                'embarcacion' => $request->embarcacion,
                 'user_id' => Auth::id(),
             ]);
             
@@ -112,6 +123,7 @@ class ValeppController extends Controller
                     'cantidad' => $cantidad,
                     'fecha_entrega' => now(), // Se entrega inmediatamente
                     'observaciones' => $request->observaciones_detalle[$index] ?? null,
+                    'embarcacion' => $request->embarcacion ?? null,
                 ]);
             }
             
@@ -182,6 +194,129 @@ class ValeppController extends Controller
     
     return $pdf->download("vale_pp_{$valepp->numero_vale}.pdf");
 }
+
+
+
+
+ // ✅ EXPORTACIÓN A EXCEL CON IMÁGENES CORRECTAS
+    public function exportExcel(Valepp $valepp)
+    {
+        $valepp->load(['personal', 'user', 'detalles.inventario']);
+
+        // Ruta a la plantilla
+        $templatePath = storage_path('app/plantillas/Valepp.xlsx');
+
+        // Cargar plantilla existente
+        $spreadsheet = IOFactory::load($templatePath);
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // 🔹 Rellena los datos donde corresponda
+
+        // $sheet->setCellValue('D9', $valepp->user->name);
+        // $sheet->setCellValue('F14', $valepp->user->role);
+        // $sheet->setCellValue('F20', $valepp->fecha_solicitud);
+         $sheet->setCellValue('m9', $valepp->created_at->format('d/m/Y'));
+        // $sheet->setCellValue('Q58', $valepp->created_at->format('d/m/Y'));  
+
+        // personal
+        $sheet->setCellValue('d9', $valepp->personal->nombre_completo);
+        // $sheet->setCellValue('d10', $valepp->personal->area);
+        // $sheet->setCellValue('G6', $valepp->personal->departamento);
+        $sheet->setCellValue('d10', $valepp->personal->grado);
+
+        // OBSERVACIONES
+         $sheet->setCellValue('b27', $valepp->observaciones ?? 'N/A');
+         $sheet->setCellValue('j10', $valepp->embarcacion ?? 'N/A');
+
+        
+
+        
+        
+
+        
+
+
+        // Supongamos que tus productos comienzan en la fila 10:
+    $row = 15;
+    foreach ($valepp->detalles as $detalle) {
+        $sheet->setCellValue('B' . $row, $detalle->cantidad);
+        $sheet->setCellValue('C' . $row, $detalle->inventario->medida ?? '-');
+        $sheet->setCellValue('D' . $row, $detalle->inventario->nombre_producto ?? 'N/A');
+        $sheet->setCellValue('m' . $row, $valepp->created_at->format('d/m/Y'));
+        $sheet->setCellValue('k' . $row, $detalle->unidad ?? 'N/A');
+        
+        
+        
+        // $sheet->setCellValue('B' . $row, $detalle->inventario->categoria ?? '-');
+        // $sheet->setCellValue('E' . $row, $detalle->precio_unitario);
+        $row++;
+    }
+
+
+
+    // ================= FIRMA =================
+        if ($valepp->user->signature) {
+
+            $signaturePath = storage_path('app/public/'.$valepp->user->signature);
+
+            if (file_exists($signaturePath)) {
+
+                $drawing = new Drawing();
+                $drawing->setPath($signaturePath);
+                $drawing->setCoordinates('b37'); // Posición de la firma
+                $drawing->setOffsetX(70);// derecha
+                $drawing->setOffsetY(-105);// abajo
+                $drawing->setHeight(150);// altura en píxeles
+                $drawing->setWidth(260);// ancho en píxeles (descomentar si necesitas)
+                $drawing->setWorksheet($sheet);
+            }
+        }
+
+        
+
+
+        // ✅ INSERTAR FOTO DE PERFIL COMO IMAGEN (OPCIONAL)
+        // if ($solicitud->user->profile_photo) {
+        //     $photoPath = storage_path('app/public/' . $solicitud->user->profile_photo);
+            
+        //     if (file_exists($photoPath)) {
+        //         $photoDrawing = new Drawing();
+        //         $photoDrawing->setName('Foto de Perfil');
+        //         $photoDrawing->setDescription('Foto del usuario');
+        //         $photoDrawing->setPath($photoPath);
+                
+        //         // Posicionar donde quieras la foto (por ejemplo F26)
+        //         $photoDrawing->setCoordinates('F26');
+                
+        //         // Ajustar tamaño
+        //         $photoDrawing->setHeight(100);
+                
+        //         // Agregar la imagen a la hoja
+        //         $photoDrawing->setWorksheet($sheet);
+        //     }
+        // }
+
+        // // Productos - comenzando en la fila 27
+        // $row = 27;
+        // foreach ($solicitud->detalles as $detalle) {
+        //     $sheet->setCellValue('D' . $row, $detalle->cantidad_solicitada);
+        //     $sheet->setCellValue('E' . $row, $detalle->inventario->medida ?? '-');
+        //     $sheet->setCellValue('F' . $row, $detalle->inventario->nombre_producto ?? 'N/A');
+        //     $row++;
+        // }
+
+        //  // Descargar el archivo final
+         $writer = new Xlsx($spreadsheet);
+         $filename = 'Valepp_' . $valepp->id . '.xlsx';
+
+         return new StreamedResponse(function() use ($writer) {
+             $writer->save('php://output');
+         }, 200, [
+             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+             'Content-Disposition' => 'attachment;filename="' . $filename . '"',
+             'Cache-Control' => 'max-age=0',
+         ]);
+    }
 
 
 

@@ -17,7 +17,24 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SolicitudMaterialController extends Controller
 {
-    public function index()
+    
+
+
+    private function obtenerImagenEstatusSolicitud($estatus)
+    {
+        $base = storage_path('app/public/admin/');
+
+        return match(strtolower($estatus)) {
+            'aprobado' => $base.'02.png',
+            'pendiente' => $base.'04.png',
+            'denegado' => $base.'03.png',
+            default => $base.'04.png',
+        };
+    }
+
+
+
+public function index()
     {
         $user = auth()->user();
         
@@ -35,71 +52,76 @@ class SolicitudMaterialController extends Controller
     }
 
     public function create()
-    {
-        return view('solicitudes.create');
-    }
+{
+    $personal = \App\Models\Personal::activo()
+        ->orderBy('nombre_completo')
+        ->get(['id', 'nombre_completo', 'employee_id', 'area']);
+
+    return view('solicitudes.create', compact('personal'));
+}
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'comentario' => 'nullable|string',
-            'productos' => 'required|array|min:1',
-            'productos.*.inventario_id' => 'required|exists:inventarios,id',
-            'productos.*.cantidad_solicitada' => 'required|integer|min:1',
-        ], [
-            'productos.required' => 'Debe agregar al menos un producto a la solicitud',
-            'productos.*.inventario_id.required' => 'Debe seleccionar un producto válido',
-            'productos.*.cantidad_solicitada.required' => 'La cantidad es obligatoria',
-            'productos.*.cantidad_solicitada.min' => 'La cantidad debe ser mayor a 0',
+{
+    // ✅ VALIDACIÓN — aquí va personal_id
+    $request->validate([
+        'personal_id'  => 'nullable|exists:personal,id',
+        'comentario'   => 'nullable|string',
+        'productos'    => 'required|array|min:1',
+        'productos.*.inventario_id'         => 'required|exists:inventarios,id',
+        'productos.*.cantidad_solicitada'   => 'required|integer|min:1',
+    ], [
+        'productos.required'                        => 'Debe agregar al menos un producto a la solicitud',
+        'productos.*.inventario_id.required'        => 'Debe seleccionar un producto válido',
+        'productos.*.cantidad_solicitada.required'  => 'La cantidad es obligatoria',
+        'productos.*.cantidad_solicitada.min'       => 'La cantidad debe ser mayor a 0',
+    ]);
+
+    DB::beginTransaction();
+
+    try {
+        foreach ($request->productos as $producto) {
+            $inventario = Inventario::find($producto['inventario_id']);
+
+            if (!$inventario) {
+                throw new \Exception("El producto con ID {$producto['inventario_id']} no existe");
+            }
+
+            if ($inventario->existencia < $producto['cantidad_solicitada']) {
+                throw new \Exception("No hay suficiente stock de '{$inventario->nombre_producto}'. Disponible: {$inventario->existencia}, Solicitado: {$producto['cantidad_solicitada']}");
+            }
+        }
+
+        // ✅ CREAR SOLICITUD — aquí va personal_id
+        $solicitud = SolicitudMaterial::create([
+            'user_id'     => auth()->id(),
+            'personal_id' => $request->personal_id ?: null,
+            'destino'     => $request->destino,
+            'comentario'  => $request->comentario,
+            'operador'    => $request->operador ?? 'N/A',
+            'categoria'   => $request->categoria ?? 'N/A',
+            'estatus'     => 'pendiente',
         ]);
 
-        DB::beginTransaction();
-        
-        try {
-            // Verificar disponibilidad de todos los productos antes de procesar
-            foreach ($request->productos as $producto) {
-                $inventario = Inventario::find($producto['inventario_id']);
-                
-                if (!$inventario) {
-                    throw new \Exception("El producto con ID {$producto['inventario_id']} no existe");
-                }
-                
-                if ($inventario->existencia < $producto['cantidad_solicitada']) {
-                    throw new \Exception("No hay suficiente stock de '{$inventario->nombre_producto}'. Disponible: {$inventario->existencia}, Solicitado: {$producto['cantidad_solicitada']}");
-                }
-            }
+        foreach ($request->productos as $producto) {
+            $inventario = Inventario::find($producto['inventario_id']);
 
-            // Crear la solicitud principal
-            $solicitud = SolicitudMaterial::create([
-                'user_id' => auth()->id(),
-                'destino' => $request->destino,
-                'comentario' => $request->comentario,
-                'operador' => $request->operador ?? 'N/A',
-                'categoria' => $request->categoria ?? 'N/A',
-                'estatus' => 'pendiente',
+            SolicitudMaterialDetalle::create([
+                'solicitud_material_id' => $solicitud->id,
+                'inventario_id'         => $producto['inventario_id'],
+                'cantidad_solicitada'   => $producto['cantidad_solicitada'],
+                'precio_unitario'       => $inventario->getPrecioPromedio(),
             ]);
-
-            // Crear los detalles de la solicitud
-            foreach ($request->productos as $producto) {
-                $inventario = Inventario::find($producto['inventario_id']);
-                
-                SolicitudMaterialDetalle::create([
-                    'solicitud_material_id' => $solicitud->id,
-                    'inventario_id' => $producto['inventario_id'],
-                    'cantidad_solicitada' => $producto['cantidad_solicitada'],
-                    'precio_unitario' => $inventario->getPrecioPromedio(), // Guardar precio al momento de la solicitud
-                ]);
-            }
-
-            DB::commit();
-            
-            return redirect()->route('solicitudes.index')->with('success', 'Solicitud enviada correctamente');
-            
-        } catch (\Exception $e) {
-            DB::rollback();
-            return back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
+
+        DB::commit();
+
+        return redirect()->route('solicitudes.index')->with('success', 'Solicitud enviada correctamente');
+
+    } catch (\Exception $e) {
+        DB::rollback();
+        return back()->withErrors(['error' => $e->getMessage()])->withInput();
     }
+}
 
     public function show(SolicitudMaterial $solicitud)
     {
@@ -277,45 +299,75 @@ class SolicitudMaterialController extends Controller
         $sheet->setCellValue('E47', $solicitud->comentario ?? 'N/A');
         $sheet->setCellValue('F18', $solicitud->user->num_empleado ?? 'N/A');
 
-        $sheet->setCellValue('M14', $solicitud->operador ?? 'N/A');
-        $sheet->setCellValue('M16', $solicitud->categoria ?? 'N/A');
+        // $sheet->setCellValue('M14', $solicitud->operador ?? 'N/A');
+        // $sheet->setCellValue('M16', $solicitud->categoria ?? 'N/A');
+        
+         $sheet->setCellValue('M14', $solicitud->operadorPersonal->nombre_completo ?? 'N/A');
+         $sheet->setCellValue('M16', $solicitud->operadorPersonal->grado ?? 'N/A');
 
-        // ✅ INSERTAR FIRMA COMO IMAGEN (NO COMO TEXTO)
-        if ($solicitud->user->signature) {
-            // Obtener la ruta completa de la imagen
-            $signaturePath = storage_path('app/public/' . $solicitud->user->signature);
-            
-            // Verificar que el archivo existe
+
+        // Supongamos que tus productos comienzan en la fila 10:
+    $row = 27;
+    foreach ($solicitud->detalles as $detalle) {
+        $sheet->setCellValue('D' . $row, $detalle->cantidad_solicitada);
+        $sheet->setCellValue('E' . $row, $detalle->inventario->medida ?? '-');
+        $sheet->setCellValue('F' . $row, $detalle->inventario->nombre_producto ?? 'N/A');
+        
+        
+        
+        // $sheet->setCellValue('B' . $row, $detalle->inventario->categoria ?? '-');
+        // $sheet->setCellValue('E' . $row, $detalle->precio_unitario);
+        $row++;
+    }
+
+
+
+
+    // ================= FIRMA =================
+       if ($solicitud->user && $solicitud->user->signature) {
+
+
+            $signaturePath = storage_path('app/public/'.$solicitud->user->signature);
+
             if (file_exists($signaturePath)) {
-                // Crear objeto Drawing para la firma
+
                 $drawing = new Drawing();
-                $drawing->setName('Firma');
-                $drawing->setDescription('Firma del usuario');
                 $drawing->setPath($signaturePath);
-                
-                // Posicionar la imagen en la celda B53
-                $drawing->setCoordinates('O53');
-
-
-                //  Ajuste fino de posición
-                $drawing->setOffsetX(50); // derecha
-                $drawing->setOffsetY(-60); // abajo
-
-            
-                
-                // Ajustar tamaño (opcional - ajusta según tu plantilla)
-                $drawing->setHeight(100); // altura en píxeles
-                $drawing->setWidth(220); // ancho en píxeles (descomentar si necesitas)
-                
-                // Agregar la imagen a la hoja
+                $drawing->setCoordinates('o57'); // Posición de la firma
+                $drawing->setOffsetX(70);// derecha
+                $drawing->setOffsetY(-208);// abajo
+                $drawing->setHeight(150);// altura en píxeles
+                $drawing->setWidth(260);// ancho en píxeles (descomentar si necesitas)
                 $drawing->setWorksheet($sheet);
-            } else {
-                // Si no existe la imagen, poner texto alternativo
-                $sheet->setCellValue('O53', 'Sin firma');
             }
-        } else {
-            $sheet->setCellValue('O53', 'Sin firma');
         }
+
+
+
+
+        // ================= ESTATUS SOLICITUD =================
+            $imgEstatus = $this->obtenerImagenEstatusSolicitud($solicitud->estatus);
+
+            if(file_exists($imgEstatus)){
+
+                $drawEstatus = new Drawing();
+                $drawEstatus->setName('Estatus Solicitud');
+                $drawEstatus->setDescription('Estatus de solicitud');
+                $drawEstatus->setPath($imgEstatus);
+
+                // 👇 AQUÍ PONES TU POSICIÓN EXACTA
+                $drawEstatus->setCoordinates('b53');
+
+                // Ajuste fino (igual que hicimos antes)
+                $drawEstatus->setOffsetX(40);
+                $drawEstatus->setOffsetY(-60);
+
+                $drawEstatus->setHeight(100);
+                $drawEstatus->setWidth(220);
+
+                $drawEstatus->setWorksheet($sheet);
+            }
+
 
         // ✅ INSERTAR FOTO DE PERFIL COMO IMAGEN (OPCIONAL)
         // if ($solicitud->user->profile_photo) {

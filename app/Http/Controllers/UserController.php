@@ -20,7 +20,7 @@ class UserController extends Controller
         return view('users.create');
     }
 
-    public function store(Request $request)
+   public function store(Request $request)
 {
     $messages = [
         'name.required' => 'El nombre es obligatorio',
@@ -52,7 +52,29 @@ class UserController extends Controller
         'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
     ], $messages);
 
+    // ✅ Preparar datos
+    $data = [
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => Hash::make($request->password),
+        'role' => $request->role,
+        'num_empleado' => $request->num_empleado,
+    ];
 
+    // ✅ Manejar firma
+    if ($request->hasFile('signature')) {
+        $data['signature'] = $request->file('signature')->store('signatures', 'public');
+    }
+
+    // ✅ Manejar foto de perfil
+    if ($request->hasFile('profile_photo')) {
+        $data['profile_photo'] = $request->file('profile_photo')->store('profile_photos', 'public');
+    }
+
+    // ✅ Crear el usuario
+    User::create($data);
+
+    return redirect()->route('users.index')->with('success', 'Usuario creado correctamente');
 }
 
 
