@@ -242,33 +242,33 @@ class RequisicionController extends Controller
             }
         }
 
-        // ================= ESTATUS DIRECCION =================
-        $imgEstatus = $this->obtenerImagenEstatus($requisicion->estatus,'direccion');
+        // ================= ESTATUS finanzas =================
+        $imgFinanzas = $this->obtenerImagenEstatus($requisicion->estatus_finanzas,'finanzas');
 
-        if(file_exists($imgEstatus)){
+        if(file_exists($imgFinanzas)){
             $draw1 = new Drawing();
-            $draw1->setPath($imgEstatus);
+            $draw1->setPath($imgFinanzas);
             $draw1->setCoordinates('B40');
-            $draw1->setOffsetY(-60); // abajo
-            $draw1->setOffsetX(-50); // derecha
+            $draw1->setOffsetY(-40); // abajo
+            $draw1->setOffsetX(-20); // derecha
 
-            $draw1->setHeight(100); // altura en píxeles
-            $draw1->setWidth(220); // ancho en píxeles (descomentar si necesitas)
+            $draw1->setHeight(90); // altura en píxeles
+            // $draw1->setWidth(100); // ancho en píxeles (descomentar si necesitas)
 
             $draw1->setWorksheet($sheet);
         }
 
-        // ================= ESTATUS FINANZAS =================
-        $imgFinanzas = $this->obtenerImagenEstatus($requisicion->estatus_finanzas,'finanzas');
+        // ================= ESTATUS direccion =================
+        $imgEstatus = $this->obtenerImagenEstatus($requisicion->estatus,'direccion');
 
-        if(file_exists($imgFinanzas)){
+        if(file_exists($imgEstatus)){
             $draw2 = new Drawing();
-            $draw2->setPath($imgFinanzas);
+            $draw2->setPath($imgEstatus);
             $draw2->setCoordinates('G40');
-            $draw2->setOffsetY(-60); // abajo
-            $draw2->setOffsetX(-50); // derecha
-            $draw2->setHeight(100); // altura en píxeles
-            $draw2->setWidth(220); // ancho en píxeles (descomentar si necesitas)
+            $draw2->setOffsetY(-30); // abajo
+            $draw2->setOffsetX(-30); // derecha
+            $draw2->setHeight(90); // altura en píxeles
+            // $draw2->setWidth(150); // ancho en píxeles (descomentar si necesitas)
   
             $draw2->setWorksheet($sheet);
         }
