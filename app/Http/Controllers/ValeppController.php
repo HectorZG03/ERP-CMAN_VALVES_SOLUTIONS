@@ -240,8 +240,8 @@ class ValeppController extends Controller
     $row = 15;
     foreach ($valepp->detalles as $detalle) {
         $sheet->setCellValue('B' . $row, $detalle->cantidad);
-        $sheet->setCellValue('C' . $row, $detalle->inventario->medida ?? '-');
-        $sheet->setCellValue('D' . $row, $detalle->inventario->nombre_producto ?? 'N/A');
+        // $sheet->setCellValue('k' . $row, $detalle->inventario->medida ?? '-');
+        $sheet->setCellValue('c' . $row, $detalle->inventario->nombre_producto ?? 'N/A');
         $sheet->setCellValue('m' . $row, $valepp->created_at->format('d/m/Y'));
         $sheet->setCellValue('k' . $row, $detalle->unidad ?? 'N/A');
         

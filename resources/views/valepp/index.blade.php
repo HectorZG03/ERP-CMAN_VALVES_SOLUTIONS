@@ -90,15 +90,25 @@
                             </td>
 
                             <!-- Materiales -->
-                            <td class="px-6 py-4">
-                                <div class="space-y-1">
-                                    @foreach($vale->detalles as $detalle)
-                                        <div class="text-sm text-gray-900 dark:text-white">
-                                            • {{ $detalle->inventario->nombre_producto }} ({{ $detalle->cantidad }})
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </td>
+<td class="px-6 py-4">
+    <div class="space-y-1">
+        @foreach($vale->detalles->take(3) as $index => $detalle)
+            <div class="text-sm text-gray-900 dark:text-white flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-500 flex-shrink-0"></span>
+                <span class="truncate max-w-[140px]" title="{{ $detalle->inventario->nombre_producto }}">
+                    {{ Str::limit($detalle->inventario->nombre_producto, 18) }}
+                </span>
+                <span class="text-gray-500 dark:text-gray-400 flex-shrink-0">({{ $detalle->cantidad }})</span>
+            </div>
+        @endforeach
+
+        @if($vale->detalles->count() > 3)
+            <div class="text-xs text-blue-500 dark:text-blue-400 font-medium pl-1">
+                +{{ $vale->detalles->count() - 3 }} más...
+            </div>
+        @endif
+    </div>
+</td>
 
                             <!-- Fecha de Entrega -->
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -112,20 +122,42 @@
                             </td>
 
                             <!-- Acciones -->
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center space-x-2">
-                                    <a href="{{ route('valepp.show', $vale) }}" 
-                                       class="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
-                                        Ver
-                                    </a>
-                                    
-                                    <a href="{{ route('valepp.exportPDF', $vale) }}" 
-                                        target="_blank"
-                                        class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
-                                            PDF
-                                        </a>
-                                </div>
-                            </td>
+<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+    <div class="flex items-center space-x-2">
+
+        <!-- Ver -->
+        <a href="{{ route('valepp.show', $vale) }}" 
+           class="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            Ver
+        </a>
+
+        <!-- PDF -->
+        <a href="{{ route('valepp.exportPDF', $vale) }}" 
+           target="_blank"
+           class="inline-flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6M9 17h4" />
+            </svg>
+            PDF
+        </a>
+
+        <!-- Excel -->
+        <a href="{{ route('valepp.exportExcel', $vale) }}" 
+           target="_blank"
+           class="inline-flex items-center gap-1 text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M10 3v18M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6z" />
+            </svg>
+            Excel
+        </a>
+
+    </div>
+</td>
                         </tr>
                         @empty
                         <tr>
