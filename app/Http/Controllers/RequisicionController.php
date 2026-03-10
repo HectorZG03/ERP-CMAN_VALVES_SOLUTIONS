@@ -200,8 +200,7 @@ class RequisicionController extends Controller
         $sheet->setCellValue('C10', strtoupper($requisicion->user->name));
         $sheet->setCellValue('C11', strtoupper($requisicion->user->role));
         $sheet->setCellValue('G5', $requisicion->created_at->format('d/m/Y'));
-        $sheet->setCellValue('A34', $requisicion->comentario ?? 'N/A');
-         $sheet->setCellValue('C12', ucwords($requisicion->proyecto ?? 'N/A'));
+        $sheet->setCellValue('C12', ucwords($requisicion->proyecto ?? 'N/A'));
         $sheet->setCellValue('C13', strtoupper($requisicion->sit ?? 'N/A'));
         $sheet->setCellValue('C14', strtoupper($requisicion->partida ?? 'N/A'));
         $sheet->setCellValue('C15', strtoupper($requisicion->plataforma ?? 'N/A'));
@@ -213,7 +212,7 @@ class RequisicionController extends Controller
         $sheet->setCellValue('G7', $requisicion->contrato->contrato ?? 'N/A');
         $sheet->setCellValue('G8', $requisicion->contrato->convenio ?? 'N/A');
         $sheet->setCellValue('G5', $requisicion->created_at->format('d/m/Y)'));
-        $sheet->setCellValue('A34', $requisicion->comentario ?? 'N/A');
+        $sheet->setCellValue('A50', $requisicion->comentario ?? 'N/A');
 
         // ✅ Materiales (múltiples productos)
         $row = 21;
@@ -233,7 +232,7 @@ class RequisicionController extends Controller
 
                 $drawing = new Drawing();
                 $drawing->setPath($signaturePath);
-                $drawing->setCoordinates('G35');
+                $drawing->setCoordinates('G51');
                 $drawing->setOffsetX(-40);// derecha
                 $drawing->setOffsetY(-60);// abajo
                 $drawing->setHeight(100);// altura en píxeles
@@ -248,7 +247,7 @@ class RequisicionController extends Controller
         if(file_exists($imgFinanzas)){
             $draw1 = new Drawing();
             $draw1->setPath($imgFinanzas);
-            $draw1->setCoordinates('B40');
+            $draw1->setCoordinates('B55');
             $draw1->setOffsetY(-40); // abajo
             $draw1->setOffsetX(-20); // derecha
 
@@ -264,7 +263,7 @@ class RequisicionController extends Controller
         if(file_exists($imgEstatus)){
             $draw2 = new Drawing();
             $draw2->setPath($imgEstatus);
-            $draw2->setCoordinates('G40');
+            $draw2->setCoordinates('G56');
             $draw2->setOffsetY(-30); // abajo
             $draw2->setOffsetX(-30); // derecha
             $draw2->setHeight(90); // altura en píxeles

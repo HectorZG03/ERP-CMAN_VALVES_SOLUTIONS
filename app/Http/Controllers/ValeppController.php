@@ -68,77 +68,133 @@ class ValeppController extends Controller
         return view('valepp.create', compact('personalActivo', 'inventarios', 'numeroVale'));
     }
 
+// funcion estore q no descuenta del inventario cada q se crea un vale, para usar esta funcion desmarcarla y comentar 
+// la otra funcion store que si descuenta del inventario
     public function store(Request $request)
-    {
-        $request->validate([
-            'personal_id' => 'required|exists:personal,id',
-            'fecha_solicitud' => 'required|date',
-            'observaciones' => 'nullable|string',
-            'embarcacion' => 'nullable|string',
-            'inventario_id' => 'required|array|min:1',
-            'inventario_id.*' => 'required|exists:inventarios,id',
-            'cantidad' => 'required|array|min:1',
-            'cantidad.*' => 'required|integer|min:1',
-        ]);
+{
+    $request->validate([
+        'personal_id' => 'required|exists:personal,id',
+        'fecha_solicitud' => 'required|date',
+        'observaciones' => 'nullable|string',
+        'embarcacion' => 'nullable|string',
+        'inventario_id' => 'required|array|min:1',
+        'inventario_id.*' => 'required|exists:inventarios,id',
+        'cantidad' => 'required|array|min:1',
+        'cantidad.*' => 'required|integer|min:1',
+    ]);
 
-        DB::beginTransaction();
+    DB::beginTransaction();
+    
+    try {
+        // Crear el vale
+        $valepp = Valepp::create([
+            'numero_vale' => Valepp::generarNumeroVale(),
+            'personal_id' => $request->personal_id,
+            'fecha_solicitud' => $request->fecha_solicitud,
+            'observaciones' => $request->observaciones,
+            'embarcacion' => $request->embarcacion,
+            'user_id' => Auth::id(),
+        ]);
         
-        try {
-            // Validar que haya suficiente existencia
-            foreach ($request->inventario_id as $index => $inventario_id) {
-                $inventario = Inventario::findOrFail($inventario_id);
-                $cantidad = $request->cantidad[$index];
-                
-                if ($inventario->existencia < $cantidad) {
-                    throw new \Exception("No hay suficiente existencia de {$inventario->nombre_producto}. Disponible: {$inventario->existencia}");
-                }
-            }
-            
-            // Crear el vale
-            $valepp = Valepp::create([
-                'numero_vale' => Valepp::generarNumeroVale(),
-                'personal_id' => $request->personal_id,
-                'fecha_solicitud' => $request->fecha_solicitud,
-                'observaciones' => $request->observaciones,
-                'embarcacion' => $request->embarcacion,
-                'user_id' => Auth::id(),
+        // Crear los detalles SIN descontar del inventario
+        foreach ($request->inventario_id as $index => $inventario_id) {
+            ValeppDetalle::create([
+                'valepp_id' => $valepp->id,
+                'inventario_id' => $inventario_id,
+                'cantidad' => $request->cantidad[$index],
+                'fecha_entrega' => now(),
+                'observaciones' => $request->observaciones_detalle[$index] ?? null,
+                'embarcacion' => $request->embarcacion ?? null,
             ]);
-            
-            // Crear los detalles y descontar del inventario
-            foreach ($request->inventario_id as $index => $inventario_id) {
-                $inventario = Inventario::findOrFail($inventario_id);
-                $cantidad = $request->cantidad[$index];
-                
-                // Descontar del inventario
-                $inventario->decrement('existencia', $cantidad);
-                
-                // Actualizar precio total proporcional
-                $precioPromedio = $inventario->getPrecioPromedio();
-                $inventario->decrement('precio_total', $precioPromedio * $cantidad);
-                
-                // Crear detalle del vale con fecha de entrega actual
-                ValeppDetalle::create([
-                    'valepp_id' => $valepp->id,
-                    'inventario_id' => $inventario_id,
-                    'cantidad' => $cantidad,
-                    'fecha_entrega' => now(), // Se entrega inmediatamente
-                    'observaciones' => $request->observaciones_detalle[$index] ?? null,
-                    'embarcacion' => $request->embarcacion ?? null,
-                ]);
-            }
-            
-            DB::commit();
-            
-            return redirect()->route('valepp.index')
-                ->with('success', 'Vale PP creado y materiales entregados exitosamente');
-                
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->withErrors(['error' => 'Error al crear el vale: ' . $e->getMessage()])
-                ->withInput();
         }
+        
+        DB::commit();
+        
+        return redirect()->route('valepp.index')
+            ->with('success', 'Vale PP creado exitosamente');
+            
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()
+            ->withErrors(['error' => 'Error al crear el vale: ' . $e->getMessage()])
+            ->withInput();
     }
+}
+
+
+
+    // para descontar del inventario  cada q se crea un vale desmarcar esta funcion y comentar el otro estore el cual no descuenta
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'personal_id' => 'required|exists:personal,id',
+    //         'fecha_solicitud' => 'required|date',
+    //         'observaciones' => 'nullable|string',
+    //         'embarcacion' => 'nullable|string',
+    //         'inventario_id' => 'required|array|min:1',
+    //         'inventario_id.*' => 'required|exists:inventarios,id',
+    //         'cantidad' => 'required|array|min:1',
+    //         'cantidad.*' => 'required|integer|min:1',
+    //     ]);
+
+    //     DB::beginTransaction();
+        
+    //     try {
+    //         // Validar que haya suficiente existencia
+    //         foreach ($request->inventario_id as $index => $inventario_id) {
+    //             $inventario = Inventario::findOrFail($inventario_id);
+    //             $cantidad = $request->cantidad[$index];
+                
+    //             if ($inventario->existencia < $cantidad) {
+    //                 throw new \Exception("No hay suficiente existencia de {$inventario->nombre_producto}. Disponible: {$inventario->existencia}");
+    //             }
+    //         }
+            
+    //         // Crear el vale
+    //         $valepp = Valepp::create([
+    //             'numero_vale' => Valepp::generarNumeroVale(),
+    //             'personal_id' => $request->personal_id,
+    //             'fecha_solicitud' => $request->fecha_solicitud,
+    //             'observaciones' => $request->observaciones,
+    //             'embarcacion' => $request->embarcacion,
+    //             'user_id' => Auth::id(),
+    //         ]);
+            
+    //         // Crear los detalles y descontar del inventario
+    //         foreach ($request->inventario_id as $index => $inventario_id) {
+    //             $inventario = Inventario::findOrFail($inventario_id);
+    //             $cantidad = $request->cantidad[$index];
+                
+    //             // Descontar del inventario
+    //             $inventario->decrement('existencia', $cantidad);
+                
+    //             // Actualizar precio total proporcional
+    //             $precioPromedio = $inventario->getPrecioPromedio();
+    //             $inventario->decrement('precio_total', $precioPromedio * $cantidad);
+                
+    //             // Crear detalle del vale con fecha de entrega actual
+    //             ValeppDetalle::create([
+    //                 'valepp_id' => $valepp->id,
+    //                 'inventario_id' => $inventario_id,
+    //                 'cantidad' => $cantidad,
+    //                 'fecha_entrega' => now(), // Se entrega inmediatamente
+    //                 'observaciones' => $request->observaciones_detalle[$index] ?? null,
+    //                 'embarcacion' => $request->embarcacion ?? null,
+    //             ]);
+    //         }
+            
+    //         DB::commit();
+            
+    //         return redirect()->route('valepp.index')
+    //             ->with('success', 'Vale PP creado y materiales entregados exitosamente');
+                
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return redirect()->back()
+    //             ->withErrors(['error' => 'Error al crear el vale: ' . $e->getMessage()])
+    //             ->withInput();
+    //     }
+    // }
 
     public function show(Valepp $valepp)
     {
