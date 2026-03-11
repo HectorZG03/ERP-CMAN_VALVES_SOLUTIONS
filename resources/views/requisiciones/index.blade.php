@@ -127,9 +127,9 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Folio
-                            </th>
+                            </th> --}}
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Fecha
                             </th>
@@ -164,12 +164,12 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200" 
                             data-status="{{ $requisicion->estatus }}"
                             data-estatus-finanzas="{{ $requisicion->estatus_finanzas }}">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900 dark:text-white">
+                            {{-- <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900 dark:text-white">
                                 {{ $requisicion->folio ?? '#' . str_pad($requisicion->id, 4, '0', STR_PAD_LEFT) }}
-                            </td>
+                            </td> --}}
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                 @if($requisicion->created_at)
-                                    {{ $requisicion->created_at->format('d/m/Y H:i') }}
+                                    {{ $requisicion->created_at->format('d/m/Y') }}
                                 @else
                                     <span class="text-gray-400 dark:text-gray-500">N/A</span>
                                 @endif
@@ -193,13 +193,18 @@
                                     </div>
                                     <div class="ml-3">
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                            {{ $requisicion->nombre_solicitante }}
+                                            
+                                            {{ strlen($requisicion->nombre_solicitante) > 9 ? substr($requisicion->nombre_solicitante, 0, 9) . '...' : $requisicion->nombre_solicitante }}
+                                            
                                         </div>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                {{ $requisicion->departamento }}
+                                
+                                {{ strlen($requisicion->departamento) > 8 ? substr($requisicion->departamento, 0, 8) . '...' : $requisicion->departamento }}
+
+                                
                             </td>
                             {{-- <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -281,6 +286,20 @@
                                         Ver
                                     </a>
 
+
+
+                                    <!-- PDF -->
+                                    <a href="{{ route('requisiciones.pdf', $requisicion) }}"
+                                        target="_blank"
+                                        class="inline-flex items-center px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-yellow-900/30 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 text-xs font-medium rounded-md transition-colors duration-200">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0014.414 6L10 1.586A2 2 0 008.586 1H6zM13 8V3.5L17.5 8H13z"/>
+                                        </svg>
+                                        PDF
+                                    </a>
+
+
+                                    
                                     <!-- ✅ Botones para FINANZAS (solo si está pendiente) -->
                                     @if(auth()->user()->canApproveFinanzas() && $requisicion->estatus_finanzas === 'pendiente')
                                         <form method="POST" action="{{ route('requisiciones.updateEstatusFinanzas', $requisicion) }}" class="inline">
@@ -348,13 +367,15 @@
                                     @endif
 
                                     <!-- Excel export -->
-                                    <a href="{{ route('requisiciones.exportExcel', $requisicion) }}" 
+                                    {{-- <a href="{{ route('requisiciones.exportExcel', $requisicion) }}" 
                                        class="inline-flex items-center px-2 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-300 text-xs font-medium rounded-md transition-colors duration-200">
                                         <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0014.414 6L10 1.586A2 2 0 008.586 1H6zM13 8V3.5L17.5 8H13z"/>
                                         </svg>
                                         Excel
-                                    </a>
+                                    </a> --}}
+
+                                    
                                 </div>
                             </td>
                         </tr>

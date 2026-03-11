@@ -186,6 +186,42 @@ class RequisicionController extends Controller
     }
 
 
+    // pdf
+
+    public function pdf(Requisicion $requisicion)
+{
+    $requisicion->load(['user', 'detalles', 'contrato', 'aprobadorFinanzas']);
+
+    // Firma del solicitante
+    $firmaUsuarioBase64 = null;
+    if ($requisicion->user->signature) {
+        $path = storage_path('app/public/' . $requisicion->user->signature);
+        if (file_exists($path)) {
+            $firmaUsuarioBase64 = base64_encode(file_get_contents($path));
+        }
+    }
+
+    // Firma de Finanzas (según estatus_finanzas)
+    $firmaFinanzasPath = $this->obtenerImagenEstatus($requisicion->estatus_finanzas, 'finanzas');
+    $firmaFinanzasBase64 = file_exists($firmaFinanzasPath)
+        ? base64_encode(file_get_contents($firmaFinanzasPath))
+        : null;
+
+    // Firma de Dirección (según estatus)
+    $firmaDireccionPath = $this->obtenerImagenEstatus($requisicion->estatus, 'direccion');
+    $firmaDireccionBase64 = file_exists($firmaDireccionPath)
+        ? base64_encode(file_get_contents($firmaDireccionPath))
+        : null;
+
+    return view('requisiciones.pdf', compact(
+        'requisicion',
+        'firmaUsuarioBase64',
+        'firmaFinanzasBase64',
+        'firmaDireccionBase64'
+    ));
+}
+
+
     // ===============================
     //  EXPORTACIÓN A EXCEL 
     // ===============================

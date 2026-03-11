@@ -25,7 +25,7 @@ class SolicitudMaterialController extends Controller
         $base = storage_path('app/public/admin/');
 
         return match(strtolower($estatus)) {
-            'aprobado' => $base.'02.png',
+            'aprobado' => $base.'01.png',
             'pendiente' => $base.'04.png',
             'denegado' => $base.'03.png',
             default => $base.'04.png',
@@ -273,6 +273,31 @@ public function index()
             'precio_promedio' => $producto->getPrecioPromedio(),
         ]);
     }
+
+
+    // pdf
+
+   public function pdf(SolicitudMaterial $solicitud)
+{
+    $solicitud->load(['detalles.inventario', 'user']);
+    
+    // Firma del director/admin según estatus
+    $firmaAdminPath = $this->obtenerImagenEstatusSolicitud($solicitud->estatus);
+    $firmaAdminBase64 = file_exists($firmaAdminPath) 
+        ? base64_encode(file_get_contents($firmaAdminPath)) 
+        : null;
+
+    // Firma del solicitante
+    $firmaUserBase64 = null;
+    if ($solicitud->user && $solicitud->user->signature) {
+        $signaturePath = storage_path('app/public/' . $solicitud->user->signature);
+        if (file_exists($signaturePath)) {
+            $firmaUserBase64 = base64_encode(file_get_contents($signaturePath));
+        }
+    }
+
+    return view('solicitudes.pdf', compact('solicitud', 'firmaAdminBase64', 'firmaUserBase64'));
+}
 
 
 

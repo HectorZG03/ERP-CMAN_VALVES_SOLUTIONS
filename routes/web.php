@@ -90,6 +90,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/solicitudes/{solicitud}', [SolicitudMaterialController::class, 'show'])->name('solicitudes.show');
 
+    
+    Route::get('solicitudes/{solicitud}/pdf', [SolicitudMaterialController::class, 'pdf'])->name('solicitudes.pdf');
+
 
     // Requisicion
 
@@ -97,6 +100,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/requisiciones/create', [RequisicionController::class, 'create'])->name('requisiciones.create');
     Route::post('/requisiciones', [RequisicionController::class, 'store'])->name('requisiciones.store');
     Route::get('/requisiciones/{requisicion}', [RequisicionController::class, 'show'])->name('requisiciones.show');
+    // pdf requisicion 
+    Route::get('requisiciones/{requisicion}/pdf', [RequisicionController::class, 'pdf'])->name('requisiciones.pdf'); 
     
     
     

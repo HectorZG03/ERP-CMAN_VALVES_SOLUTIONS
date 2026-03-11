@@ -79,9 +79,9 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Fecha / ID
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                    {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Productos Solicitados
-                                    </th>
+                                    </th> --}}
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                         Destino
                                     </th>
@@ -116,7 +116,7 @@
                                     </td>
 
                                     <!-- Productos Solicitados -->
-                                    <td class="px-6 py-4">
+                                    {{-- <td class="px-6 py-4">
                                         <div class="space-y-2">
                                             @if($solicitud->detalles && $solicitud->detalles->count() > 0)
                                                 @foreach($solicitud->detalles->take(3) as $detalle)
@@ -149,7 +149,7 @@
                                                 </div>
                                             @endif
                                         </div>
-                                    </td>
+                                    </td> --}}
 
                                     <!-- Destino -->
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -161,7 +161,7 @@
                                             <div>
                                                 @if($solicitud->destino)
                                                     <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                                        {{ $solicitud->destino }}
+                                                        {{ strlen($solicitud->destino) > 12 ? substr($solicitud->destino, 0, 12) . '...' : $solicitud->destino }}
                                                     </div>
                                                     @if($solicitud->destino == 'BMS MAYA')
                                                         <div class="text-xs text-gray-500 dark:text-gray-400">
@@ -217,7 +217,7 @@
                                             </div>
                                             <div class="ml-3">
                                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                                    {{ $solicitud->user->name }}
+                                                    {{ strlen($solicitud->user->name) > 12 ? substr($solicitud->user->name, 0, 12) . '...' : $solicitud->user->name }}
                                                 </div>
                                                 <div class="text-xs text-gray-500 dark:text-gray-400">
                                                     {{ ucfirst(str_replace('_', ' ', $solicitud->user->role)) }}
@@ -269,15 +269,25 @@
 
 
                                             <!-- Excel export -->
-                                        <a href="{{ route('solicitudes.exportExcel', $solicitud) }}"
+                                        {{-- <a href="{{ route('solicitudes.exportExcel', $solicitud) }}"
                                         class="inline-flex items-center px-2 py-1 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-300 text-xs font-medium rounded-md transition-colors duration-200">
                                             <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                                 <path d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0014.414 6L10 1.586A2 2 0 008.586 1H6zM13 8V3.5L17.5 8H13z"/>
                                             </svg>
                                             Excel
-                                        </a>
+                                        </a> --}}
 
-                                       
+                                        {{-- PDF --}}
+
+                                        <a href="{{ route('solicitudes.pdf', $solicitud) }}"
+                                            target="_blank"
+                                            class="inline-flex items-center px-2 py-1 bg-yellow-100 hover:bg-red-200 dark:bg-yellow-900/30 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 text-xs font-medium rounded-md transition-colors duration-200">
+                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0014.414 6L10 1.586A2 2 0 008.586 1H6zM13 8V3.5L17.5 8H13z"/>
+                                            </svg>
+                                            PDF
+                                        </a>
+                                        
 
 
 
