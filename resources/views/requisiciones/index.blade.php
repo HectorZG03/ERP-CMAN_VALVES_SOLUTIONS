@@ -139,9 +139,9 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Solicitante
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                            {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Departamento
-                            </th>
+                            </th> --}}
                             {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Tipo
                             </th> --}}
@@ -174,14 +174,34 @@
                                     <span class="text-gray-400 dark:text-gray-500">N/A</span>
                                 @endif
                             </td>
+                            
+
+                            {{-- resumen --}}
+
+                            <!-- Resumen -->
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ $requisicion->total_materiales }} materiales
-                                </div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">
-                                    <span class="font-medium">{{ $requisicion->total_unidades }}</span> unidades
+                                <div class="space-y-1">
+                                    <div class="flex items-center text-sm">
+                                        <svg class="w-4 h-4 mr-1 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        </svg>
+                                        <span class="font-medium text-gray-900 dark:text-white">{{ $requisicion->total_materiales }}</span>
+                                        <span class="text-gray-500 dark:text-gray-400 ml-1">materiales</span>
+                                    </div>
+                                    <div class="flex items-center text-sm">
+                                        <svg class="w-4 h-4 mr-1 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 6 6 6-6 3 3-9 9-9-9z"/>
+                                        </svg>
+                                        <span class="font-medium text-gray-900 dark:text-white">{{ $requisicion->total_unidades }}</span>
+                                        <span class="text-gray-500 dark:text-gray-400 ml-1">unidades</span>
+                                    </div>
                                 </div>
                             </td>
+                            
+
+
+
+
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-8 w-8">
@@ -194,18 +214,26 @@
                                     <div class="ml-3">
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">
                                             
-                                            {{ strlen($requisicion->nombre_solicitante) > 9 ? substr($requisicion->nombre_solicitante, 0, 9) . '...' : $requisicion->nombre_solicitante }}
+                                            {{ strlen($requisicion->nombre_solicitante) > 19 ? substr($requisicion->nombre_solicitante, 0, 19) . '...' : $requisicion->nombre_solicitante }}
                                             
                                         </div>
+                                                <div class="text-xs text-gray-500 dark:text-gray-400">
+                                                    {{ ucfirst(str_replace('_', ' ', $requisicion->user->role)) }}
+                                                </div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+
+                            {{-- este es para mostrar el rol pero ya se mejoro y se coloco en el cosifo de arriba --}}
+                            {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                                 
                                 {{ strlen($requisicion->departamento) > 8 ? substr($requisicion->departamento, 0, 8) . '...' : $requisicion->departamento }}
 
                                 
-                            </td>
+                            </td> --}}
+
+
+
                             {{-- <td class="px-6 py-4 whitespace-nowrap">
                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                                     {{ $requisicion->tipo_requerimiento === 'interno' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' : 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' }}">
