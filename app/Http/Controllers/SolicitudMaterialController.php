@@ -34,21 +34,43 @@ class SolicitudMaterialController extends Controller
 
 
 
-public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
-        
-        // Los que pueden aprobar y el personal de inventario ven todas las solicitudes
-        if ($user->canApproveRequests() || $user->canManageInventory()) {
-            $solicitudes = SolicitudMaterial::with(['detalles.inventario', 'user'])->paginate(15);
+        $filterStatus = $request->get('status', 'all');
+
+        // Base query según permisos
+        $baseQuery = ($user->canApproveRequests() || $user->canManageInventory())
+            ? SolicitudMaterial::with(['detalles.inventario', 'user'])
+            : SolicitudMaterial::where('user_id', $user->id)->with(['detalles.inventario', 'user']);
+
+        // Conteos reales desde la BD (sin importar paginación)
+        $countQuery = ($user->canApproveRequests() || $user->canManageInventory())
+            ? SolicitudMaterial::query()
+            : SolicitudMaterial::where('user_id', $user->id);
+
+        $counts = [
+            'all'      => (clone $countQuery)->count(),
+            'pendiente' => (clone $countQuery)->where('estatus', 'pendiente')->count(),
+            'aprobado'  => (clone $countQuery)->where('estatus', 'aprobado')->count(),
+            'denegado'  => (clone $countQuery)->where('estatus', 'denegado')->count(),
+        ];
+
+        // Si hay filtro activo → sin paginación, todos los registros del estado
+        if ($filterStatus !== 'all') {
+            $solicitudes = (clone $baseQuery)
+                ->where('estatus', $filterStatus)
+                ->orderByDesc('created_at')
+                ->get(); // <- Collection, sin paginar
+            $isPaginated = false;
         } else {
-            // Los demás usuarios solo ven sus propias solicitudes
-            $solicitudes = SolicitudMaterial::where('user_id', $user->id)
-                                          ->with(['detalles.inventario', 'user'])
-                                          ->paginate(15);
+            $solicitudes = (clone $baseQuery)
+                ->orderByDesc('created_at')
+                ->paginate(15);
+            $isPaginated = true;
         }
-        
-        return view('solicitudes.index', compact('solicitudes'));
+
+        return view('solicitudes.index', compact('solicitudes', 'counts', 'filterStatus', 'isPaginated'));
     }
 
     public function create()

@@ -239,9 +239,39 @@
             </div>
         </div>
 
+
+        {{-- CSS DEL FOLIO DEL DOCUMENTO  --}}
+
+        <style>
+            .status-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .status-folio {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 2px;
+            font-size: 11px;
+            opacity: 0.95;
+        
+        }
+
+        </style>
+
+        
+
         {{-- ── STATUS BAR ── --}}
         <div class="status-bar">
             <span class="status-label">Estatus General del Documento</span>
+
+            <span class="status-folio">FOR-03-PRO-ALM-001</span>
+
             @if($solicitud->estatus === 'pendiente')
                 <span class="badge badge-pendiente">&#9679; Pendiente</span>
             @elseif($solicitud->estatus === 'aprobado')

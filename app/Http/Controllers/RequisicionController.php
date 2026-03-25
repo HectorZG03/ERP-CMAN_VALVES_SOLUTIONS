@@ -31,32 +31,79 @@ class RequisicionController extends Controller
         return public_path('storage/admin/04.png');
     }
 
-    public function index()
-    {
-        $user = auth()->user();
+    public function index(Request $request)
+{
+    $user = auth()->user();
+    $filterStatus = $request->get('status', 'all');
+    $filterFinanzas = $request->get('finanzas', 'all');
 
-        if ($user->canApproveFinanzas()) {
-            $requisiciones = Requisicion::with(['user', 'detalles', 'aprobadorFinanzas'])
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
-        } elseif ($user->canApproveRequests()) {
-            $requisiciones = Requisicion::with(['user', 'detalles', 'aprobadorFinanzas'])
-                ->where('estatus_finanzas', 'aprobado')
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
-        } elseif ($user->canManageInventory()) {
-            $requisiciones = Requisicion::with(['user', 'detalles'])
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
-        } else {
-            $requisiciones = Requisicion::where('user_id', $user->id)
-                ->with(['user', 'detalles'])
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
-        }
-
-        return view('requisiciones.index', compact('requisiciones'));
+    // Base query según rol
+    if ($user->canApproveFinanzas()) {
+        $baseQuery = Requisicion::with(['user', 'detalles', 'aprobadorFinanzas'])
+            ->orderBy('created_at', 'desc');
+    } elseif ($user->canApproveRequests()) {
+        $baseQuery = Requisicion::with(['user', 'detalles', 'aprobadorFinanzas'])
+            ->where('estatus_finanzas', 'aprobado')
+            ->orderBy('created_at', 'desc');
+    } elseif ($user->canManageInventory()) {
+        $baseQuery = Requisicion::with(['user', 'detalles'])
+            ->orderBy('created_at', 'desc');
+    } else {
+        $baseQuery = Requisicion::where('user_id', $user->id)
+            ->with(['user', 'detalles'])
+            ->orderBy('created_at', 'desc');
     }
+
+    // Conteos reales desde la BD
+    $countQuery = clone $baseQuery;
+
+    if ($user->canApproveFinanzas()) {
+        // Para finanzas: contamos por estatus_finanzas
+        $counts = [
+            'all'       => (clone $countQuery)->count(),
+            'pendiente' => (clone $countQuery)->where('estatus_finanzas', 'pendiente')->count(),
+            'aprobado'  => (clone $countQuery)->where('estatus_finanzas', 'aprobado')->count(),
+            'denegado'  => (clone $countQuery)->where('estatus_finanzas', 'denegado')->count(),
+        ];
+    } else {
+        // Para otros roles: contamos por estatus general
+        $counts = [
+            'all'       => (clone $countQuery)->count(),
+            'pendiente' => (clone $countQuery)->where('estatus', 'pendiente')->count(),
+            'aprobado'  => (clone $countQuery)->where('estatus', 'aprobado')->count(),
+            'denegado'  => (clone $countQuery)->where('estatus', 'denegado')->count(),
+        ];
+    }
+
+    // Aplicar filtro y decidir si paginar o no
+    if ($user->canApproveFinanzas()) {
+        // Finanzas filtra por estatus_finanzas
+        if ($filterFinanzas !== 'all') {
+            $requisiciones = (clone $baseQuery)
+                ->where('estatus_finanzas', $filterFinanzas)
+                ->get();
+            $isPaginated = false;
+        } else {
+            $requisiciones = (clone $baseQuery)->paginate(15);
+            $isPaginated = true;
+        }
+    } else {
+        // Otros roles filtran por estatus general
+        if ($filterStatus !== 'all') {
+            $requisiciones = (clone $baseQuery)
+                ->where('estatus', $filterStatus)
+                ->get();
+            $isPaginated = false;
+        } else {
+            $requisiciones = (clone $baseQuery)->paginate(15);
+            $isPaginated = true;
+        }
+    }
+
+    return view('requisiciones.index', compact(
+        'requisiciones', 'counts', 'filterStatus', 'filterFinanzas', 'isPaginated'
+    ));
+}
 
     public function create()
     {
