@@ -97,6 +97,16 @@
                            class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('prestamos.*') ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' : '' }}">
                             Préstamos
                         </a>
+                        
+                        {{-- finanzas --}}
+                        
+                        @if (auth()->user()->canManageFinanzas())
+                        <a href="{{ route('orden-compra.index') }}" 
+                           class="px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors {{ request()->routeIs('orden-compra.*') ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20' : '' }}">
+                            Órdenes de Compra
+                        </a>
+                        @endif
+                       
 
                         {{-- epp --}}
 

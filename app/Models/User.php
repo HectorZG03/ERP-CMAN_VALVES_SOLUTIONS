@@ -78,6 +78,18 @@ class User extends Authenticatable
         return in_array($this->role, ['direccion']);
     }
 
+
+    /** esta oparte es para que salga en la parte de la barre quien lo puede ver y quien no 
+     * Verificar si el usuario puede gestionar finanzas
+     */
+    public function canManageFinanzas()
+    {
+        return in_array($this->role, ['finanzas', 'aux_finanzas']);
+    }
+
+
+
+
     /**
      * Verificar si el usuario tiene uno o más roles específicos
      */

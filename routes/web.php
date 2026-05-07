@@ -19,6 +19,8 @@ use App\Http\Controllers\BajaColaboradorController;
 use App\Http\Controllers\CambioPuestoSueldoController;
 use App\Http\Controllers\ValeppController;
 
+use App\Http\Controllers\OrdenCompraController;
+
 
 Route::get('/', function () {
     return redirect('/dashboard');
@@ -237,6 +239,32 @@ Route::middleware(['auth', 'hse.access'])->group(function () {
     Route::get('valepp/{valepp}/pdf', [ValeppController::class, 'exportPDF'])->name('valepp.exportPDF');
     Route::get('valepp/{valepp}/export/excel', [ValeppController::class, 'exportExcel'])->name('valepp.exportExcel');
 });
+
+
+
+
+// 🔒 Órdenes de Compra - Solo Finanzas y Auxiliar Finanzas
+Route::middleware(['auth', 'finanzas.access'])->group(function () {
+ 
+    // Ruta AJAX para autocomplete de productos del inventario
+    Route::get('/orden-compra/buscar-productos', [OrdenCompraController::class, 'buscarProductos'])->name('OrdenCompra.buscar-productos');
+
+
+ 
+    // CRUD completo
+    Route::resource('orden-compra', OrdenCompraController::class)->parameters([
+        'orden-compra' => 'ordenCompra'
+
+       
+    ]);
+    
+});
+
+
+
+ // PDF
+        Route::get('orden-compra/{ordenCompra}/pdf', [OrdenCompraController::class, 'pdf'])->name('orden-compra.pdf');
+
 
 
 

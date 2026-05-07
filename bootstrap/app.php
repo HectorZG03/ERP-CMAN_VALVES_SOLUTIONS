@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'user.access' => \App\Http\Middleware\CheckUserAccess::class,
             'rh.access' => \App\Http\Middleware\CheckRHAccess::class,
             'hse.access' => \App\Http\Middleware\CheckHSEAccess::class,
+            'finanzas.access' => \App\Http\Middleware\CheckFinanzasAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

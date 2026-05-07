@@ -58,5 +58,7 @@ class Inventario extends Model
         return $this->hasMany(ValeppDetalle::class, 'inventario_id');
     }
 
+    
+
 
 }
