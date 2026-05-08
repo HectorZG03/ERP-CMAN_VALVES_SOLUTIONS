@@ -12,6 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('folio')->unique(); // Folio autogenerado, ej: OC-2024-0001
             $table->string('nombre_proveedor');
+            $table->string('razon_social_proveedor');
+            $table->string('rfc_proveedor');
             $table->string('direccion_proveedor')->nullable();
             $table->string('telefono_proveedor')->nullable();
             $table->string('email_proveedor')->nullable();

@@ -54,7 +54,9 @@ class OrdenCompraController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nombre_proveedor'    => 'required|string|max:255',
+            'nombre_proveedor'    => 'string|max:255',
+            'razon_social_proveedor' => 'string|max:255',
+            'rfc_proveedor'       => 'string|max:255',
             'direccion_proveedor' => 'nullable|string|max:500',
             'telefono_proveedor'  => 'nullable|string|max:50',
             'email_proveedor'     => 'nullable|email|max:255',
@@ -87,6 +89,8 @@ class OrdenCompraController extends Controller
             $ordenCompra = OrdenCompra::create([
                 'folio'               => OrdenCompra::generarFolio(),
                 'nombre_proveedor'    => $request->nombre_proveedor,
+                'razon_social_proveedor' => $request->razon_social_proveedor,
+                'rfc_proveedor'       => $request->rfc_proveedor,
                 'direccion_proveedor' => $request->direccion_proveedor,
                 'telefono_proveedor'  => $request->telefono_proveedor,
                 'email_proveedor'     => $request->email_proveedor,
@@ -183,6 +187,8 @@ public function edit(OrdenCompra $ordenCompra)
     {
         $request->validate([
             'nombre_proveedor'    => 'required|string|max:255',
+            'razon_social_proveedor' => 'nullable|string|max:255',
+            'rfc_proveedor'       => 'nullable|string|max:255',
             'direccion_proveedor' => 'nullable|string|max:500',
             'telefono_proveedor'  => 'nullable|string|max:50',
             'email_proveedor'     => 'nullable|email|max:255',
@@ -214,6 +220,8 @@ public function edit(OrdenCompra $ordenCompra)
             // Actualizar la orden
             $ordenCompra->update([
                 'nombre_proveedor'    => $request->nombre_proveedor,
+                'razon_social_proveedor' => $request->razon_social_proveedor,
+                'rfc_proveedor'       => $request->rfc_proveedor,
                 'direccion_proveedor' => $request->direccion_proveedor,
                 'telefono_proveedor'  => $request->telefono_proveedor,
                 'email_proveedor'     => $request->email_proveedor,

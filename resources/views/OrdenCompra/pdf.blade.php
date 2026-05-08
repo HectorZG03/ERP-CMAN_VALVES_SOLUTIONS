@@ -290,7 +290,7 @@
         <tr>
           <td>
             <div class="party-name">{{ $ordenCompra->nombre_proveedor }}</div>
-            {{ $ordenCompra->nombre_proveedor }}<br>
+            {{ $ordenCompra->razon_social_proveedor }}<br>
             {{ $ordenCompra->direccion_proveedor }}<br>
             Tel: {{ $ordenCompra->telefono_proveedor }} &nbsp; RFC:{{ $ordenCompra->rfc_proveedor }}<br>
             Email: {{ $ordenCompra->email_proveedor }}
@@ -307,7 +307,7 @@
     </table>
 
     <div class="delivery-note">
-      <em>CONDICIONES DE ENTREGA: Locación Pinturerias y Muros Comerciales, Vhsa, Tab.</em>
+      <em>CONDICIONES DE ENTREGA: {{ $ordenCompra->razon_social_proveedor}}, {{ $ordenCompra->direccion_proveedor }}</em>
     </div>
 
     <!-- TABLA DE ARTÍCULOS -->
@@ -357,7 +357,7 @@
         <div class="totals-row"><span class="t-label">IVA (16%):</span><span class="t-value">${{ number_format($ordenCompra->iva, 2) }}</span></div>
         <div class="totals-row"><span class="t-label">ENVÍO:</span><span class="t-value">${{ number_format($ordenCompra->envio, 2) }}</span></div>
         <div class="totals-row"><span class="t-label">OTROS:</span><span class="t-value">${{ number_format($ordenCompra->otros, 2) }}</span></div>
-        <div class="totals-row grand-total"><span class="t-label">TOTAL:</span><span class="t-value">${{ number_format($ordenCompra->total, 2) }}</span></div>
+        <div class="totals-row grand-total"><span class="t-label">TOTAL:</span><span class="t-value">${{ number_format($ordenCompra->subtotal + $ordenCompra->iva + $ordenCompra->envio + $ordenCompra->otros, 2) }}</span></div>
       </div>
     </div>
 

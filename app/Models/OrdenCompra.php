@@ -14,6 +14,8 @@ class OrdenCompra extends Model
     protected $fillable = [
         'folio',
         'nombre_proveedor',
+        'razon_social_proveedor',
+        'rfc_proveedor',
         'direccion_proveedor',
         'telefono_proveedor',
         'email_proveedor',

@@ -58,6 +58,24 @@
                                class="mt-1 block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200">
                     </div>
 
+                    {{-- razon social y rfc --}}
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Razón social</label>
+                        <input type="text" name="razon_social_proveedor"
+                               value="{{ old('razon_social_proveedor', $ordenCompra->razon_social_proveedor) }}"
+                               placeholder="Nombre de la empresa"
+                               class="mt-1 block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">RFC</label>
+                        <input type="text" name="rfc_proveedor"
+                               value="{{ old('rfc_proveedor', $ordenCompra->rfc_proveedor) }}"
+                               placeholder="RFC del proveedor"
+                               class="mt-1 block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200">
+                    </div>
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Teléfono</label>
                         <input type="text" name="telefono_proveedor"

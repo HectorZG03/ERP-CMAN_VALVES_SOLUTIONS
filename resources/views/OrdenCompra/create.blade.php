@@ -76,6 +76,48 @@
                     <div>
 
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Razón social
+                            <span class="text-red-500">*</span>
+                        </label>
+
+                        <input type="text"
+                               name="razon_social_proveedor"
+                               required
+                               value="{{ old('razon_social_proveedor') }}"
+                               placeholder="Nombre de la empresa"
+                               class="mt-1 block w-full bg-white dark:bg-gray-700
+                                      border border-gray-300 dark:border-gray-600
+                                      rounded-md shadow-sm
+                                      focus:ring-blue-500 dark:focus:ring-blue-400
+                                      focus:border-blue-500 dark:focus:border-blue-400
+                                      text-gray-900 dark:text-white
+                                      transition-colors duration-200">
+
+                    </div>
+
+                     <div>
+
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            RFC
+                        </label>
+
+                        <input type="text"
+                               name="rfc_proveedor"
+                               value="{{ old('rfc_proveedor') }}"
+                               placeholder="RFC del proveedor"
+                               class="mt-1 block w-full bg-white dark:bg-gray-700
+                                      border border-gray-300 dark:border-gray-600
+                                      rounded-md shadow-sm
+                                      focus:ring-blue-500 dark:focus:ring-blue-400
+                                      focus:border-blue-500 dark:focus:border-blue-400
+                                      text-gray-900 dark:text-white
+                                      transition-colors duration-200">
+
+                    </div>
+
+                    <div>
+
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             Teléfono
                         </label>
 
@@ -204,7 +246,7 @@
                         <input type="number"
                                name="envio"
                                id="envio"
-                               value="0"
+                               placeholder="0"
                                min="0"
                                step="0.01"
                                class="mt-1 block w-full bg-white dark:bg-gray-700
@@ -226,7 +268,7 @@
                         <input type="number"
                                name="otros"
                                id="otros"
-                               value="0"
+                               placeholder="0"
                                min="0"
                                step="0.01"
                                class="mt-1 block w-full bg-white dark:bg-gray-700
@@ -440,7 +482,7 @@
                     Precio Unitario ($) <span class="text-red-500">*</span>
                 </label>
                 <input type="number" name="articulos[INDEX][precio_unitario]" required
-                       min="0" step="0.01" value="0" oninput="calcularTotales()"
+                       min="0" step="0.01" placeholder="0" oninput="calcularTotales()"
                        class="campo-precio w-full text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white transition-colors duration-200">
             </div>
 

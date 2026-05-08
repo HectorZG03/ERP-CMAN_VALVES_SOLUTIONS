@@ -87,7 +87,7 @@
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Subtotal</th>
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">IVA (16%)</th>
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Creado por</th>
+                        {{-- <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Creado por</th> --}}
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
                         <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
                     </tr>
@@ -110,7 +110,7 @@
                         <td class="px-4 py-3 whitespace-nowrap text-right text-gray-900 dark:text-white">${{ number_format($orden->subtotal, 2) }}</td>
                         <td class="px-4 py-3 whitespace-nowrap text-right text-gray-900 dark:text-white">${{ number_format($orden->iva, 2) }}</td>
                         <td class="px-4 py-3 whitespace-nowrap text-right font-bold text-green-600 dark:text-green-400">${{ number_format($orden->total_general, 2) }}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-gray-600 dark:text-gray-400">{{ $orden->user->name ?? '—' }}</td>
+                        {{-- <td class="px-4 py-3 whitespace-nowrap text-gray-600 dark:text-gray-400">{{ $orden->user->name ?? '—' }}</td> --}}
                         <td class="px-4 py-3 whitespace-nowrap text-gray-600 dark:text-gray-400">{{ $orden->created_at->format('d/m/Y') }}</td>
                         <td class="px-4 py-3 whitespace-nowrap text-center">
                             <div class="flex items-center justify-center gap-1">
@@ -127,6 +127,15 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </a>
+
+                                {{-- PDF --}}
+                                <a href="{{ route('orden-compra.pdf', $orden->id) }}" 
+                                   class="p-1.5 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors" title="Descargar PDF">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                    </svg>
+                                </a>
+                                
                                 <form action="{{ route('orden-compra.destroy', $orden->id) }}" method="POST" class="inline" 
                                       onsubmit="return confirm('¿Eliminar la orden {{ $orden->folio }}? Esta acción no se puede deshacer.')">
                                     @csrf
