@@ -6,11 +6,7 @@
 
 <div class="flex items-center justify-center py-4 px-4 sm:px-6 lg:px-8 min-h-[60vh]">
     <div class="max-w-md w-full space-y-8">
-        <!-- ... resto del código ... -->
-
-
-        <!-- Header -->
-        <div class="text-center">
+                <div class="text-center">
             <div class="flex justify-center mb-6">
                 <img src="{{ asset('img/logo/logo.png') }}" 
                      alt="Logo" 

@@ -204,13 +204,6 @@ Route::patch('/requisiciones/{requisicion}/estatus-finanzas', [RequisicionContro
 
 });
 
-
-
-
-
-
-
-
 // 🔒 Rutas Protegidas para RH (Personal, Bajas, Cambios)
 Route::middleware(['auth', 'rh.access'])->group(function () {
     // Rutas de Personal
