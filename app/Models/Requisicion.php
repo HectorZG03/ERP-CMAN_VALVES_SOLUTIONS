@@ -18,6 +18,7 @@ class Requisicion extends Model
         'departamento',
         'plataforma',
         'embarcacion',
+        'destino_id',
         'proyecto',
         'sit',
         'partida',
@@ -135,5 +136,11 @@ class Requisicion extends Model
     public function puedeSerVistaPorDireccion()
     {
         return $this->estatus_finanzas === 'aprobado';
+    }
+
+    // Destino Seleccionado desde el catalogo
+    public function destinoCatalogo()
+    {
+        return $this->belongsTo(Destino::class, 'destino_id');
     }
 }
