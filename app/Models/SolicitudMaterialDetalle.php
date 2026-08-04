@@ -25,37 +25,58 @@ class SolicitudMaterialDetalle extends Model
         'updated_at' => 'datetime',
     ];
 
-    // Relación con la solicitud principal
+    /**
+     * Solicitud principal a la que pertenece el detalle.
+     */
     public function solicitudMaterial()
     {
-        return $this->belongsTo(SolicitudMaterial::class);
+        return $this->belongsTo(
+            SolicitudMaterial::class,
+            'solicitud_material_id'
+        );
     }
 
-    // Relación con el inventario/producto
+    /**
+     * Producto relacionado con el inventario.
+     */
     public function inventario()
     {
-        return $this->belongsTo(Inventario::class);
+        return $this->belongsTo(
+            Inventario::class,
+            'inventario_id'
+        );
     }
 
-    // Accessor para obtener el subtotal
+    /**
+     * Subtotal del producto solicitado.
+     */
     public function getSubtotalAttribute()
     {
-        return $this->cantidad_solicitada * ($this->precio_unitario ?? 0);
+        return $this->cantidad_solicitada
+            * ($this->precio_unitario ?? 0);
     }
 
-    // Scope para filtrar por producto
+    /**
+     * Filtrar detalles por producto.
+     */
     public function scopeProducto($query, $inventarioId)
     {
-        return $query->where('inventario_id', $inventarioId);
+        return $query->where(
+            'inventario_id',
+            $inventarioId
+        );
     }
 
-    // Método para verificar disponibilidad antes de guardar
+    /**
+     * Verificar si existe suficiente disponibilidad.
+     */
     public function verificarDisponibilidad()
     {
         if (!$this->inventario) {
             return false;
         }
 
-        return $this->inventario->existencia >= $this->cantidad_solicitada;
+        return $this->inventario->existencia
+            >= $this->cantidad_solicitada;
     }
 }

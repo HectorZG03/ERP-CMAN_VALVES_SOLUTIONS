@@ -54,32 +54,32 @@
                 </div>
             </div>
 
-            {{-- ubicacion de destino --}}
+            {{-- ubicación de destino / embarcación --}}
 
-            <!-- Selección de Ubicación de Destino -->
+            <!-- Selección dinámica desde el catálogo de embarcaciones -->
             <div class="mb-6">
-                <label for="destino" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label for="embarcacion_id"
+                       class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Ubicación de Destino
+                    <span class="text-red-500">*</span>
                 </label>
-                <select name="destino" id="destino" required
+
+                <select name="embarcacion_id"
+                        id="embarcacion_id"
+                        required
                         class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200">
+
                     <option value="">Seleccione una ubicación</option>
-                    <option value="Capitan America" {{ old('destino') == 'Capitan America' ? 'selected' : '' }}>BMS Capitán América</option>
-                    <option value="Base Operativa" {{ old('destino') == 'Base Operativa' ? 'selected' : '' }}>Base Operativa</option>
-                    <option value="BMS MAYA" {{ old('destino') == 'BMS MAYA' ? 'selected' : '' }}>BMS Maya</option>
-                    <option value="BMS IRON HORSE" {{ old('destino') == 'BMS IRON HORSE' ? 'selected' : '' }}>BMS Iron Horse</option>
-                    <option value="BMS GRAND CANYON" {{ old('destino') == 'BMS GRAND CANYON' ? 'selected' : '' }}>BMS Grand Canyon</option>
-                    <option value="BMS OCEAN INTREPID"
-                        {{ old('destino') === 'BMS OCEAN INTREPID' ? 'selected' : '' }}>
-                        BMS Ocean Intrepid
-                    </option>
-                    <option value="BMS OCEAN INTREPID"
-                        {{ old('destino') === 'STIM STAR' ? 'selected' : '' }}>
-                        BMS STIM STARz
-                    </option>
+
+                    @foreach($embarcaciones as $embarcacion)
+                        <option value="{{ $embarcacion->id }}"
+                            {{ (string) old('embarcacion_id') === (string) $embarcacion->id ? 'selected' : '' }}>
+                            {{ $embarcacion->nombre }}
+                        </option>
+                    @endforeach
                 </select>
 
-                @error('destino')
+                @error('embarcacion_id')
                     <p class="mt-1 text-sm text-red-600 dark:text-red-400">
                         {{ $message }}
                     </p>

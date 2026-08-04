@@ -14,69 +14,117 @@ class SolicitudMaterial extends Model
     protected $fillable = [
         'user_id',
         'personal_id',
+
+        // Campo histórico con el nombre de la embarcación
         'destino',
+
+        // Relación con el catálogo de embarcaciones
+        'embarcacion_id',
+
         'estatus',
         'comentario',
         'operador',
         'categoria',
     ];
 
-    // Relación con el operador (personal)
-        public function operadorPersonal()
-        {
-            return $this->belongsTo(\App\Models\Personal::class, 'personal_id');
-        }
-
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
-    // Relación con el usuario que hizo la solicitud
+    /**
+     * Personal u operador asignado a la solicitud.
+     */
+    public function operadorPersonal()
+    {
+        return $this->belongsTo(
+            Personal::class,
+            'personal_id'
+        );
+    }
+
+    /**
+     * Usuario que realizó la solicitud.
+     */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(
+            User::class,
+            'user_id'
+        );
     }
 
-    // Relación con los detalles de la solicitud (múltiples productos)
+    /**
+     * Embarcación seleccionada desde el catálogo.
+     *
+     * Se utiliza embarcacionCatalogo porque la columna
+     * histórica continúa llamándose destino.
+     */
+    public function embarcacionCatalogo()
+    {
+        return $this->belongsTo(
+            Embarcacion::class,
+            'embarcacion_id'
+        );
+    }
+
+    /**
+     * Detalles o productos incluidos en la solicitud.
+     */
     public function detalles()
     {
-        return $this->hasMany(SolicitudMaterialDetalle::class);
+        return $this->hasMany(
+            SolicitudMaterialDetalle::class,
+            'solicitud_material_id'
+        );
     }
 
-    // Método para obtener el total de la solicitud
+    /**
+     * Calcula el valor económico estimado de la solicitud.
+     */
     public function getTotalAttribute()
     {
         return $this->detalles->sum(function ($detalle) {
-            return $detalle->cantidad_solicitada * ($detalle->precio_unitario ?? 0);
+            return $detalle->cantidad_solicitada
+                * ($detalle->precio_unitario ?? 0);
         });
     }
 
-    // Método para obtener el número total de productos diferentes
+    /**
+     * Obtiene el número de productos diferentes.
+     */
     public function getTotalProductosAttribute()
     {
         return $this->detalles->count();
     }
 
-    // Método para obtener el total de unidades solicitadas
+    /**
+     * Obtiene el total de unidades solicitadas.
+     */
     public function getTotalUnidadesAttribute()
     {
         return $this->detalles->sum('cantidad_solicitada');
     }
 
-    // Scope para filtrar por estatus
+    /**
+     * Filtra las solicitudes por estatus.
+     */
     public function scopeEstatus($query, $estatus)
     {
         return $query->where('estatus', $estatus);
     }
 
-    // Scope para solicitudes pendientes
+    /**
+     * Filtra las solicitudes pendientes.
+     */
     public function scopePendientes($query)
     {
         return $query->where('estatus', 'pendiente');
     }
 
-    // Scope para solicitudes aprobadas
+    /**
+     * Filtra las solicitudes aprobadas.
+     */
     public function scopeAprobadas($query)
     {
         return $query->where('estatus', 'aprobado');

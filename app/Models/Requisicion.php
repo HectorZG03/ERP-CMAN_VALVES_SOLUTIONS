@@ -10,15 +10,20 @@ class Requisicion extends Model
     use HasFactory;
 
     protected $table = 'requisiciones';
-    
+
     public $timestamps = true;
 
     protected $fillable = [
         'nombre_solicitante',
         'departamento',
         'plataforma',
+
+        // Campo de texto histórico
         'embarcacion',
-        'destino_id',
+
+        // Nueva relación con el catálogo
+        'embarcacion_id',
+
         'proyecto',
         'sit',
         'partida',
@@ -36,7 +41,7 @@ class Requisicion extends Model
 
     protected $attributes = [
         'estatus' => 'pendiente',
-        'estatus_finanzas' => 'pendiente'
+        'estatus_finanzas' => 'pendiente',
     ];
 
     protected $casts = [
@@ -45,57 +50,98 @@ class Requisicion extends Model
         'fecha_aprobacion_finanzas' => 'datetime',
     ];
 
-    // 🔹 GENERAR FOLIO AUTOMÁTICAMENTE
+    /**
+     * Generar folio automáticamente.
+     */
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function ($requisicion) {
-            $requisicion->folio = self::generarFolio($requisicion);
+            $requisicion->folio = self::generarFolio();
         });
     }
 
-    public static function generarFolio($requisicion)
+    /**
+     * Generar folio de requisición.
+     */
+    public static function generarFolio()
     {
         $user = auth()->user();
+
         $rol = strtoupper($user->role ?? 'USER');
         $mes = date('m');
         $año = date('y');
+
         $ultimoId = self::max('id') ?? 0;
         $nuevoId = $ultimoId + 1;
-        
+
         return "{$rol}/{$mes}/{$año}-{$nuevoId}";
     }
 
+    /**
+     * Usuario que creó la requisición.
+     */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * Contrato relacionado.
+     */
     public function contrato()
     {
-        return $this->belongsTo(Contrato::class);
+        return $this->belongsTo(Contrato::class, 'contrato_id');
     }
 
-    // ✅ Relación con usuario que aprobó en finanzas
+    /**
+     * Embarcación seleccionada desde el catálogo.
+     *
+     * Se utiliza embarcacionCatalogo() porque ya existe
+     * una columna llamada embarcacion.
+     */
+    public function embarcacionCatalogo()
+    {
+        return $this->belongsTo(
+            Embarcacion::class,
+            'embarcacion_id'
+        );
+    }
+
+    /**
+     * Usuario que aprobó en finanzas.
+     */
     public function aprobadorFinanzas()
     {
-        return $this->belongsTo(User::class, 'aprobado_por_finanzas_id');
+        return $this->belongsTo(
+            User::class,
+            'aprobado_por_finanzas_id'
+        );
     }
 
-    // ✅ Relación con los detalles (múltiples materiales)
+    /**
+     * Materiales de la requisición.
+     */
     public function detalles()
     {
-        return $this->hasMany(RequisicionDetalle::class);
+        return $this->hasMany(
+            RequisicionDetalle::class,
+            'requisicion_id'
+        );
     }
 
-    // Método para obtener el número total de materiales diferentes
+    /**
+     * Número total de materiales diferentes.
+     */
     public function getTotalMaterialesAttribute()
     {
         return $this->detalles->count();
     }
 
-    // Método para obtener el total de unidades solicitadas
+    /**
+     * Total de unidades solicitadas.
+     */
     public function getTotalUnidadesAttribute()
     {
         return $this->detalles->sum('cantidad');
@@ -116,7 +162,6 @@ class Requisicion extends Model
         return $query->where('estatus', 'denegado');
     }
 
-    // ✅ NUEVOS SCOPES PARA FINANZAS
     public function scopePendientesFinanzas($query)
     {
         return $query->where('estatus_finanzas', 'pendiente');
@@ -132,15 +177,11 @@ class Requisicion extends Model
         return $query->where('estatus_finanzas', 'denegado');
     }
 
-    // ✅ Método para verificar si puede ser vista por dirección
+    /**
+     * Verificar si la requisición puede ser vista por Dirección.
+     */
     public function puedeSerVistaPorDireccion()
     {
         return $this->estatus_finanzas === 'aprobado';
-    }
-
-    // Destino Seleccionado desde el catalogo
-    public function destinoCatalogo()
-    {
-        return $this->belongsTo(Destino::class, 'destino_id');
     }
 }

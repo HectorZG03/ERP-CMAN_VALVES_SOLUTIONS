@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Models\Destino;
+use App\Models\Embarcacion;
 use Illuminate\Database\Seeder;
 
-class DestinoSeeder extends Seeder
+class EmbarcacionSeeder extends Seeder
 {
     /**
      * Ejecutar el seeder.
      */
     public function run(): void
     {
-        $destinos = [
+        $embarcaciones = [
             'BMS Capitán América',
             'Base Operativa',
             'BMS Maya',
@@ -22,8 +22,8 @@ class DestinoSeeder extends Seeder
             'BMS Stim Star',
         ];
 
-        foreach ($destinos as $nombre) {
-            Destino::firstOrCreate([
+        foreach ($embarcaciones as $nombre) {
+            Embarcacion::firstOrCreate([
                 'nombre' => $nombre,
             ]);
         }

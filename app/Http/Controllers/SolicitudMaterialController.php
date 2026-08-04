@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\SolicitudMaterial;
 use App\Models\SolicitudMaterialDetalle;
 use App\Models\Inventario;
+use App\Models\Embarcacion;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -73,75 +74,144 @@ class SolicitudMaterialController extends Controller
         return view('solicitudes.index', compact('solicitudes', 'counts', 'filterStatus', 'isPaginated'));
     }
 
-    public function create()
+public function create()
 {
     $personal = \App\Models\Personal::activo()
         ->orderBy('nombre_completo')
-        ->get(['id', 'nombre_completo', 'employee_id', 'area']);
+        ->get([
+            'id',
+            'nombre_completo',
+            'employee_id',
+            'area',
+        ]);
 
-    return view('solicitudes.create', compact('personal'));
+    $embarcaciones = Embarcacion::orderBy('nombre')
+        ->get([
+            'id',
+            'nombre',
+        ]);
+
+    return view('solicitudes.create', compact(
+        'personal',
+        'embarcaciones'
+    ));
 }
-
-    public function store(Request $request)
+public function store(Request $request)
 {
-    // ✅ VALIDACIÓN — aquí va personal_id
     $request->validate([
-        'personal_id'  => 'nullable|exists:personal,id',
-        'comentario'   => 'nullable|string',
-        'productos'    => 'required|array|min:1',
-        'productos.*.inventario_id'         => 'required|exists:inventarios,id',
-        'productos.*.cantidad_solicitada'   => 'required|integer|min:1',
+        'personal_id' => 'nullable|exists:personal,id',
+
+        // Embarcación seleccionada desde el nuevo catálogo
+        'embarcacion_id' => 'required|exists:embarcaciones,id',
+
+        'comentario' => 'nullable|string',
+
+        'productos' => 'required|array|min:1',
+        'productos.*.inventario_id' => 'required|exists:inventarios,id',
+        'productos.*.cantidad_solicitada' => 'required|integer|min:1',
     ], [
-        'productos.required'                        => 'Debe agregar al menos un producto a la solicitud',
-        'productos.*.inventario_id.required'        => 'Debe seleccionar un producto válido',
-        'productos.*.cantidad_solicitada.required'  => 'La cantidad es obligatoria',
-        'productos.*.cantidad_solicitada.min'       => 'La cantidad debe ser mayor a 0',
+        'embarcacion_id.required' => 'Debes seleccionar una embarcación',
+        'embarcacion_id.exists' => 'La embarcación seleccionada no es válida',
+
+        'productos.required' => 'Debe agregar al menos un producto a la solicitud',
+        'productos.*.inventario_id.required' => 'Debe seleccionar un producto válido',
+        'productos.*.cantidad_solicitada.required' => 'La cantidad es obligatoria',
+        'productos.*.cantidad_solicitada.min' => 'La cantidad debe ser mayor a 0',
     ]);
 
     DB::beginTransaction();
 
     try {
+        /*
+         * Verificar que todos los productos existan
+         * y tengan suficiente disponibilidad.
+         */
         foreach ($request->productos as $producto) {
-            $inventario = Inventario::find($producto['inventario_id']);
+            $inventario = Inventario::find(
+                $producto['inventario_id']
+            );
 
             if (!$inventario) {
-                throw new \Exception("El producto con ID {$producto['inventario_id']} no existe");
+                throw new \Exception(
+                    "El producto con ID {$producto['inventario_id']} no existe"
+                );
             }
 
-            if ($inventario->existencia < $producto['cantidad_solicitada']) {
-                throw new \Exception("No hay suficiente stock de '{$inventario->nombre_producto}'. Disponible: {$inventario->existencia}, Solicitado: {$producto['cantidad_solicitada']}");
+            if (
+                $inventario->existencia
+                < $producto['cantidad_solicitada']
+            ) {
+                throw new \Exception(
+                    "No hay suficiente stock de "
+                    . "'{$inventario->nombre_producto}'. "
+                    . "Disponible: {$inventario->existencia}, "
+                    . "Solicitado: {$producto['cantidad_solicitada']}"
+                );
             }
         }
 
-        // ✅ CREAR SOLICITUD — aquí va personal_id
+        /*
+         * Obtener la embarcación seleccionada.
+         * La validación anterior garantiza que existe.
+         */
+        $embarcacion = Embarcacion::findOrFail(
+            $request->embarcacion_id
+        );
+
+        /*
+         * Guardar la solicitud.
+         *
+         * embarcacion_id: relación con el nuevo catálogo.
+         * destino: nombre histórico para mantener compatibles
+         * las vistas, PDF y Excel actuales.
+         */
         $solicitud = SolicitudMaterial::create([
-            'user_id'     => auth()->id(),
+            'user_id' => auth()->id(),
             'personal_id' => $request->personal_id ?: null,
-            'destino'     => $request->destino,
-            'comentario'  => $request->comentario,
-            'operador'    => $request->operador ?? 'N/A',
-            'categoria'   => $request->categoria ?? 'N/A',
-            'estatus'     => 'pendiente',
+
+            'embarcacion_id' => $embarcacion->id,
+            'destino' => $embarcacion->nombre,
+
+            'comentario' => $request->comentario,
+            'operador' => $request->operador ?? 'N/A',
+            'categoria' => $request->categoria ?? 'N/A',
+            'estatus' => 'pendiente',
         ]);
 
+        /*
+         * Guardar los productos de la solicitud.
+         */
         foreach ($request->productos as $producto) {
-            $inventario = Inventario::find($producto['inventario_id']);
+            $inventario = Inventario::findOrFail(
+                $producto['inventario_id']
+            );
 
             SolicitudMaterialDetalle::create([
                 'solicitud_material_id' => $solicitud->id,
-                'inventario_id'         => $producto['inventario_id'],
-                'cantidad_solicitada'   => $producto['cantidad_solicitada'],
-                'precio_unitario'       => $inventario->getPrecioPromedio(),
+                'inventario_id' => $producto['inventario_id'],
+                'cantidad_solicitada' => $producto['cantidad_solicitada'],
+                'precio_unitario' => $inventario->getPrecioPromedio(),
             ]);
         }
 
         DB::commit();
 
-        return redirect()->route('solicitudes.index')->with('success', 'Solicitud enviada correctamente');
+        return redirect()
+            ->route('solicitudes.index')
+            ->with(
+                'success',
+                'Solicitud enviada correctamente'
+            );
 
     } catch (\Exception $e) {
-        DB::rollback();
-        return back()->withErrors(['error' => $e->getMessage()])->withInput();
+        DB::rollBack();
+
+        return back()
+            ->withErrors([
+                'error' => 'Error al crear la solicitud: '
+                    . $e->getMessage(),
+            ])
+            ->withInput();
     }
 }
 

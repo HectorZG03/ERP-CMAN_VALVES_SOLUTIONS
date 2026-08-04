@@ -106,12 +106,30 @@
                     </div>
 
                     <div>
-                        <label for="embarcacion" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Embarcación/Barco 
+                        <label for="embarcacion_id"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Embarcación/Barco
                         </label>
-                        <input type="text" name="embarcacion" id="embarcacion" 
-                               class="mt-1 block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200"
-                               value="{{ old('embarcacion') }}" placeholder="Nombre del barco o N/A">
+
+                        <select name="embarcacion_id"
+                                id="embarcacion_id"
+                                class="mt-1 block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200">
+
+                            <option value="">No aplica / Seleccione una embarcación</option>
+
+                            @foreach($embarcaciones as $embarcacion)
+                                <option value="{{ $embarcacion->id }}"
+                                    {{ (string) old('embarcacion_id') === (string) $embarcacion->id ? 'selected' : '' }}>
+                                    {{ $embarcacion->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        @error('embarcacion_id')
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">
+                                {{ $message }}
+                            </p>
+                        @enderror
                     </div>
 
                     <div>

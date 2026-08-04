@@ -3,19 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 use App\Models\Requisicion;
 use App\Models\RequisicionDetalle;
 use App\Models\Contrato;
-use Illuminate\Support\Facades\DB;
+use App\Models\Embarcacion;
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RequisicionController extends Controller
 {
-
     private function obtenerImagenEstatus($estatus, $tipo = 'direccion')
     {
         if ($estatus === 'aprobado') {
@@ -32,175 +33,282 @@ class RequisicionController extends Controller
     }
 
     public function index(Request $request)
-{
-    $user = auth()->user();
-    $filterStatus = $request->get('status', 'all');
-    $filterFinanzas = $request->get('finanzas', 'all');
+    {
+        $user = auth()->user();
+        $filterStatus = $request->get('status', 'all');
+        $filterFinanzas = $request->get('finanzas', 'all');
 
-    // Base query según rol
-    if ($user->canApproveFinanzas()) {
-        $baseQuery = Requisicion::with(['user', 'detalles', 'aprobadorFinanzas'])
-            ->orderBy('created_at', 'desc');
-    } elseif ($user->canApproveRequests()) {
-        $baseQuery = Requisicion::with(['user', 'detalles', 'aprobadorFinanzas'])
-            ->where('estatus_finanzas', 'aprobado')
-            ->orderBy('created_at', 'desc');
-    } elseif ($user->canManageInventory()) {
-        $baseQuery = Requisicion::with(['user', 'detalles'])
-            ->orderBy('created_at', 'desc');
-    } else {
-        $baseQuery = Requisicion::where('user_id', $user->id)
-            ->with(['user', 'detalles'])
-            ->orderBy('created_at', 'desc');
-    }
+        if ($user->canApproveFinanzas()) {
+            $baseQuery = Requisicion::with([
+                'user',
+                'detalles',
+                'aprobadorFinanzas',
+            ])->orderBy('created_at', 'desc');
 
-    // Conteos reales desde la BD
-    $countQuery = clone $baseQuery;
+        } elseif ($user->canApproveRequests()) {
+            $baseQuery = Requisicion::with([
+                'user',
+                'detalles',
+                'aprobadorFinanzas',
+            ])
+                ->where('estatus_finanzas', 'aprobado')
+                ->orderBy('created_at', 'desc');
 
-    if ($user->canApproveFinanzas()) {
-        // Para finanzas: contamos por estatus_finanzas
-        $counts = [
-            'all'       => (clone $countQuery)->count(),
-            'pendiente' => (clone $countQuery)->where('estatus_finanzas', 'pendiente')->count(),
-            'aprobado'  => (clone $countQuery)->where('estatus_finanzas', 'aprobado')->count(),
-            'denegado'  => (clone $countQuery)->where('estatus_finanzas', 'denegado')->count(),
-        ];
-    } else {
-        // Para otros roles: contamos por estatus general
-        $counts = [
-            'all'       => (clone $countQuery)->count(),
-            'pendiente' => (clone $countQuery)->where('estatus', 'pendiente')->count(),
-            'aprobado'  => (clone $countQuery)->where('estatus', 'aprobado')->count(),
-            'denegado'  => (clone $countQuery)->where('estatus', 'denegado')->count(),
-        ];
-    }
+        } elseif ($user->canManageInventory()) {
+            $baseQuery = Requisicion::with([
+                'user',
+                'detalles',
+            ])->orderBy('created_at', 'desc');
 
-    // Aplicar filtro y decidir si paginar o no
-    if ($user->canApproveFinanzas()) {
-        // Finanzas filtra por estatus_finanzas
-        if ($filterFinanzas !== 'all') {
-            $requisiciones = (clone $baseQuery)
-                ->where('estatus_finanzas', $filterFinanzas)
-                ->get();
-            $isPaginated = false;
         } else {
-            $requisiciones = (clone $baseQuery)->paginate(15);
-            $isPaginated = true;
+            $baseQuery = Requisicion::where('user_id', $user->id)
+                ->with([
+                    'user',
+                    'detalles',
+                ])
+                ->orderBy('created_at', 'desc');
         }
-    } else {
-        // Otros roles filtran por estatus general
-        if ($filterStatus !== 'all') {
-            $requisiciones = (clone $baseQuery)
-                ->where('estatus', $filterStatus)
-                ->get();
-            $isPaginated = false;
-        } else {
-            $requisiciones = (clone $baseQuery)->paginate(15);
-            $isPaginated = true;
-        }
-    }
 
-    return view('requisiciones.index', compact(
-        'requisiciones', 'counts', 'filterStatus', 'filterFinanzas', 'isPaginated'
-    ));
-}
+        $countQuery = clone $baseQuery;
+
+        if ($user->canApproveFinanzas()) {
+            $counts = [
+                'all' => (clone $countQuery)->count(),
+                'pendiente' => (clone $countQuery)
+                    ->where('estatus_finanzas', 'pendiente')
+                    ->count(),
+                'aprobado' => (clone $countQuery)
+                    ->where('estatus_finanzas', 'aprobado')
+                    ->count(),
+                'denegado' => (clone $countQuery)
+                    ->where('estatus_finanzas', 'denegado')
+                    ->count(),
+            ];
+        } else {
+            $counts = [
+                'all' => (clone $countQuery)->count(),
+                'pendiente' => (clone $countQuery)
+                    ->where('estatus', 'pendiente')
+                    ->count(),
+                'aprobado' => (clone $countQuery)
+                    ->where('estatus', 'aprobado')
+                    ->count(),
+                'denegado' => (clone $countQuery)
+                    ->where('estatus', 'denegado')
+                    ->count(),
+            ];
+        }
+
+        if ($user->canApproveFinanzas()) {
+            if ($filterFinanzas !== 'all') {
+                $requisiciones = (clone $baseQuery)
+                    ->where('estatus_finanzas', $filterFinanzas)
+                    ->get();
+
+                $isPaginated = false;
+            } else {
+                $requisiciones = (clone $baseQuery)->paginate(15);
+                $isPaginated = true;
+            }
+        } else {
+            if ($filterStatus !== 'all') {
+                $requisiciones = (clone $baseQuery)
+                    ->where('estatus', $filterStatus)
+                    ->get();
+
+                $isPaginated = false;
+            } else {
+                $requisiciones = (clone $baseQuery)->paginate(15);
+                $isPaginated = true;
+            }
+        }
+
+        return view('requisiciones.index', compact(
+            'requisiciones',
+            'counts',
+            'filterStatus',
+            'filterFinanzas',
+            'isPaginated'
+        ));
+    }
 
     public function create()
     {
         $contratos = Contrato::all();
-        return view('requisiciones.create', compact('contratos'));
+
+        $embarcaciones = Embarcacion::orderBy('nombre')
+            ->get([
+                'id',
+                'nombre',
+            ]);
+
+        return view('requisiciones.create', compact(
+            'contratos',
+            'embarcaciones'
+        ));
     }
 
     public function store(Request $request)
-{
-    // Mensajes personalizados en español
-    $messages = [
-        'nombre_solicitante.required' => 'El nombre del solicitante es obligatorio',
-        'departamento.required' => 'El departamento es obligatorio',
-        'tipo_requerimiento.required' => 'Debes seleccionar un tipo de requerimiento',
-        'tipo_requerimiento.in' => 'El tipo de requerimiento debe ser interno o externo',
-        'comentario.required' => 'Debes proporcionar un comentario o justificación',
-        'materiales.required' => 'Debes agregar al menos un material',
-        'materiales.min' => 'Debes agregar al menos un material',
-        'materiales.*.cantidad.required' => 'La cantidad es obligatoria',
-        'materiales.*.cantidad.integer' => 'La cantidad debe ser un número entero',
-        'materiales.*.cantidad.min' => 'La cantidad debe ser al menos 1',
-        'materiales.*.unidad.required' => 'La unidad es obligatoria',
-        'materiales.*.material.required' => 'La descripción del material es obligatoria',
-        'contrato_id.required' => 'Debes seleccionar un contrato',
-    ];
+    {
+        $messages = [
+            'nombre_solicitante.required' =>
+                'El nombre del solicitante es obligatorio',
 
-    $request->validate([
-        'nombre_solicitante' => 'required|string|max:255',
-        'departamento' => 'required|string|max:255',
-        // ✅ PLATAFORMA Y EMBARCACIÓN AHORA SON OPCIONALES (nullable)
-        'plataforma' => 'nullable|string|max:255',
-        'embarcacion' => 'nullable|string|max:255',
-        'tipo_requerimiento' => 'required|in:interno,externo',
-        'comentario' => 'required|string',
-        'contrato_id' => 'required|exists:contratos,id',
-        'materiales' => 'required|array|min:1',
-        'materiales.*.cantidad' => 'required|integer|min:1',
-        'materiales.*.unidad' => 'required|string|max:255',
-        'materiales.*.material' => 'required|string|max:255',
-    ], $messages);
+            'departamento.required' =>
+                'El departamento es obligatorio',
 
-    DB::beginTransaction();
+            'embarcacion_id.exists' =>
+                'La embarcación seleccionada no es válida',
 
-    try {
-        $requisicion = Requisicion::create([
-            'nombre_solicitante' => $request->nombre_solicitante,
-            'departamento' => $request->departamento,
-            'proyecto' => $request->proyecto ?? 'N/A',
-            'sit' => $request->sit ?? 'N/A',
-            'partida' => $request->partida ?? 'N/A',
-            // ✅ Si plataforma o embarcación vienen vacíos, se guardan como N/A
-            'plataforma' => $request->plataforma ?: 'N/A',
-            'area' => $request->area ?? 'N/A',
-            'activo' => $request->activo ?? 'N/A',
-            'contrato_id' => $request->contrato_id,
-            'embarcacion' => $request->embarcacion ?: 'N/A',
-            'tipo_requerimiento' => $request->tipo_requerimiento,
-            'comentario' => $request->comentario,
-            'user_id' => auth()->id(),
-        ]);
+            'tipo_requerimiento.required' =>
+                'Debes seleccionar un tipo de requerimiento',
 
-        foreach ($request->materiales as $material) {
-            RequisicionDetalle::create([
-                'requisicion_id' => $requisicion->id,
-                'cantidad' => $material['cantidad'],
-                'unidad' => $material['unidad'],
-                'material' => $material['material'],
+            'tipo_requerimiento.in' =>
+                'El tipo de requerimiento debe ser interno o externo',
+
+            'comentario.required' =>
+                'Debes proporcionar un comentario o justificación',
+
+            'materiales.required' =>
+                'Debes agregar al menos un material',
+
+            'materiales.min' =>
+                'Debes agregar al menos un material',
+
+            'materiales.*.cantidad.required' =>
+                'La cantidad es obligatoria',
+
+            'materiales.*.cantidad.integer' =>
+                'La cantidad debe ser un número entero',
+
+            'materiales.*.cantidad.min' =>
+                'La cantidad debe ser al menos 1',
+
+            'materiales.*.unidad.required' =>
+                'La unidad es obligatoria',
+
+            'materiales.*.material.required' =>
+                'La descripción del material es obligatoria',
+
+            'contrato_id.required' =>
+                'Debes seleccionar un contrato',
+        ];
+
+        $request->validate([
+            'nombre_solicitante' => 'required|string|max:255',
+            'departamento' => 'required|string|max:255',
+            'plataforma' => 'nullable|string|max:255',
+
+            // Embarcación seleccionada desde el catálogo
+            'embarcacion_id' => 'nullable|exists:embarcaciones,id',
+
+            'tipo_requerimiento' => 'required|in:interno,externo',
+            'comentario' => 'required|string',
+            'contrato_id' => 'required|exists:contratos,id',
+
+            'materiales' => 'required|array|min:1',
+            'materiales.*.cantidad' => 'required|integer|min:1',
+            'materiales.*.unidad' => 'required|string|max:255',
+            'materiales.*.material' => 'required|string|max:255',
+        ], $messages);
+
+        DB::beginTransaction();
+
+        try {
+            $embarcacion = null;
+
+            if ($request->filled('embarcacion_id')) {
+                $embarcacion = Embarcacion::findOrFail(
+                    $request->embarcacion_id
+                );
+            }
+
+            $requisicion = Requisicion::create([
+                'nombre_solicitante' => $request->nombre_solicitante,
+                'departamento' => $request->departamento,
+                'proyecto' => $request->proyecto ?: 'N/A',
+                'sit' => $request->sit ?: 'N/A',
+                'partida' => $request->partida ?: 'N/A',
+                'plataforma' => $request->plataforma ?: 'N/A',
+                'area' => $request->area ?: 'N/A',
+                'activo' => $request->activo ?: 'N/A',
+                'contrato_id' => $request->contrato_id,
+
+                // Nueva relación con la tabla embarcaciones
+                'embarcacion_id' => $embarcacion?->id,
+
+                // Campo de texto histórico para vistas, PDF y Excel
+                'embarcacion' => $embarcacion?->nombre ?? 'N/A',
+
+                'tipo_requerimiento' => $request->tipo_requerimiento,
+                'comentario' => $request->comentario,
+                'user_id' => auth()->id(),
             ]);
+
+            foreach ($request->materiales as $material) {
+                RequisicionDetalle::create([
+                    'requisicion_id' => $requisicion->id,
+                    'cantidad' => $material['cantidad'],
+                    'unidad' => $material['unidad'],
+                    'material' => $material['material'],
+                ]);
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('requisiciones.index')
+                ->with(
+                    'success',
+                    'Requisición enviada correctamente'
+                );
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return back()
+                ->withErrors([
+                    'error' => 'Error al crear la requisición: '
+                        . $e->getMessage(),
+                ])
+                ->withInput();
         }
-
-        DB::commit();
-        return redirect()->route('requisiciones.index')->with('success', 'Requisición enviada correctamente');
-
-    } catch (\Exception $e) {
-        DB::rollback();
-        return back()->withErrors(['error' => 'Error al crear la requisición: ' . $e->getMessage()])->withInput();
     }
-}
 
     public function show(Requisicion $requisicion)
     {
         $user = auth()->user();
 
-        if (!($requisicion->user_id == $user->id ||
-            $user->canApproveRequests() ||
-            $user->canApproveFinanzas() ||
-            $user->canManageInventory())) {
+        if (!(
+            $requisicion->user_id == $user->id
+            || $user->canApproveRequests()
+            || $user->canApproveFinanzas()
+            || $user->canManageInventory()
+        )) {
             abort(403);
         }
 
-        $requisicion->load(['user', 'detalles', 'contrato', 'aprobadorFinanzas']);
-        return view('requisiciones.show', compact('requisicion'));
+        $requisicion->load([
+            'user',
+            'detalles',
+            'contrato',
+            'aprobadorFinanzas',
+            'embarcacionCatalogo',
+        ]);
+
+        return view(
+            'requisiciones.show',
+            compact('requisicion')
+        );
     }
 
-    public function updateEstatusFinanzas(Request $request, Requisicion $requisicion)
-    {
-        if (!auth()->user()->canApproveFinanzas()) abort(403);
+    public function updateEstatusFinanzas(
+        Request $request,
+        Requisicion $requisicion
+    ) {
+        if (!auth()->user()->canApproveFinanzas()) {
+            abort(403);
+        }
 
         $request->validate([
             'estatus_finanzas' => 'required|in:aprobado,denegado',
@@ -212,166 +320,265 @@ class RequisicionController extends Controller
             'fecha_aprobacion_finanzas' => now(),
         ]);
 
-        return back()->with('success', 'Estatus finanzas actualizado');
+        return back()->with(
+            'success',
+            'Estatus finanzas actualizado'
+        );
     }
 
-    public function updateEstatus(Request $request, Requisicion $requisicion)
-    {
-        if (!auth()->user()->canApproveRequests()) abort(403);
+    public function updateEstatus(
+        Request $request,
+        Requisicion $requisicion
+    ) {
+        if (!auth()->user()->canApproveRequests()) {
+            abort(403);
+        }
 
         if ($requisicion->estatus_finanzas !== 'aprobado') {
-            return back()->with('error', 'Aún no aprobado por finanzas');
+            return back()->with(
+                'error',
+                'Aún no aprobado por finanzas'
+            );
         }
 
         $request->validate([
             'estatus' => 'required|in:aprobado,denegado',
         ]);
 
-        $requisicion->update(['estatus' => $request->estatus]);
+        $requisicion->update([
+            'estatus' => $request->estatus,
+        ]);
 
-        return back()->with('success', 'Estatus actualizado');
+        return back()->with(
+            'success',
+            'Estatus actualizado'
+        );
     }
-
-
-    // pdf
 
     public function pdf(Requisicion $requisicion)
-{
-    $requisicion->load(['user', 'detalles', 'contrato', 'aprobadorFinanzas']);
+    {
+        $requisicion->load([
+            'user',
+            'detalles',
+            'contrato',
+            'aprobadorFinanzas',
+            'embarcacionCatalogo',
+        ]);
 
-    // Firma del solicitante
-    $firmaUsuarioBase64 = null;
-    if ($requisicion->user->signature) {
-        $path = storage_path('app/public/' . $requisicion->user->signature);
-        if (file_exists($path)) {
-            $firmaUsuarioBase64 = base64_encode(file_get_contents($path));
+        $firmaUsuarioBase64 = null;
+
+        if ($requisicion->user->signature) {
+            $path = storage_path(
+                'app/public/' . $requisicion->user->signature
+            );
+
+            if (file_exists($path)) {
+                $firmaUsuarioBase64 = base64_encode(
+                    file_get_contents($path)
+                );
+            }
         }
+
+        $firmaFinanzasPath = $this->obtenerImagenEstatus(
+            $requisicion->estatus_finanzas,
+            'finanzas'
+        );
+
+        $firmaFinanzasBase64 = file_exists($firmaFinanzasPath)
+            ? base64_encode(file_get_contents($firmaFinanzasPath))
+            : null;
+
+        $firmaDireccionPath = $this->obtenerImagenEstatus(
+            $requisicion->estatus,
+            'direccion'
+        );
+
+        $firmaDireccionBase64 = file_exists($firmaDireccionPath)
+            ? base64_encode(file_get_contents($firmaDireccionPath))
+            : null;
+
+        return view('requisiciones.pdf', compact(
+            'requisicion',
+            'firmaUsuarioBase64',
+            'firmaFinanzasBase64',
+            'firmaDireccionBase64'
+        ));
     }
 
-    // Firma de Finanzas (según estatus_finanzas)
-    $firmaFinanzasPath = $this->obtenerImagenEstatus($requisicion->estatus_finanzas, 'finanzas');
-    $firmaFinanzasBase64 = file_exists($firmaFinanzasPath)
-        ? base64_encode(file_get_contents($firmaFinanzasPath))
-        : null;
-
-    // Firma de Dirección (según estatus)
-    $firmaDireccionPath = $this->obtenerImagenEstatus($requisicion->estatus, 'direccion');
-    $firmaDireccionBase64 = file_exists($firmaDireccionPath)
-        ? base64_encode(file_get_contents($firmaDireccionPath))
-        : null;
-
-    return view('requisiciones.pdf', compact(
-        'requisicion',
-        'firmaUsuarioBase64',
-        'firmaFinanzasBase64',
-        'firmaDireccionBase64'
-    ));
-}
-
-
-    // ===============================
-    //  EXPORTACIÓN A EXCEL 
-    // ===============================
     public function exportExcel(Requisicion $requisicion)
     {
-        $requisicion->load(['user','contrato','detalles']);
+        $requisicion->load([
+            'user',
+            'contrato',
+            'detalles',
+            'embarcacionCatalogo',
+        ]);
 
-        $templatePath = storage_path('app/plantillas/Requisicion.xlsx');
+        $templatePath = storage_path(
+            'app/plantillas/Requisicion.xlsx'
+        );
+
         $spreadsheet = IOFactory::load($templatePath);
         $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('C10', strtoupper($requisicion->user->name));
-        $sheet->setCellValue('C11', strtoupper($requisicion->user->role));
-        $sheet->setCellValue('G5', $requisicion->created_at->format('d/m/Y'));
-        $sheet->setCellValue('C12', ucwords($requisicion->proyecto ?? 'N/A'));
-        $sheet->setCellValue('C13', strtoupper($requisicion->sit ?? 'N/A'));
-        $sheet->setCellValue('C14', strtoupper($requisicion->partida ?? 'N/A'));
-        $sheet->setCellValue('C15', strtoupper($requisicion->plataforma ?? 'N/A'));
-        $sheet->setCellValue('C16', strtoupper($requisicion->embarcacion ?? 'N/A'));
-        $sheet->setCellValue('C17', strtoupper($requisicion->area ?? 'N/A'));
-        $sheet->setCellValue('C18', strtoupper($requisicion->activo ?? 'N/A'));
-        $sheet->setCellValue('F36', $requisicion->user->name);
-        $sheet->setCellValue('G6', $requisicion->folio);
-        $sheet->setCellValue('G7', $requisicion->contrato->contrato ?? 'N/A');
-        $sheet->setCellValue('G8', $requisicion->contrato->convenio ?? 'N/A');
-        $sheet->setCellValue('G5', $requisicion->created_at->format('d/m/Y)'));
-        $sheet->setCellValue('A50', $requisicion->comentario ?? 'N/A');
+        $sheet->setCellValue(
+            'C10',
+            strtoupper($requisicion->user->name)
+        );
 
-        // ✅ Materiales (múltiples productos)
+        $sheet->setCellValue(
+            'C11',
+            strtoupper($requisicion->user->role)
+        );
+
+        $sheet->setCellValue(
+            'G5',
+            $requisicion->created_at->format('d/m/Y')
+        );
+
+        $sheet->setCellValue(
+            'C12',
+            ucwords($requisicion->proyecto ?? 'N/A')
+        );
+
+        $sheet->setCellValue(
+            'C13',
+            strtoupper($requisicion->sit ?? 'N/A')
+        );
+
+        $sheet->setCellValue(
+            'C14',
+            strtoupper($requisicion->partida ?? 'N/A')
+        );
+
+        $sheet->setCellValue(
+            'C15',
+            strtoupper($requisicion->plataforma ?? 'N/A')
+        );
+
+        $sheet->setCellValue(
+            'C16',
+            strtoupper($requisicion->embarcacion ?? 'N/A')
+        );
+
+        $sheet->setCellValue(
+            'C17',
+            strtoupper($requisicion->area ?? 'N/A')
+        );
+
+        $sheet->setCellValue(
+            'C18',
+            strtoupper($requisicion->activo ?? 'N/A')
+        );
+
+        $sheet->setCellValue(
+            'F36',
+            $requisicion->user->name
+        );
+
+        $sheet->setCellValue(
+            'G6',
+            $requisicion->folio
+        );
+
+        $sheet->setCellValue(
+            'G7',
+            $requisicion->contrato->contrato ?? 'N/A'
+        );
+
+        $sheet->setCellValue(
+            'G8',
+            $requisicion->contrato->convenio ?? 'N/A'
+        );
+
+        $sheet->setCellValue(
+            'A50',
+            $requisicion->comentario ?? 'N/A'
+        );
+
         $row = 21;
+
         foreach ($requisicion->detalles as $detalle) {
-            $sheet->setCellValue('A' . $row, $detalle->cantidad);
-            $sheet->setCellValue('B' . $row, $detalle->unidad);
-            $sheet->setCellValue('C' . $row, $detalle->material);
+            $sheet->setCellValue(
+                'A' . $row,
+                $detalle->cantidad
+            );
+
+            $sheet->setCellValue(
+                'B' . $row,
+                $detalle->unidad
+            );
+
+            $sheet->setCellValue(
+                'C' . $row,
+                $detalle->material
+            );
+
             $row++;
         }
 
-        // ================= FIRMA =================
         if ($requisicion->user->signature) {
-
-            $signaturePath = storage_path('app/public/'.$requisicion->user->signature);
+            $signaturePath = storage_path(
+                'app/public/' . $requisicion->user->signature
+            );
 
             if (file_exists($signaturePath)) {
-
                 $drawing = new Drawing();
                 $drawing->setPath($signaturePath);
                 $drawing->setCoordinates('G51');
-                $drawing->setOffsetX(-40);// derecha
-                $drawing->setOffsetY(-60);// abajo
-                $drawing->setHeight(100);// altura en píxeles
-                $drawing->setWidth(220);// ancho en píxeles (descomentar si necesitas)
+                $drawing->setOffsetX(-40);
+                $drawing->setOffsetY(-60);
+                $drawing->setHeight(100);
+                $drawing->setWidth(220);
                 $drawing->setWorksheet($sheet);
             }
         }
 
-        // ================= ESTATUS finanzas =================
-        $imgFinanzas = $this->obtenerImagenEstatus($requisicion->estatus_finanzas,'finanzas');
+        $imgFinanzas = $this->obtenerImagenEstatus(
+            $requisicion->estatus_finanzas,
+            'finanzas'
+        );
 
-        if(file_exists($imgFinanzas)){
+        if (file_exists($imgFinanzas)) {
             $draw1 = new Drawing();
             $draw1->setPath($imgFinanzas);
             $draw1->setCoordinates('B55');
-            $draw1->setOffsetY(-40); // abajo
-            $draw1->setOffsetX(-20); // derecha
-
-            $draw1->setHeight(90); // altura en píxeles
-            // $draw1->setWidth(100); // ancho en píxeles (descomentar si necesitas)
-
+            $draw1->setOffsetY(-40);
+            $draw1->setOffsetX(-20);
+            $draw1->setHeight(90);
             $draw1->setWorksheet($sheet);
         }
 
-        // ================= ESTATUS direccion =================
-        $imgEstatus = $this->obtenerImagenEstatus($requisicion->estatus,'direccion');
+        $imgEstatus = $this->obtenerImagenEstatus(
+            $requisicion->estatus,
+            'direccion'
+        );
 
-        if(file_exists($imgEstatus)){
+        if (file_exists($imgEstatus)) {
             $draw2 = new Drawing();
             $draw2->setPath($imgEstatus);
             $draw2->setCoordinates('G56');
-            $draw2->setOffsetY(-30); // abajo
-            $draw2->setOffsetX(-30); // derecha
-            $draw2->setHeight(90); // altura en píxeles
-            // $draw2->setWidth(150); // ancho en píxeles (descomentar si necesitas)
-  
+            $draw2->setOffsetY(-30);
+            $draw2->setOffsetX(-30);
+            $draw2->setHeight(90);
             $draw2->setWorksheet($sheet);
         }
 
-        // ================= MATERIALES =================
-        $row = 21;
-        foreach ($requisicion->detalles as $detalle) {
-            $sheet->setCellValue('A'.$row, $detalle->cantidad);
-            $sheet->setCellValue('B'.$row, $detalle->unidad);
-            $sheet->setCellValue('C'.$row, $detalle->material);
-            $row++;
-        }
-
         $writer = new Xlsx($spreadsheet);
-        $filename = 'Requisicion_'.$requisicion->id.'.xlsx';
+        $filename = 'Requisicion_' . $requisicion->id . '.xlsx';
 
-        return new StreamedResponse(function() use ($writer){
-            $writer->save('php://output');
-        },200,[
-            'Content-Type'=>'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition'=>'attachment;filename="'.$filename.'"',
-        ]);
+        return new StreamedResponse(
+            function () use ($writer) {
+                $writer->save('php://output');
+            },
+            200,
+            [
+                'Content-Type' =>
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+
+                'Content-Disposition' =>
+                    'attachment;filename="' . $filename . '"',
+            ]
+        );
     }
 }

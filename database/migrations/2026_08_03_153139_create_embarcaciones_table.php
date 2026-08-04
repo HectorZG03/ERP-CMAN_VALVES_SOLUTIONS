@@ -6,19 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-
+    /**
+     * Ejecutar la migración.
+     */
     public function up(): void
     {
-        Schema::create('destinos', function (Blueprint $table) {
+        Schema::create('embarcaciones', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 150)->unique();
             $table->timestamps();
         });
     }
 
-
+    /**
+     * Revertir la migración.
+     */
     public function down(): void
     {
-        Schema::dropIfExists('destinos');
+        Schema::dropIfExists('embarcaciones');
     }
 };

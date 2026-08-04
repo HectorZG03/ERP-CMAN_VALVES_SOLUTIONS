@@ -5,11 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Destino extends Model
+class Embarcacion extends Model
 {
     use HasFactory;
 
-    protected $table = 'destinos';
+    protected $table = 'embarcaciones';
     
     protected $fillable = [
         'nombre',
@@ -17,12 +17,12 @@ class Destino extends Model
 
     public function requisiciones()
     {
-        return $this->hasMany(Requisicion::class, 'destino_id');
+        return $this->hasMany(Requisicion::class, 'embaracion_id');
     }
 
     public function solicitudesMaterial()
     {
-        return $this->hasMany(SolicitudMaterial::class, 'destino_id');
+        return $this->hasMany(SolicitudMaterial::class, 'embaracion_id');
     }
     
 }
