@@ -1,6 +1,6 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\EmbarcacionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventarioController;
@@ -12,13 +12,10 @@ use App\Http\Controllers\SolicitudMaterialController;
 use App\Http\Controllers\RequisicionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PrestamoMaterialController;
-
-
 use App\Http\Controllers\PersonalController;
 use App\Http\Controllers\BajaColaboradorController;
 use App\Http\Controllers\CambioPuestoSueldoController;
 use App\Http\Controllers\ValeppController;
-
 use App\Http\Controllers\OrdenCompraController;
 
 
@@ -148,21 +145,28 @@ Route::prefix('prestamos')->name('prestamos.')->group(function () {
 
 
 
-    // Usuarios - Solo TI y Dirección
-    Route::middleware(['user.access'])->group(function () {
-        Route::resource('users', UserController::class);
-    });
+// Usuarios y embarcaciones - Solo TI y Dirección
+Route::middleware(['user.access'])->group(function () {
+    Route::resource('users', UserController::class);
 
-
+    Route::resource('embarcaciones', EmbarcacionController::class)
+        ->parameters([
+            'embarcaciones' => 'embarcacion',
+        ])
+        ->only([
+            'index',
+            'store',
+            'update',
+            'destroy',
+        ]);
+});
 
 
 
     // ✅ NUEVA RUTA: Para que finanzas apruebe/deniegue
-Route::patch('/requisiciones/{requisicion}/estatus-finanzas', [RequisicionController::class, 'updateEstatusFinanzas'])
+    Route::patch('/requisiciones/{requisicion}/estatus-finanzas', [RequisicionController::class, 'updateEstatusFinanzas'])
     ->name('requisiciones.updateEstatusFinanzas')
     ->middleware('auth');
-
-
 
 
 
