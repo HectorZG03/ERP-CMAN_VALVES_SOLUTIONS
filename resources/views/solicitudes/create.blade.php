@@ -54,25 +54,69 @@
                 </div>
             </div>
 
-            {{-- ubicacion de destino --}}
+            {{-- Ubicación de destino --}}
 
-            <!-- Selección de Ubicación de Destino -->
             <div class="mb-6">
-                <label for="ubicacion_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label for="destino"
+                       class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Ubicación de Destino
                 </label>
-                <select name="destino" id="destino" required
+
+                <select name="destino"
+                        id="destino"
+                        required
                         class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200">
+
                     <option value="">Seleccione una ubicación</option>
-                    <option value="Capitan America" {{ old('ubicacion_id') == 'Capitan America' ? 'selected' : '' }}>BMS Capitan America</option>
-                    <option value="Base Operativa" {{ old('ubicacion_id') == 'Base Operativa' ? 'selected' : '' }}>Base Operativa</option>
-                    <option value="BMS MAYA" {{ old('ubicacion_id') == 'BMS MAYA' ? 'selected' : '' }}>BMS Maya</option>
-                    <option value="BMS IRON HORSE" {{ old('ubicacion_id') == 'BMS IRON HORSE' ? 'selected' : '' }}>BMS Iron Horse</option>
-                    <option value="BMS GRAND CANYON" {{ old('ubicacion_id') == 'BMS GRAND CANYON' ? 'selected' : '' }}>BMS Grand Canyon</option>
+
+                    <option value="Capitan America"
+                        {{ old('destino') === 'Capitan America' ? 'selected' : '' }}>
+                        BMS Capitán América
+                    </option>
+
+                    <option value="Base Operativa"
+                        {{ old('destino') === 'Base Operativa' ? 'selected' : '' }}>
+                        Base Operativa
+                    </option>
+
+                    <option value="BMS MAYA"
+                        {{ old('destino') === 'BMS MAYA' ? 'selected' : '' }}>
+                        BMS Maya
+                    </option>
+
+                    <option value="BMS IRON HORSE"
+                        {{ old('destino') === 'BMS IRON HORSE' ? 'selected' : '' }}>
+                        BMS Iron Horse
+                    </option>
+
+                    <option value="BMS GRAND CANYON"
+                        {{ old('destino') === 'BMS GRAND CANYON' ? 'selected' : '' }}>
+                        BMS Grand Canyon
+                    </option>
+
+                    <option value="BMS OCEAN INTREPID"
+                        {{ old('destino') === 'BMS OCEAN INTREPID' ? 'selected' : '' }}>
+                        BMS Ocean Intrepid
+                    </option>
+
+                    <option value="BMS STIM STAR"
+                        {{ old('destino') === 'BMS STIM STAR' ? 'selected' : '' }}>
+                        BMS Stim Star
+                    </option>
+
+                    <option value="ONEL A"
+                        {{ old('destino') === 'ONEL A' ? 'selected' : '' }}>
+                        Onel A
+                    </option>
                 </select>
+
+                @error('destino')
+                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">
+                        {{ $message }}
+                    </p>
+                @enderror
             </div>
 
-            
             {{-- parte que solo vera HSE parte de id_personal --}}
 
             {{-- aqui quieor q meteas lo de el select para la lista de personal --}}
@@ -469,4 +513,6 @@ function limpiarSolicitud() {
     limpiarBuscador();
 }
 </script>
+
+
 @endsection
