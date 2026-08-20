@@ -2,28 +2,24 @@
 
 namespace App\Providers;
 
-use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
 
-class AuthServiceProvider extends ServiceProvider
+class AppServiceProvider extends ServiceProvider
 {
     /**
-     * The model to policy mappings for the application.
-     *
-     * @var array<class-string, class-string>
+     * Register any application services.
      */
-    protected $policies = [
+    public function register(): void
+    {
         //
-    ];
+    }
 
     /**
-     * Register any authentication / authorization services.
+     * Bootstrap any application services.
      */
     public function boot(): void
     {
-        $this->registerPolicies();
-
-        // Definir gates para los permisos
         Gate::define('manage-users', function ($user) {
             return in_array($user->role, ['ti', 'direccion']);
         });
@@ -36,14 +32,13 @@ class AuthServiceProvider extends ServiceProvider
             return $user->role === 'direccion';
         });
 
-        // ✅ NUEVO: Gate para aprobación de finanzas
         Gate::define('approve-finanzas', function ($user) {
             return in_array($user->role, ['finanzas', 'aux_finanzas']);
         });
 
-        // Gate adicional para debug
         Gate::define('debug-role', function ($user) {
             \Log::info('Usuario: ' . $user->name . ' - Rol: ' . $user->role);
+
             return true;
         });
     }
