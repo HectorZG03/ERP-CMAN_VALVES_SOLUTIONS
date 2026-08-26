@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\AjusteInventarioController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\EntradaController;
@@ -56,7 +57,21 @@ Route::middleware(['auth'])->group(function () {
     
     // Inventario - Almacén, Auxiliar Almacén, Dirección y TI
     Route::middleware(['inventory.access'])->group(function () {
-        Route::resource('inventario', InventarioController::class);
+        // Las rutas específicas deben declararse antes de /inventario/{inventario}.
+        Route::post('inventario/search-ajax', [InventarioController::class, 'searchAjax'])->name('inventario.search.ajax');
+        Route::get('inventario/export/pdf', [InventarioController::class, 'exportPDF'])->name('inventario.export.pdf');
+        Route::get('inventario/export/excel', [InventarioController::class, 'exportExcel'])->name('inventario.export.excel');
+        Route::get('inventario/view/pdf', [InventarioController::class, 'viewPDF'])->name('inventario.view.pdf');
+        Route::get('inventario/api/all', [InventarioController::class, 'getAll'])->name('inventario.api.all');
+        Route::get('inventario/ajustes', [AjusteInventarioController::class, 'index'])->name('inventario.ajustes.index');
+
+        Route::middleware('can:manage-inventory')->group(function () {
+            Route::resource('inventario', InventarioController::class)->only(['create', 'store', 'edit', 'update', 'destroy']);
+            Route::post('inventario/{inventario}/ajustes', [AjusteInventarioController::class, 'store'])
+                ->name('inventario.ajustes.store');
+        });
+        Route::resource('inventario', InventarioController::class)->only(['index', 'show']);
+
         Route::resource('proveedores', ProveedorController::class)->parameters(['proveedores' => 'proveedor']);
         Route::resource('clientes', ClienteController::class);
 
@@ -162,33 +177,6 @@ Route::patch('/requisiciones/{requisicion}/estatus-finanzas', [RequisicionContro
     ->name('requisiciones.updateEstatusFinanzas')
     ->middleware('auth');
 
-
-
-
-
-    // parte del inventario
-    
-   // Rutas de inventario
-    Route::prefix('inventario')->name('inventario.')->group(function () {
-    Route::get('/', [InventarioController::class, 'index'])->name('index');
-    Route::post('/search-ajax', [InventarioController::class, 'searchAjax'])->name('search.ajax');
-    Route::get('/create', [InventarioController::class, 'create'])->name('create');
-    Route::post('/', [InventarioController::class, 'store'])->name('store');
-    Route::get('/{inventario}', [InventarioController::class, 'show'])->name('show');
-    Route::get('/{inventario}/edit', [InventarioController::class, 'edit'])->name('edit');
-    Route::put('/{inventario}', [InventarioController::class, 'update'])->name('update');
-    Route::delete('/{inventario}', [InventarioController::class, 'destroy'])->name('destroy');
-    
-    // Rutas de exportación
-    Route::get('/export/pdf', [InventarioController::class, 'exportPDF'])->name('export.pdf');
-    Route::get('/export/excel', [InventarioController::class, 'exportExcel'])->name('export.excel');
-    Route::get('/view/pdf', [InventarioController::class, 'viewPDF'])->name('view.pdf');
-    
-    // Ruta para API si la necesitas
-    Route::get('/api/all', [InventarioController::class, 'getAll'])->name('api.all');
-});
-
-
     // PARTE DEL BOTON DEL EXCEL SOLICITUD DE MATERIAL
     Route::get('/solicitudes/{solicitud}/excel', [SolicitudMaterialController::class, 'exportExcel'])
     ->name('solicitudes.exportExcel');
@@ -264,8 +252,6 @@ Route::middleware(['auth', 'finanzas.access'])->group(function () {
 
  // PDF
         Route::get('orden-compra/{ordenCompra}/pdf', [OrdenCompraController::class, 'pdf'])->name('orden-compra.pdf');
-
-
 
 
 

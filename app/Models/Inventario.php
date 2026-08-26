@@ -45,6 +45,11 @@ class Inventario extends Model
         return $this->hasMany(InventarioBarco::class, 'inventario_id');
     }
 
+    public function ajustes()
+    {
+        return $this->hasMany(AjusteInventario::class);
+    }
+
     public function getPrecioPromedio()
     {
         return $this->existencia > 0 ? $this->precio_total / $this->existencia : 0;

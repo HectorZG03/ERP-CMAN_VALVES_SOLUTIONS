@@ -224,6 +224,11 @@ class InventarioController extends Controller
 
     public function destroy(Inventario $inventario)
     {
+        if ($inventario->ajustes()->exists()) {
+            return redirect()->route('inventario.index')
+                ->with('error', 'No se puede eliminar un producto que tiene ajustes registrados. El historial debe conservarse.');
+        }
+
         try {
             \DB::statement('SET FOREIGN_KEY_CHECKS=0');
             $inventario->delete();

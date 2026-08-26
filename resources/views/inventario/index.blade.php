@@ -6,6 +6,10 @@
     <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Inventario de Productos</h1>
         <div class="flex space-x-3">
+            <a href="{{ route('inventario.ajustes.index') }}"
+               class="inline-flex items-center px-3 py-2 bg-purple-600 dark:bg-purple-700 hover:bg-purple-700 dark:hover:bg-purple-800 text-white text-sm font-medium rounded-md transition-colors duration-200 shadow-sm hover:shadow-md">
+                Historial de ajustes
+            </a>
             <!-- Botones de descarga -->
             <div class="flex space-x-2">
                 <a href="{{ route('inventario.export.pdf') }}" 

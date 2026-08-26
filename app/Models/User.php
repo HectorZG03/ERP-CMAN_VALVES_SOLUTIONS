@@ -78,6 +78,11 @@ class User extends Authenticatable
         return in_array($this->role, ['direccion']);
     }
 
+    public function ajustesInventario()
+    {
+        return $this->hasMany(AjusteInventario::class);
+    }
+
 
     /** esta oparte es para que salga en la parte de la barre quien lo puede ver y quien no 
      * Verificar si el usuario puede gestionar finanzas
