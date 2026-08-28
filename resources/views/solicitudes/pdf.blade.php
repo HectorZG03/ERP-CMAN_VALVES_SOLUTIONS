@@ -181,12 +181,326 @@
         }
         .fc { color: #6a80a8; font-family: 'IBM Plex Sans', sans-serif; letter-spacing: 0.5px; }
 
-        /* ── PRINT ── */
+        @page {
+            size: Letter portrait;
+            margin: 0.35in;
+        }
+
         @media print {
-            body { background: #fff; }
-            .action-bar { display: none !important; }
-            .page-wrapper { max-width: 100%; margin: 0; box-shadow: none; }
-            @page { margin: 1cm 1.2cm; size: A4; }
+            html,
+            body {
+                width: 100%;
+                background: #fff;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                font-size: 9px;
+            }
+
+            .action-bar {
+                display: none !important;
+            }
+
+            .page-wrapper {
+                width: 100%;
+                max-width: none;
+                margin: 0;
+                overflow: visible;
+                box-shadow: none;
+            }
+
+            /* Encabezado principal */
+            .header {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .header-logo-zone {
+                min-width: 115px;
+                padding: 12px 14px;
+            }
+
+            .header-logo-zone img {
+                max-width: 105px;
+                max-height: 42px;
+            }
+
+            .header-company {
+                padding: 12px 14px;
+            }
+
+            .company-name {
+                font-size: 13px;
+            }
+
+            .company-sub,
+            .company-tagline {
+                font-size: 7.5px;
+            }
+
+            .header-doc {
+                min-width: 145px;
+                padding: 12px 14px;
+            }
+
+            .doc-folio {
+                font-size: 18px;
+            }
+
+            .doc-date-small {
+                font-size: 7.5px;
+            }
+
+            /* Barra de estatus */
+            .status-bar {
+                padding: 6px 18px;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .status-label,
+            .status-folio {
+                font-size: 7.5px;
+            }
+
+            .badge {
+                padding: 2px 8px;
+                font-size: 7.5px;
+            }
+
+            /* Contenido */
+            .body-content {
+                padding: 15px 18px;
+            }
+
+            .section-title {
+                margin-bottom: 7px;
+                font-size: 7px;
+                page-break-after: avoid;
+                break-after: avoid-page;
+            }
+
+            /* Información general */
+            .info-grid-2 {
+                margin-bottom: 12px;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .info-block {
+                padding: 8px 10px;
+            }
+
+            .info-block-title {
+                margin-bottom: 5px;
+                padding-bottom: 3px;
+                font-size: 7px;
+            }
+
+            .user-row {
+                margin-bottom: 5px;
+                padding-bottom: 5px;
+            }
+
+            .user-initials {
+                width: 28px;
+                height: 28px;
+                font-size: 11px;
+            }
+
+            .user-name-text {
+                font-size: 10px;
+            }
+
+            .user-dept {
+                font-size: 7.5px;
+            }
+
+            .field-row {
+                gap: 3px;
+                padding: 2px 0;
+                font-size: 9px;
+            }
+
+            .field-label {
+                min-width: 68px;
+                font-size: 8px;
+            }
+
+            .field-value {
+                font-size: 8.5px;
+                overflow-wrap: anywhere;
+                word-wrap: break-word;
+            }
+
+            /* Tabla multipágina */
+            table.tbl {
+                width: 100%;
+                table-layout: fixed;
+                border-collapse: collapse;
+                margin-bottom: 12px;
+                font-size: 8px;
+                page-break-inside: auto;
+                break-inside: auto;
+            }
+
+            table.tbl thead {
+                display: table-header-group;
+            }
+
+            table.tbl tbody {
+                display: table-row-group;
+            }
+
+            table.tbl tr {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                page-break-after: auto;
+            }
+
+            table.tbl th,
+            table.tbl td {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                overflow-wrap: anywhere;
+                word-wrap: break-word;
+                hyphens: auto;
+            }
+
+            table.tbl thead th {
+                width: auto !important;
+                padding: 5px 3px;
+                font-size: 7px;
+                line-height: 1.2;
+                letter-spacing: 0;
+                word-break: normal;
+            }
+
+            table.tbl tbody td {
+                padding: 5px 3px;
+                font-size: 8px;
+                line-height: 1.25;
+                word-break: normal;
+            }
+
+            table.tbl th:first-child,
+            table.tbl td:first-child {
+                width: 5% !important;
+            }
+
+            table.tbl th:nth-child(2),
+            table.tbl td:nth-child(2) {
+                width: 27% !important;
+            }
+
+            .row-num {
+                width: 18px;
+                height: 18px;
+                font-size: 8px;
+            }
+
+            .pname {
+                line-height: 1.25;
+            }
+
+            .pcat {
+                margin-top: 1px;
+                font-size: 7px;
+            }
+
+            .qty-val {
+                font-size: 9px;
+            }
+
+            /* Totales */
+            .totals-wrap {
+                margin-bottom: 12px;
+                page-break-inside: avoid;
+                break-inside: avoid;
+                page-break-before: auto;
+            }
+
+            .totals-box {
+                min-width: 220px;
+                padding: 8px 12px;
+            }
+
+            .t-row {
+                padding: 3px 0;
+                font-size: 8.5px;
+            }
+
+            .t-row.final {
+                margin-top: 4px;
+                padding-top: 5px;
+                font-size: 10px;
+            }
+
+            /* Observaciones */
+            .obs-block {
+                padding: 8px 10px;
+                margin-bottom: 12px;
+                font-size: 8.5px;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .obs-label {
+                margin-bottom: 3px;
+                font-size: 7px;
+            }
+
+            /* Firmas */
+            .sign-section {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .sign-grid {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .sign-cell {
+                padding: 10px 14px;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            .sign-img-zone {
+                height: 52px;
+                margin-bottom: 5px;
+            }
+
+            .sign-img-zone img {
+                max-width: 145px;
+                max-height: 50px;
+            }
+
+            .sign-line {
+                margin-bottom: 5px;
+            }
+
+            .sign-person {
+                font-size: 9px;
+            }
+
+            .sign-role-tag,
+            .sign-pill {
+                font-size: 7px;
+            }
+
+            /* Pie propio del documento */
+            .doc-footer {
+                padding: 7px 18px;
+                font-size: 7px;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
         }
     </style>
 </head>
