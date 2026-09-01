@@ -88,8 +88,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('entradas/{entrada}/view-pdf', [EntradaController::class, 'viewPDF'])->name('entradas.view-pdf');
 
 
+        // Búsqueda AJAX de productos para una nueva salida
+        Route::get('salidas/buscar-productos', [SalidaController::class, 'buscarProductos'])
+            ->name('salidas.buscar-productos');
+
         // Rutas para salidas
-        Route::resource('salidas', SalidaController::class)->only(['index', 'create', 'store', 'show']);
+        Route::resource('salidas', SalidaController::class)
+            ->only(['index', 'create', 'store', 'show']);
     
         // Nuevas rutas para PDF
         Route::get('salidas/{salida}/pdf', [SalidaController::class, 'generatePDF'])->name('salidas.pdf');
