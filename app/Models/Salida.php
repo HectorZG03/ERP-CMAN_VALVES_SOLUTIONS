@@ -12,6 +12,7 @@ class Salida extends Model
     protected $fillable = [
         'numero_factura',
         'cliente_id',
+        'solicitud_material_id',
         'fecha_salida',
         'observaciones',
         'cantidad_total',
@@ -60,6 +61,11 @@ class Salida extends Model
     public function cliente()
     {
         return $this->belongsTo(Cliente::class);
+    }
+
+    public function solicitudMaterial()
+    {
+        return $this->belongsTo(SolicitudMaterial::class, 'solicitud_material_id');
     }
 
     public function user()

@@ -21,30 +21,46 @@ class SolicitudMaterial extends Model
         'categoria',
     ];
 
-    // Relación con el operador (personal)
-        public function operadorPersonal()
-        {
-            return $this->belongsTo(\App\Models\Personal::class, 'personal_id');
-        }
-
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
-    // Relación con el usuario que hizo la solicitud
+    /**
+     * Operador o personal asignado a la solicitud.
+     */
+    public function operadorPersonal()
+    {
+        return $this->belongsTo(Personal::class, 'personal_id');
+    }
+
+    /**
+     * Usuario que generó la solicitud.
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // Relación con los detalles de la solicitud (múltiples productos)
+    /**
+     * Materiales incluidos en la solicitud.
+     */
     public function detalles()
     {
         return $this->hasMany(SolicitudMaterialDetalle::class);
     }
 
-    // Método para obtener el total de la solicitud
+    /**
+     * Salidas de almacén generadas desde esta solicitud.
+     */
+    public function salidas()
+    {
+        return $this->hasMany(Salida::class, 'solicitud_material_id');
+    }
+
+    /**
+     * Valor total estimado de la solicitud.
+     */
     public function getTotalAttribute()
     {
         return $this->detalles->sum(function ($detalle) {
@@ -52,31 +68,41 @@ class SolicitudMaterial extends Model
         });
     }
 
-    // Método para obtener el número total de productos diferentes
+    /**
+     * Número de productos diferentes.
+     */
     public function getTotalProductosAttribute()
     {
         return $this->detalles->count();
     }
 
-    // Método para obtener el total de unidades solicitadas
+    /**
+     * Total de unidades solicitadas.
+     */
     public function getTotalUnidadesAttribute()
     {
         return $this->detalles->sum('cantidad_solicitada');
     }
 
-    // Scope para filtrar por estatus
+    /**
+     * Filtrar solicitudes por estatus.
+     */
     public function scopeEstatus($query, $estatus)
     {
         return $query->where('estatus', $estatus);
     }
 
-    // Scope para solicitudes pendientes
+    /**
+     * Solicitudes pendientes.
+     */
     public function scopePendientes($query)
     {
         return $query->where('estatus', 'pendiente');
     }
 
-    // Scope para solicitudes aprobadas
+    /**
+     * Solicitudes aprobadas.
+     */
     public function scopeAprobadas($query)
     {
         return $query->where('estatus', 'aprobado');
