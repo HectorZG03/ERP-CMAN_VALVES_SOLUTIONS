@@ -2,367 +2,564 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Factura de Salida #{{ $salida->numero_factura ?? str_pad($salida->id, 6, '0', STR_PAD_LEFT) }}</title>
+    <title>Vale de salida {{ $salida->numero_factura ?? $salida->id }}</title>
     <style>
+        @page {
+            size: letter portrait;
+            margin: 8mm 10mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Arial', sans-serif;
-            font-size: 12px;
-            line-height: 1.4;
-            color: #333;
             margin: 0;
-            padding: 20px;
-            background-color: #fff;
+            color: #111827;
+            font-family: DejaVu Sans, Arial, sans-serif;
+            font-size: 7.5pt;
+            line-height: 1.25;
         }
-        
-        /* Encabezado de empresa */
-        .company-header {
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table td {
+            vertical-align: top;
+        }
+
+        .logo-cell {
+            width: 20%;
+            vertical-align: middle !important;
+        }
+
+        .logo {
+            width: 118px;
+            max-height: 58px;
+        }
+
+        .title-cell {
+            width: 52%;
+            padding: 2px 8px 0;
             text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #dc2626;
         }
-        
+
         .company-name {
-            font-size: 24px;
+            font-size: 10pt;
             font-weight: bold;
-            color: #dc2626;
-            margin: 0;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
-        
-        .company-tagline {
-            font-size: 14px;
-            color: #666;
-            margin: 5px 0 15px 0;
+
+        .company-address {
+            margin-top: 2px;
+            color: #4b5563;
+            font-size: 6.2pt;
         }
-        
-        .company-info {
-            font-size: 11px;
-            color: #555;
-            margin-top: 10px;
-        }
-        
-        /* Información del documento */
-        .document-info {
-            margin-bottom: 25px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-        }
-        
+
         .document-title {
-            text-align: center;
-            font-size: 18px;
+            margin-top: 7px;
+            font-size: 8.2pt;
             font-weight: bold;
-            color: #1f2937;
-            margin: 0 0 15px 0;
+            text-transform: uppercase;
         }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 10px;
+
+        .meta-cell {
+            width: 28%;
         }
-        
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px dotted #ddd;
+
+        .meta-table {
+            border: 1px solid #111827;
         }
-        
-        .info-label {
+
+        .meta-table th {
+            padding: 3px;
+            border-bottom: 1px solid #111827;
+            background: #1f2937;
+            color: #ffffff;
+            font-size: 6.8pt;
+            text-transform: uppercase;
+        }
+
+        .meta-table td {
+            padding: 3px 5px;
+            border-bottom: 1px solid #d1d5db;
+            font-size: 6.8pt;
+        }
+
+        .meta-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .meta-label {
+            width: 48%;
             font-weight: bold;
-            color: #555;
         }
-        
-        .info-value {
-            color: #333;
-        }
-        
-        /* Tabla de productos */
-        .products-section {
-            margin: 25px 0;
-        }
-        
-        .section-title {
-            background-color: #dc2626;
-            color: white;
-            padding: 8px 12px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 4px 4px 0 0;
-            margin: 0;
-        }
-        
-        .products-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0;
-        }
-        
-        .products-table th {
-            background-color: #f3f4f6;
-            border: 1px solid #d1d5db;
-            padding: 8px 10px;
-            text-align: left;
-            font-weight: bold;
-            color: #374151;
-            font-size: 11px;
-        }
-        
-        .products-table td {
-            border: 1px solid #d1d5db;
-            padding: 8px 10px;
-            font-size: 11px;
-        }
-        
-        .products-table tbody tr:nth-child(even) {
-            background-color: #f9fafb;
-        }
-        
-        /* Totales */
-        .totals-section {
-            margin-top: 30px;
-            width: 100%;
-        }
-        
-        .totals-table {
-            width: 50%;
-            margin-left: auto;
-            border-collapse: collapse;
-        }
-        
-        .totals-table td {
-            padding: 8px 10px;
-            border: 1px solid #d1d5db;
+
+        .form-code {
+            margin-top: 2px;
             text-align: right;
-        }
-        
-        .totals-label {
-            font-weight: bold;
-            background-color: #f3f4f6;
-        }
-        
-        .subtotal-row {
+            font-size: 5.8pt;
             font-weight: bold;
         }
-        
-        .iva-row {
+
+        .section {
+            margin-top: 6px;
+            border: 1px solid #111827;
+        }
+
+        .section-title {
+            padding: 3px 6px;
+            background: #1f2937;
+            color: #ffffff;
+            font-size: 6.8pt;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .data-table td {
+            width: 50%;
+            padding: 3px 6px;
+            border-right: 1px solid #d1d5db;
+            border-bottom: 1px solid #d1d5db;
+            vertical-align: top;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .data-table td:last-child {
+            border-right: 0;
+        }
+
+        .label {
             font-weight: bold;
         }
-        
-        .total-row {
-            font-weight: bold;
-            background-color: #dcfce7;
-            color: #065f46;
-            font-size: 13px;
+
+        .items {
+            margin-top: 6px;
+            table-layout: fixed;
         }
-        
-        /* Firmas */
-        .signatures-section {
-            margin-top: 50px;
-            display: flex;
-            justify-content: space-between;
+
+        .items thead {
+            display: table-header-group;
+        }
+
+        .items th {
+            padding: 4px 3px;
+            border: 1px solid #111827;
+            background: #1f2937;
+            color: #ffffff;
+            font-size: 6.5pt;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .items td {
+            height: 22px;
+            padding: 3px 4px;
+            border: 1px solid #111827;
+            font-size: 6.5pt;
+            vertical-align: middle;
+        }
+
+        .items tr {
             page-break-inside: avoid;
         }
-        
-        .signature-box {
-            width: 45%;
+
+        .col-code {
+            width: 13%;
             text-align: center;
-            padding-top: 40px;
         }
-        
-        .signature-line {
-            border-bottom: 1px solid #333;
-            width: 80%;
-            margin: 0 auto 5px auto;
-            height: 40px;
+
+        .col-description {
+            width: 43%;
         }
-        
-        .signature-label {
-            font-size: 11px;
-            color: #555;
+
+        .col-unit {
+            width: 10%;
+            text-align: center;
+        }
+
+        .col-quantity {
+            width: 9%;
+            text-align: center;
+        }
+
+        .col-price,
+        .col-total {
+            width: 12.5%;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .summary-table {
             margin-top: 5px;
         }
-        
-        .signature-name {
+
+        .observations-cell {
+            width: 72%;
+            border: 1px solid #111827;
+            vertical-align: top;
+        }
+
+        .summary-space {
+            width: 2%;
+        }
+
+        .total-cell {
+            width: 26%;
+            border: 1px solid #111827;
+            vertical-align: top;
+        }
+
+        .small-header {
+            padding: 3px 6px;
+            background: #1f2937;
+            color: #ffffff;
+            font-size: 6.8pt;
             font-weight: bold;
-            margin-top: 5px;
+            text-transform: uppercase;
         }
-        
-        /* Pie de página */
-        .footer {
-            margin-top: 60px;
-            padding-top: 15px;
-            border-top: 1px solid #e5e7eb;
+
+        .observations-body {
+            min-height: 35px;
+            padding: 5px 6px;
+        }
+
+        .total-value {
+            padding: 10px 6px;
+            font-size: 10pt;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        .obligations {
+            margin-top: 6px;
+            border: 1px solid #111827;
+            page-break-inside: avoid;
+        }
+
+        .obligations p {
+            margin: 0;
+            padding: 5px 6px;
+            font-size: 6.2pt;
+            font-weight: bold;
+            text-align: justify;
+        }
+
+        .signatures {
+            margin-top: 8px;
+            page-break-inside: avoid;
+        }
+
+        .signature-cell {
+            width: 33.33%;
+            padding: 0 4px;
+            vertical-align: top;
+        }
+
+        .signature-box {
+            height: 102px;
+            border: 1px solid #111827;
+        }
+
+        .signature-title {
+            padding: 3px;
+            border-bottom: 1px solid #111827;
+            font-size: 6.3pt;
+            font-weight: bold;
             text-align: center;
-            font-size: 10px;
-            color: #6b7280;
+            text-transform: uppercase;
         }
-        
-        @media print {
-            body { 
-                margin: 0; 
-                padding: 15px; 
-                font-size: 11px;
-            }
-            .signatures-section { page-break-inside: avoid; }
-            .totals-section { page-break-inside: avoid; }
+
+        .signature-space {
+            height: 58px;
+            padding: 2px 5px 0;
+            text-align: center;
+            overflow: hidden;
         }
-        
-        /* Estilo para números */
-        .number {
-            text-align: right;
-            font-family: 'Courier New', monospace;
+
+        .signature-image {
+            display: block;
+            width: 145px;
+            height: 50px;
+            margin: 0 auto;
         }
-        
-        .currency {
-            text-align: right;
-            font-family: 'Courier New', monospace;
+
+        .signature-line {
+            height: 1px;
+            margin: 0 5px;
+            border-top: 1px solid #111827;
+            font-size: 0;
+            line-height: 0;
+        }
+
+        .signature-name {
+            margin: 0 5px;
+            padding: 3px 2px 0;
+            font-size: 5.7pt;
+            font-weight: bold;
+            line-height: 1.2;
+            text-align: center;
+            text-transform: uppercase;
+            word-wrap: break-word;
+        }
+
+        .footer {
+            margin-top: 8px;
+            padding-top: 4px;
+            border-top: 1px solid #111827;
+            color: #4b5563;
+            font-size: 6pt;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <!-- Encabezado de la empresa -->
-    <div class="company-header">
-        <h1 class="company-name">CMAN GLOBAL CONSTRUCTION</h1>
-        <p class="company-tagline">Sistema de Control de Inventario</p>
-        <div class="company-info">
-            <p>Documento generado: {{ date('d/m/Y H:i:s') }}</p>
-        </div>
-    </div>
+@php
+    $solicitud = $salida->solicitudMaterial;
+    $usuarioSolicitante = $solicitud?->user;
+    $operadorAsignado = $solicitud?->operadorPersonal;
 
-    <!-- Información del documento -->
-    <div class="document-info">
-        <h2 class="document-title">FACTURA DE SALIDA</h2>
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">Número de Factura:</span>
-                <span class="info-value">{{ $salida->numero_factura ?? 'N/A' }}</span>
+    $solicitanteNombre = $usuarioSolicitante?->name
+        ?? $salida->cliente?->nombre
+        ?? 'NO DISPONIBLE';
+    $solicitanteId = $usuarioSolicitante?->num_empleado ?? 'N/A';
+    $solicitanteEmail = $usuarioSolicitante?->email
+        ?? $salida->cliente?->email
+        ?? 'N/A';
+    $areaSolicitante = $usuarioSolicitante?->role
+        ?? $salida->cliente?->area
+        ?? 'N/A';
+    $destino = $solicitud?->destino
+        ?? $salida->cliente?->area
+        ?? 'N/A';
+    $operadorNombre = $operadorAsignado?->nombre_completo
+        ?? $solicitud?->operador
+        ?? 'NO ASIGNADO';
+    $folio = $salida->numero_factura
+        ?? 'SAL-' . str_pad($salida->id, 6, '0', STR_PAD_LEFT);
+    $fechaSalida = $salida->fecha_salida?->format('d/m/Y')
+        ?? $salida->created_at?->format('d/m/Y')
+        ?? 'N/A';
+@endphp
+
+<table class="header-table">
+    <tr>
+        <td class="logo-cell">
+            @if(file_exists(public_path('img/logo/logo_cman.png')))
+                <img class="logo"
+                    src="{{ public_path('img/logo/logo_cman.png') }}"
+                    alt="CMAN">
+            @elseif(file_exists(public_path('img/logo/logo.png')))
+                <img class="logo"
+                    src="{{ public_path('img/logo/logo.png') }}"
+                    alt="CMAN">
+            @endif
+        </td>
+        <td class="title-cell">
+            <div class="company-name">CMAN GLOBAL CONSTRUCTION S.A. DE C.V.</div>
+            <div class="company-address">
+                ANACLETO CANABAL 1RA SECCIÓN - C.P. 86103 - VILLAHERMOSA, TABASCO
             </div>
-            <div class="info-item">
-                <span class="info-label">Fecha de Salida:</span>
-                <span class="info-value">
-                    @if($salida->fecha_salida)
-                        {{ $salida->fecha_salida->format('d/m/Y') }}
-                    @elseif($salida->created_at)
-                        {{ $salida->created_at->format('d/m/Y') }}
-                    @else
-                        N/A
+            <div class="document-title">
+                VALE DE SALIDA DE MATERIALES, HERRAMIENTAS Y/O EQUIPO
+            </div>
+        </td>
+        <td class="meta-cell">
+            <table class="meta-table">
+                <tr>
+                    <th colspan="2">Datos de salida</th>
+                </tr>
+                <tr>
+                    <td class="meta-label">FECHA:</td>
+                    <td>{{ $fechaSalida }}</td>
+                </tr>
+                <tr>
+                    <td class="meta-label">FOLIO:</td>
+                    <td>{{ $folio }}</td>
+                </tr>
+                <tr>
+                    <td class="meta-label">SOLICITUD:</td>
+                    <td>{{ $solicitud ? '#' . $solicitud->id : 'N/A' }}</td>
+                </tr>
+            </table>
+            <div class="form-code">FOR-04-PRO-ALM 01</div>
+        </td>
+    </tr>
+</table>
+
+<div class="section">
+    <div class="section-title">Datos del remitente</div>
+    <table class="data-table">
+        <tr>
+            <td><span class="label">DEPARTAMENTO:</span> ALMACÉN GENERAL</td>
+            <td><span class="label">TELÉFONO:</span> 993 175 5082</td>
+        </tr>
+        <tr>
+            <td><span class="label">EMAIL:</span> almacengeneral@cman.com.mx</td>
+            <td><span class="label">DIRECCIÓN:</span> TECNO PARQUE - BODEGA #2</td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <div class="section-title">Datos de la solicitud y del solicitante</div>
+    <table class="data-table">
+        <tr>
+            <td><span class="label">DESTINO:</span> {{ mb_strtoupper($destino) }}</td>
+            <td><span class="label">COMPAÑÍA:</span> CMAN GLOBAL CONSTRUCTION S.A. DE C.V.</td>
+        </tr>
+        <tr>
+            <td><span class="label">SOLICITANTE:</span> {{ mb_strtoupper($solicitanteNombre) }}</td>
+            <td><span class="label">ID SOLICITANTE:</span> {{ mb_strtoupper($solicitanteId) }}</td>
+        </tr>
+        <tr>
+            <td><span class="label">ÁREA/ROL:</span> {{ mb_strtoupper($areaSolicitante) }}</td>
+            <td><span class="label">EMAIL:</span> {{ $solicitanteEmail }}</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="width: 100%; border-right: 0;">
+                <span class="label">OPERADOR ASIGNADO:</span> {{ mb_strtoupper($operadorNombre) }}
+            </td>
+        </tr>
+    </table>
+</div>
+
+<table class="items">
+    <thead>
+        <tr>
+            <th class="col-code">Código</th>
+            <th class="col-description">Descripción del material, herramienta y/o equipo</th>
+            <th class="col-unit">Medida</th>
+            <th class="col-quantity">Cantidad</th>
+            <th class="col-price">Costo unitario</th>
+            <th class="col-total">Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($salida->detalles as $detalle)
+            @php
+                $importe = (float) $detalle->precio_unitario * (int) $detalle->cantidad;
+            @endphp
+            <tr>
+                <td class="col-code">
+                    {{ $detalle->inventario?->economico ?? 'INV-' . $detalle->inventario_id }}
+                </td>
+                <td class="col-description">
+                    <strong>{{ mb_strtoupper($detalle->inventario?->nombre_producto ?? 'MATERIAL NO DISPONIBLE') }}</strong>
+                    @if($detalle->inventario?->categoria)
+                        <br>{{ mb_strtoupper($detalle->inventario->categoria) }}
                     @endif
-                </span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Cliente:</span>
-                <span class="info-value">{{ $salida->cliente->nombre ?? 'N/A' }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Área:</span>
-                <span class="info-value">{{ $salida->cliente->area ?? 'N/A' }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Atendido por:</span>
-                <span class="info-value">{{ $salida->user->name ?? 'N/A' }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Productos:</span>
-                <span class="info-value">{{ $salida->detalles->count() ?? 0 }}</span>
-            </div>
-        </div>
-        @if($salida->observaciones)
-        <div class="info-item">
-            <span class="info-label">Observaciones:</span>
-            <span class="info-value">{{ $salida->observaciones }}</span>
-        </div>
-        @endif
-    </div>
-
-    <!-- Tabla de productos -->
-    <div class="products-section">
-        <h3 class="section-title">DETALLE DE PRODUCTOS</h3>
-        <table class="products-table">
-            <thead>
-                <tr>
-                    <th width="5%">#</th>
-                    <th width="35%">PRODUCTO</th>
-                    <th width="15%" class="number">CANTIDAD</th>
-                    <th width="15%" class="currency">PRECIO UNIT.</th>
-                    <th width="15%" class="currency">SUBTOTAL</th>
-                    <th width="15%" class="currency">TOTAL</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($salida->detalles as $index => $detalle)
-                <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>
-                        <strong>{{ $detalle->inventario->nombre_producto ?? 'Producto' }}</strong><br>
-                        <small>{{ $detalle->inventario->categoria ?? 'Sin categoría' }}</small>
-                    </td>
-                    <td class="number">
-                        {{ $detalle->cantidad }} 
-                        {{ $detalle->inventario->medida ?? 'unid' }}
-                    </td>
-                    <td class="currency">${{ number_format($detalle->precio_unitario, 2) }}</td>
-                    <td class="currency">${{ number_format($detalle->precio_total, 2) }}</td>
-                    <td class="currency">${{ number_format($detalle->total_con_iva, 2) }}</td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6" style="text-align: center; padding: 20px;">
-                        No hay productos registrados
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Totales -->
-    <div class="totals-section">
-        <table class="totals-table">
-            <tr class="subtotal-row">
-                <td class="totals-label">Subtotal:</td>
-                <td class="currency">${{ number_format($salida->precio_total, 2) }}</td>
+                </td>
+                <td class="col-unit">
+                    {{ mb_strtoupper($detalle->inventario?->medida ?? 'UNIDAD') }}
+                </td>
+                <td class="col-quantity">{{ $detalle->cantidad }}</td>
+                <td class="col-price">${{ number_format((float) $detalle->precio_unitario, 2) }}</td>
+                <td class="col-total">${{ number_format($importe, 2) }}</td>
             </tr>
-            <tr class="iva-row">
-                <td class="totals-label">IVA (16%):</td>
-                <td class="currency">${{ number_format($salida->iva, 2) }}</td>
+        @empty
+            <tr>
+                <td colspan="6" style="height: 35px; text-align: center;">
+                    SIN MATERIALES REGISTRADOS
+                </td>
             </tr>
-            <tr class="total-row">
-                <td class="totals-label">TOTAL:</td>
-                <td class="currency">${{ number_format($salida->total_con_iva, 2) }}</td>
-            </tr>
-        </table>
-    </div>
+        @endforelse
 
-    <!-- Firmas -->
-    <div class="signatures-section">
-        <div class="signature-box">
-            <div class="signature-line"></div>
-            <div class="signature-label">ENTREGADO POR</div>
-            <div class="signature-name">{{ $salida->user->name ?? 'N/A' }}</div>
-            <div class="signature-label">CMAN GLOBAL CONSTRUCTION</div>
-        </div>
-        
-        <div class="signature-box">
-            <div class="signature-line"></div>
-            <div class="signature-label">RECIBIDO POR</div>
-            <div class="signature-name">{{ $salida->cliente->nombre ?? 'N/A' }}</div>
-            <div class="signature-label">{{ $salida->cliente->area ?? 'Cliente' }}</div>
-        </div>
-    </div>
+    </tbody>
+</table>
 
-    <!-- Pie de página -->
-    <div class="footer">
-        <p>Documento generado automáticamente por el Sistema de Control de Inventario de CMAN GLOBAL CONSTRUCTION</p>
-        <p>Este documento es válido como comprobante de salida de materiales</p>
-        <p>Impreso el {{ date('d/m/Y') }} a las {{ date('H:i:s') }}</p>
-    </div>
+<table class="summary-table">
+    <tr>
+        <td class="observations-cell">
+            <div class="small-header">Observaciones</div>
+            <div class="observations-body">
+                {{ $salida->observaciones ?: 'SIN OBSERVACIONES' }}
+            </div>
+        </td>
+        <td class="summary-space"></td>
+        <td class="total-cell">
+            <div class="small-header">Total</div>
+            <div class="total-value">
+                ${{ number_format((float) $salida->precio_total, 2) }}
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div class="obligations">
+    <div class="small-header">Obligaciones del solicitante</div>
+    <p>
+        EL PERSONAL SOLICITANTE DEBERÁ REVISAR LOS MATERIALES, HERRAMIENTAS
+        Y/O EQUIPOS AL MOMENTO DE LA ENTREGA. ESTOS NO DEBERÁN PRESENTAR
+        FALTANTES, DEFECTOS O ALTERACIONES; DE SER ASÍ, NO DEBERÁ RECIBIRLOS.
+    </p>
+</div>
+
+<table class="signatures">
+    <tr>
+        <td class="signature-cell">
+            <div class="signature-box">
+                <div class="signature-title">Vo. Bo. autorización de salida</div>
+                <div class="signature-space">
+                    @if($firmaAutorizador ?? null)
+                        <img class="signature-image"
+                            width="145"
+                            height="50"
+                            src="{{ $firmaAutorizador }}"
+                            alt="Firma de autorización">
+                    @endif
+                </div>
+                <div class="signature-line"></div>
+                <div class="signature-name">
+                    {{ mb_strtoupper(($firmanteAutorizador ?? null)?->name ?? 'ING. FRANCISCO MAGAÑA FIGUEROA') }}
+                </div>
+            </div>
+        </td>
+        <td class="signature-cell">
+            <div class="signature-box">
+                <div class="signature-title">Almacén general - entregó</div>
+                <div class="signature-space">
+                    @if($firmaAlmacen ?? null)
+                        <img class="signature-image"
+                            width="145"
+                            height="50"
+                            src="{{ $firmaAlmacen }}"
+                            alt="Firma de almacén">
+                    @endif
+                </div>
+                <div class="signature-line"></div>
+                <div class="signature-name">
+                    {{ mb_strtoupper(($firmanteAlmacen ?? null)?->name ?? 'ING. JOSE JAVIER PERERA DE LA CRUZ') }}
+                </div>
+            </div>
+        </td>
+        <td class="signature-cell">
+            <div class="signature-box">
+                <div class="signature-title">Recibió material</div>
+                <div class="signature-space">
+                    @if($firmaSolicitante ?? null)
+                        <img class="signature-image"
+                            width="145"
+                            height="50"
+                            src="{{ $firmaSolicitante }}"
+                            alt="Firma del solicitante">
+                    @endif
+                </div>
+                <div class="signature-line"></div>
+                <div class="signature-name">{{ mb_strtoupper($solicitanteNombre) }}</div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div class="footer">
+    Para dudas relacionadas con el suministro de materiales, comuníquese al
+    993 175 5082 o a almacengeneral@cman.com.mx
+</div>
 </body>
 </html>
