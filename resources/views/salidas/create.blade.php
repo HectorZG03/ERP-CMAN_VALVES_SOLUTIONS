@@ -15,6 +15,7 @@
                         <svg class="w-6 h-6 text-green-600 dark:text-green-400 mr-2"
                             fill="currentColor"
                             viewBox="0 0 20 20">
+
                             <path fill-rule="evenodd"
                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                 clip-rule="evenodd">
@@ -47,6 +48,7 @@
                             <div class="text-gray-600 dark:text-gray-400">
                                 Subtotal
                             </div>
+
                             <div class="font-semibold text-gray-900 dark:text-white text-lg">
                                 ${{ number_format($salidaReciente['subtotal'] ?? 0, 2) }}
                             </div>
@@ -56,6 +58,7 @@
                             <div class="text-gray-600 dark:text-gray-400">
                                 IVA (16%)
                             </div>
+
                             <div class="font-semibold text-gray-900 dark:text-white text-lg">
                                 ${{ number_format($salidaReciente['iva'] ?? 0, 2) }}
                             </div>
@@ -65,6 +68,7 @@
                             <div class="text-gray-600 dark:text-gray-400">
                                 Total general
                             </div>
+
                             <div class="font-semibold text-red-600 dark:text-red-400 text-xl">
                                 ${{ number_format($salidaReciente['total'] ?? 0, 2) }}
                             </div>
@@ -89,6 +93,7 @@
                 <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-400 mr-3 flex-shrink-0"
                     fill="currentColor"
                     viewBox="0 0 20 20">
+
                     <path fill-rule="evenodd"
                         d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
                         clip-rule="evenodd">
@@ -99,6 +104,7 @@
                     <h3 class="text-lg font-semibold text-yellow-800 dark:text-yellow-300">
                         Advertencia
                     </h3>
+
                     <p class="text-yellow-700 dark:text-yellow-400 whitespace-pre-line">
                         {{ session('warning') }}
                     </p>
@@ -121,6 +127,7 @@
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
                 Nueva salida de materiales
             </h1>
+
             <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                 Registra la entrega correspondiente a una solicitud aprobada.
             </p>
@@ -136,7 +143,7 @@
         <form method="POST"
             action="{{ route('salidas.store') }}"
             id="salidaForm"
-            data-buscar-productos-url="{{ route('salidas.buscar-productos') }}"
+            data-buscar-solicitudes-url="{{ route('salidas.buscar-solicitudes') }}"
             data-solicitud-url-template="{{ route(
                 'salidas.solicitudes.show',
                 ['solicitud' => '__SOLICITUD__']
@@ -147,37 +154,36 @@
             {{-- Datos principales --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                    <label for="solicitud_material_id"
+                    <label for="buscar-solicitud"
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Solicitud aprobada *
                     </label>
 
-                    <select name="solicitud_material_id"
-                        id="solicitud_material_id"
-                        required
-                        class="block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200 p-2">
+                    <div id="buscador-solicitudes" class="relative">
+                        <input type="search"
+                            id="buscar-solicitud"
+                            autocomplete="off"
+                            placeholder="Buscar por número, solicitante, empleado, operador o destino..."
+                            aria-autocomplete="list"
+                            aria-controls="resultados-solicitudes"
+                            aria-expanded="false"
+                            class="block w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200 p-2">
 
-                        <option value="">Seleccionar solicitud</option>
+                        <input type="hidden"
+                            name="solicitud_material_id"
+                            id="solicitud_material_id"
+                            value="{{ old('solicitud_material_id') }}">
 
-                        @forelse($solicitudesAprobadas as $solicitud)
-                            <option value="{{ $solicitud->id }}"
-                                {{ (string) old('solicitud_material_id') === (string) $solicitud->id
-                                    ? 'selected'
-                                    : '' }}>
-                                Solicitud #{{ $solicitud->id }}
-                                — {{ $solicitud->user->name ?? 'Usuario no disponible' }}
-                                — {{ $solicitud->destino ?? 'Sin destino' }}
-                                — {{ $solicitud->created_at?->format('d/m/Y') }}
-                            </option>
-                        @empty
-                            <option value="" disabled>
-                                No existen solicitudes aprobadas disponibles
-                            </option>
-                        @endforelse
-                    </select>
+                        <div id="resultados-solicitudes"
+                            role="listbox"
+                            class="hidden absolute z-20 mt-1 max-h-80 w-full overflow-y-auto rounded-md border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 shadow-lg">
+                        </div>
+                    </div>
 
-                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                        Selecciona la solicitud que será atendida por almacén.
+                    <p id="estado-busqueda-solicitudes"
+                        class="mt-1 text-xs text-gray-500 dark:text-gray-400"
+                        aria-live="polite">
+                        Escribe un número de solicitud o al menos dos caracteres.
                     </p>
 
                     @error('solicitud_material_id')
@@ -213,6 +219,7 @@
                 <h3 class="font-semibold text-blue-900 dark:text-blue-200">
                     Salida vinculada con solicitud
                 </h3>
+
                 <p class="mt-1 text-sm text-blue-700 dark:text-blue-300">
                     Solo podrán registrarse productos incluidos en la solicitud
                     seleccionada y cantidades que continúen pendientes de entrega.
@@ -224,7 +231,9 @@
                 <label for="observaciones"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Observaciones
-                    <span class="text-gray-400 text-xs">(opcional)</span>
+                    <span class="text-gray-400 text-xs">
+                        (opcional)
+                    </span>
                 </label>
 
                 <textarea name="observaciones"
@@ -243,32 +252,36 @@
 
             <hr class="my-6 border-gray-300 dark:border-gray-600">
 
-            {{-- Productos --}}
+            {{-- Materiales --}}
             <div class="mb-6">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             Materiales entregados
                         </h3>
+
                         <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            Agrega únicamente productos pertenecientes a la solicitud.
+                            Los materiales pendientes se cargarán desde la solicitud seleccionada.
                         </p>
                     </div>
 
                     <button type="button"
-                        id="agregar-producto"
+                        id="recargar-materiales"
                         class="inline-flex items-center justify-center bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
 
                         <svg class="w-5 h-5 mr-2"
-                            fill="currentColor"
+                            fill="none"
+                            stroke="currentColor"
                             viewBox="0 0 20 20">
-                            <path fill-rule="evenodd"
-                                d="M10 3a1 1 0 00-1 1v5H4a1 1 0 100 2h5v5a1 1 0 102 0v-5h5a1 1 0 100-2h-5V4a1 1 0 00-1-1z"
-                                clip-rule="evenodd">
+
+                            <path stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 4v5h5M16 16v-5h-5M5.5 13.5A6 6 0 0015 11M14.5 6.5A6 6 0 005 9">
                             </path>
                         </svg>
 
-                        Agregar producto
+                        Recargar materiales
                     </button>
                 </div>
 
@@ -306,6 +319,7 @@
                         <span class="text-sm text-gray-600 dark:text-gray-400">
                             Productos
                         </span>
+
                         <div id="total-productos"
                             class="text-2xl font-bold text-blue-600 dark:text-blue-400">
                             0
@@ -316,6 +330,7 @@
                         <span class="text-sm text-gray-600 dark:text-gray-400">
                             Subtotal
                         </span>
+
                         <div id="subtotal-total"
                             class="text-2xl font-bold text-gray-900 dark:text-white">
                             $0.00
@@ -326,6 +341,7 @@
                         <span class="text-sm text-gray-600 dark:text-gray-400">
                             IVA (16%)
                         </span>
+
                         <div id="iva-total"
                             class="text-2xl font-bold text-gray-900 dark:text-white">
                             $0.00
@@ -336,6 +352,7 @@
                         <span class="text-sm text-gray-600 dark:text-gray-400">
                             Total general
                         </span>
+
                         <div id="total-general"
                             class="text-3xl font-bold text-red-600 dark:text-red-400">
                             $0.00
@@ -363,6 +380,7 @@
                     <svg class="w-5 h-5 mr-2"
                         fill="currentColor"
                         viewBox="0 0 20 20">
+
                         <path fill-rule="evenodd"
                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
                             clip-rule="evenodd">
@@ -409,5 +427,7 @@
 }
 </style>
 
-<script src="{{ asset('js/salidas-create.js') }}" defer></script>
+<script type="module"
+    src="{{ asset('js/inventario/salidas/salidas.js') }}">
+</script>
 @endsection

@@ -118,19 +118,19 @@ Route::middleware(['auth'])->group(function () {
             [EntradaController::class, 'viewPDF']
         )->name('entradas.view-pdf');
 
-        // Búsqueda AJAX de productos para salidas antiguas o manuales
+        // Búsqueda AJAX de solicitudes aprobadas con materiales pendientes
         Route::get(
-            'salidas/buscar-productos',
-            [SalidaController::class, 'buscarProductos']
-        )->name('salidas.buscar-productos');
+            'salidas/buscar-solicitudes',
+            [SalidaController::class, 'buscarSolicitudes']
+        )->name('salidas.buscar-solicitudes');
 
-        // Obtener una solicitud aprobada y sus materiales pendientes
+        // Obtener los datos y materiales pendientes de una solicitud aprobada
         Route::get(
             'salidas/solicitudes/{solicitud}',
             [SalidaController::class, 'obtenerSolicitud']
         )->name('salidas.solicitudes.show');
 
-        // Salidas
+        // Salidas de material
         Route::resource('salidas', SalidaController::class)
             ->only(['index', 'create', 'store', 'show']);
 
@@ -143,7 +143,7 @@ Route::middleware(['auth'])->group(function () {
             'salidas/{salida}/view-pdf',
             [SalidaController::class, 'viewPDF']
         )->name('salidas.view-pdf');
-    });
+            });
 
     // Solicitudes de material
     Route::get(
