@@ -2,460 +2,537 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Inventario;
+use App\Models\Personal;
 use App\Models\SolicitudMaterial;
 use App\Models\SolicitudMaterialDetalle;
-use App\Models\Inventario;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-
-// PARTE PARA EXCEL
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class SolicitudMaterialController extends Controller
 {
-    
-
-
-    private function obtenerImagenEstatusSolicitud($estatus)
+    /**
+     * Obtener la imagen correspondiente al estatus de la solicitud.
+     */
+    private function obtenerImagenEstatusSolicitud(string $estatus): string
     {
         $base = storage_path('app/public/admin/');
 
-        return match(strtolower($estatus)) {
-            'aprobado' => $base.'01.png',
-            'pendiente' => $base.'04.png',
-            'denegado' => $base.'03.png',
-            default => $base.'04.png',
+        return match (strtolower($estatus)) {
+            'aprobado' => $base . '01.png',
+            'denegado' => $base . '03.png',
+            default => $base . '04.png',
         };
     }
 
-
-
+    /**
+     * Mostrar el listado de solicitudes.
+     */
     public function index(Request $request)
     {
-        $user = auth()->user();
+        $user = $request->user();
         $filterStatus = $request->get('status', 'all');
 
-        // Base query según permisos
-        $baseQuery = ($user->canApproveRequests() || $user->canManageInventory())
-            ? SolicitudMaterial::with(['detalles.inventario', 'user'])
-            : SolicitudMaterial::where('user_id', $user->id)->with(['detalles.inventario', 'user']);
-
-        // Conteos reales desde la BD (sin importar paginación)
-        $countQuery = ($user->canApproveRequests() || $user->canManageInventory())
-            ? SolicitudMaterial::query()
-            : SolicitudMaterial::where('user_id', $user->id);
-
-        $counts = [
-            'all'      => (clone $countQuery)->count(),
-            'pendiente' => (clone $countQuery)->where('estatus', 'pendiente')->count(),
-            'aprobado'  => (clone $countQuery)->where('estatus', 'aprobado')->count(),
-            'denegado'  => (clone $countQuery)->where('estatus', 'denegado')->count(),
+        $estatusValidos = [
+            'all',
+            'pendiente',
+            'aprobado',
+            'denegado',
         ];
 
-        // Si hay filtro activo → sin paginación, todos los registros del estado
+        if (!in_array($filterStatus, $estatusValidos, true)) {
+            $filterStatus = 'all';
+        }
+
+        $puedeVerTodas = $user->canApproveRequests()
+            || $user->canManageInventory();
+
+        $baseQuery = SolicitudMaterial::query()
+            ->with([
+                'detalles.inventario',
+                'user',
+                'operadorPersonal',
+            ]);
+
+        $countQuery = SolicitudMaterial::query();
+
+        if (!$puedeVerTodas) {
+            $baseQuery->where('user_id', $user->id);
+            $countQuery->where('user_id', $user->id);
+        }
+
+        $counts = [
+            'all' => (clone $countQuery)->count(),
+            'pendiente' => (clone $countQuery)
+                ->where('estatus', 'pendiente')
+                ->count(),
+            'aprobado' => (clone $countQuery)
+                ->where('estatus', 'aprobado')
+                ->count(),
+            'denegado' => (clone $countQuery)
+                ->where('estatus', 'denegado')
+                ->count(),
+        ];
+
         if ($filterStatus !== 'all') {
-            $solicitudes = (clone $baseQuery)
+            $solicitudes = $baseQuery
                 ->where('estatus', $filterStatus)
                 ->orderByDesc('created_at')
-                ->get(); // <- Collection, sin paginar
+                ->get();
+
             $isPaginated = false;
         } else {
-            $solicitudes = (clone $baseQuery)
+            $solicitudes = $baseQuery
                 ->orderByDesc('created_at')
-                ->paginate(15);
+                ->paginate(15)
+                ->withQueryString();
+
             $isPaginated = true;
         }
 
-        return view('solicitudes.index', compact('solicitudes', 'counts', 'filterStatus', 'isPaginated'));
+        return view('solicitudes.index', compact(
+            'solicitudes',
+            'counts',
+            'filterStatus',
+            'isPaginated'
+        ));
     }
 
-    public function create()
-{
-    $personal = \App\Models\Personal::activo()
-        ->orderBy('nombre_completo')
-        ->get(['id', 'nombre_completo', 'employee_id', 'area']);
+    /**
+     * Mostrar el formulario para crear una solicitud.
+     */
+    public function create(Request $request)
+    {
+        $personal = Personal::activo()
+            ->orderBy('nombre_completo')
+            ->get([
+                'id',
+                'nombre_completo',
+                'employee_id',
+                'area',
+            ]);
 
-    return view('solicitudes.create', compact('personal'));
-}
+        $puedeCrearEpp = $request->user()->canManageValeEPP();
 
+        return view('solicitudes.create', compact(
+            'personal',
+            'puedeCrearEpp'
+        ));
+    }
+
+    /**
+     * Registrar una solicitud.
+     */
     public function store(Request $request)
-{
-    // ✅ VALIDACIÓN — aquí va personal_id
-    $request->validate([
-        'personal_id'  => 'nullable|exists:personal,id',
-        'comentario'   => 'nullable|string',
-        'productos'    => 'required|array|min:1',
-        'productos.*.inventario_id'         => 'required|exists:inventarios,id',
-        'productos.*.cantidad_solicitada'   => 'required|integer|min:1',
-    ], [
-        'productos.required'                        => 'Debe agregar al menos un producto a la solicitud',
-        'productos.*.inventario_id.required'        => 'Debe seleccionar un producto válido',
-        'productos.*.cantidad_solicitada.required'  => 'La cantidad es obligatoria',
-        'productos.*.cantidad_solicitada.min'       => 'La cantidad debe ser mayor a 0',
-    ]);
+    {
+        $user = $request->user();
 
-    DB::beginTransaction();
-
-    try {
-        foreach ($request->productos as $producto) {
-            $inventario = Inventario::find($producto['inventario_id']);
-
-            if (!$inventario) {
-                throw new \Exception("El producto con ID {$producto['inventario_id']} no existe");
-            }
-
-            if ($inventario->existencia < $producto['cantidad_solicitada']) {
-                throw new \Exception("No hay suficiente stock de '{$inventario->nombre_producto}'. Disponible: {$inventario->existencia}, Solicitado: {$producto['cantidad_solicitada']}");
-            }
-        }
-
-        // ✅ CREAR SOLICITUD — aquí va personal_id
-        $solicitud = SolicitudMaterial::create([
-            'user_id'     => auth()->id(),
-            'personal_id' => $request->personal_id ?: null,
-            'destino'     => $request->destino,
-            'comentario'  => $request->comentario,
-            'operador'    => $request->operador ?? 'N/A',
-            'categoria'   => $request->categoria ?? 'N/A',
-            'estatus'     => 'pendiente',
+        $validated = $request->validate([
+            'personal_id' => [
+                'nullable',
+                'exists:personal,id',
+            ],
+            'destino' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+            'comentario' => [
+                'nullable',
+                'string',
+            ],
+            'operador' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'categoria' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'tipo_solicitud' => [
+                'nullable',
+                Rule::in(SolicitudMaterial::TIPOS_VALIDOS),
+            ],
+            'productos' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+            'productos.*.inventario_id' => [
+                'required',
+                'integer',
+                'distinct',
+                'exists:inventarios,id',
+            ],
+            'productos.*.cantidad_solicitada' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
+        ], [
+            'destino.required' => 'Debe seleccionar un destino.',
+            'tipo_solicitud.in' => 'El tipo de solicitud no es válido.',
+            'productos.required' => 'Debe agregar al menos un producto a la solicitud.',
+            'productos.min' => 'Debe agregar al menos un producto a la solicitud.',
+            'productos.*.inventario_id.required' => 'Debe seleccionar un producto válido.',
+            'productos.*.inventario_id.distinct' => 'No puede agregar el mismo producto más de una vez.',
+            'productos.*.inventario_id.exists' => 'Uno de los productos seleccionados no existe.',
+            'productos.*.cantidad_solicitada.required' => 'La cantidad es obligatoria.',
+            'productos.*.cantidad_solicitada.integer' => 'La cantidad debe ser un número entero.',
+            'productos.*.cantidad_solicitada.min' => 'La cantidad debe ser mayor a cero.',
         ]);
 
-        foreach ($request->productos as $producto) {
-            $inventario = Inventario::find($producto['inventario_id']);
+        $tipoSolicitud = $validated['tipo_solicitud']
+            ?? SolicitudMaterial::TIPO_ESTANDAR;
 
-            SolicitudMaterialDetalle::create([
-                'solicitud_material_id' => $solicitud->id,
-                'inventario_id'         => $producto['inventario_id'],
-                'cantidad_solicitada'   => $producto['cantidad_solicitada'],
-                'precio_unitario'       => $inventario->getPrecioPromedio(),
+        if (
+            $tipoSolicitud === SolicitudMaterial::TIPO_EPP
+            && !$user->canManageValeEPP()
+        ) {
+            throw ValidationException::withMessages([
+                'tipo_solicitud' => 'Solo el personal de HSE puede crear solicitudes de EPP.',
             ]);
         }
 
-        DB::commit();
+        try {
+            DB::transaction(function () use (
+                $validated,
+                $tipoSolicitud,
+                $user
+            ) {
+                $inventarioIds = collect($validated['productos'])
+                    ->pluck('inventario_id')
+                    ->map(fn ($id) => (int) $id)
+                    ->values();
 
-        return redirect()->route('solicitudes.index')->with('success', 'Solicitud enviada correctamente');
+                $inventarios = Inventario::query()
+                    ->whereIn('id', $inventarioIds)
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
 
-    } catch (\Exception $e) {
-        DB::rollback();
-        return back()->withErrors(['error' => $e->getMessage()])->withInput();
-    }
-}
+                foreach ($validated['productos'] as $indice => $producto) {
+                    $inventarioId = (int) $producto['inventario_id'];
+                    $cantidad = (int) $producto['cantidad_solicitada'];
+                    $inventario = $inventarios->get($inventarioId);
 
-    public function show(SolicitudMaterial $solicitud)
-    {
-        $user = auth()->user();
-        
-        // Verificar permisos
-        if (!($solicitud->user_id == $user->id || 
-              $user->canApproveRequests() || 
-              $user->canManageInventory())) {
-            abort(403, 'No tienes permisos para ver esta solicitud');
+                    if (!$inventario) {
+                        throw ValidationException::withMessages([
+                            "productos.{$indice}.inventario_id"
+                                => 'El producto seleccionado ya no está disponible.',
+                        ]);
+                    }
+
+                    if (
+                        $tipoSolicitud === SolicitudMaterial::TIPO_EPP
+                        && strtoupper(trim((string) $inventario->categoria))
+                            !== 'SEGURIDAD'
+                    ) {
+                        throw ValidationException::withMessages([
+                            "productos.{$indice}.inventario_id"
+                                => "El producto '{$inventario->nombre_producto}' no pertenece a la categoría SEGURIDAD.",
+                        ]);
+                    }
+
+                    if ($inventario->existencia < $cantidad) {
+                        throw ValidationException::withMessages([
+                            "productos.{$indice}.cantidad_solicitada"
+                                => "No hay suficiente existencia de '{$inventario->nombre_producto}'. Disponible: {$inventario->existencia}.",
+                        ]);
+                    }
+                }
+
+                $solicitud = SolicitudMaterial::create([
+                    'user_id' => $user->id,
+                    'personal_id' => $validated['personal_id'] ?? null,
+                    'destino' => $validated['destino'],
+                    'comentario' => $validated['comentario'] ?? null,
+                    'operador' => $validated['operador'] ?? 'N/A',
+                    'categoria' => $validated['categoria'] ?? 'N/A',
+                    'tipo_solicitud' => $tipoSolicitud,
+                    'estatus' => 'pendiente',
+                ]);
+
+                foreach ($validated['productos'] as $producto) {
+                    $inventarioId = (int) $producto['inventario_id'];
+                    $inventario = $inventarios->get($inventarioId);
+
+                    SolicitudMaterialDetalle::create([
+                        'solicitud_material_id' => $solicitud->id,
+                        'inventario_id' => $inventarioId,
+                        'cantidad_solicitada'
+                            => (int) $producto['cantidad_solicitada'],
+                        'precio_unitario'
+                            => $inventario->getPrecioPromedio(),
+                    ]);
+                }
+            });
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()
+                ->withErrors([
+                    'error' => 'No fue posible registrar la solicitud. Inténtelo nuevamente.',
+                ])
+                ->withInput();
         }
 
-        // Cargar relaciones
-        $solicitud->load(['detalles.inventario', 'user']);
-        
+        $mensaje = $tipoSolicitud === SolicitudMaterial::TIPO_EPP
+            ? 'Solicitud de EPP enviada correctamente.'
+            : 'Solicitud de materiales enviada correctamente.';
+
+        return redirect()
+            ->route('solicitudes.index')
+            ->with('success', $mensaje);
+    }
+
+    /**
+     * Mostrar una solicitud.
+     */
+    public function show(
+        Request $request,
+        SolicitudMaterial $solicitud
+    ) {
+        $user = $request->user();
+
+        $puedeVer = (int) $solicitud->user_id === (int) $user->id
+            || $user->canApproveRequests()
+            || $user->canManageInventory();
+
+        if (!$puedeVer) {
+            abort(
+                403,
+                'No tienes permisos para ver esta solicitud.'
+            );
+        }
+
+        $solicitud->load([
+            'detalles.inventario',
+            'user',
+            'operadorPersonal',
+        ]);
+
         return view('solicitudes.show', compact('solicitud'));
     }
 
-
-    // este no descuenta el inventario
-     public function updateEstatus(Request $request, SolicitudMaterial $solicitud)
-     {
-         if (!auth()->user()->canApproveRequests()) {
-             abort(403);
-         }
-
-         $request->validate([
-             'estatus' => 'required|in:aprobado,denegado',
-         ]);
-
-         $solicitud->update(['estatus' => $request->estatus]);
-
-         return back()->with('success', 'Estatus actualizado');
-     }
-
-
-    // CON ESTE  SI DESCUESTA EL INVENTARIO
-    // public function updateEstatus(Request $request, SolicitudMaterial $solicitud)
-    // {
-    //     if (!auth()->user()->canApproveRequests()) {
-    //         abort(403);
-    //     }
-
-    //     $request->validate([
-    //         'estatus' => 'required|in:aprobado,denegado',
-    //     ]);
-
-    //     DB::beginTransaction();
-        
-    //     try {
-    //         $estatusAnterior = $solicitud->estatus;
-    //         $nuevoEstatus = $request->estatus;
-
-    //         // Si se aprueba la solicitud, reducir existencia del inventario
-    //         if ($nuevoEstatus === 'aprobado' && $estatusAnterior !== 'aprobado') {
-    //             foreach ($solicitud->detalles as $detalle) {
-    //                 $inventario = $detalle->inventario;
-                    
-    //                 if (!$inventario) {
-    //                     throw new \Exception("No se puede procesar la solicitud porque uno de los productos no existe");
-    //                 }
-                    
-    //                 if ($inventario->existencia < $detalle->cantidad_solicitada) {
-    //                     throw new \Exception("No hay suficiente existencia de '{$inventario->nombre_producto}' para aprobar esta solicitud");
-    //                 }
-                    
-    //                 $inventario->decrement('existencia', $detalle->cantidad_solicitada);
-    //             }
-    //         }
-            
-    //         // Si se deniega una solicitud previamente aprobada, restaurar existencia
-    //         if ($nuevoEstatus === 'denegado' && $estatusAnterior === 'aprobado') {
-    //             foreach ($solicitud->detalles as $detalle) {
-    //                 $detalle->inventario->increment('existencia', $detalle->cantidad_solicitada);
-    //             }
-    //         }
-
-    //         $solicitud->update(['estatus' => $nuevoEstatus]);
-
-    //         DB::commit();
-            
-    //         return back()->with('success', 'Estatus actualizado correctamente');
-            
-    //     } catch (\Exception $e) {
-    //         DB::rollback();
-    //         return back()->withErrors(['error' => $e->getMessage()]);
-    //     }
-    // }
-
-
-    // Buscar solicitudes por número de folio, destino o estatus
-    public function search(Request $request)
-    {
-        $query = SolicitudMaterial::query();
-
-        if ($request->filled('term')) {
-            $term = $request->get('term');
-            $query->where(function ($q) use ($term) {
-                $q->where('id', $term)
-                  ->orWhere('destino', 'like', "%{$term}%")
-                  ->orWhere('estatus', 'like', "%{$term}%");
-            });
+    /**
+     * Aprobar o denegar una solicitud.
+     *
+     * Este proceso no descuenta inventario.
+     */
+    public function updateEstatus(
+        Request $request,
+        SolicitudMaterial $solicitud
+    ) {
+        if (!$request->user()->canApproveRequests()) {
+            abort(403);
         }
 
-        // Opcional: limitar resultados y cargar relaciones
-        $solicitudes = $query->with(['user'])
-                             ->orderByDesc('created_at')
-                             ->limit(20)
-                             ->get();
+        $validated = $request->validate([
+            'estatus' => [
+                'required',
+                Rule::in([
+                    'aprobado',
+                    'denegado',
+                ]),
+            ],
+        ]);
 
-        return response()->json($solicitudes);
+        $solicitud->update([
+            'estatus' => $validated['estatus'],
+        ]);
+
+        return back()->with(
+            'success',
+            'Estatus actualizado correctamente.'
+        );
     }
 
-    // Método para búsqueda de productos via AJAX
+    /**
+     * Buscar productos disponibles mediante AJAX.
+     */
     public function buscarProductos(Request $request)
     {
-        $search = $request->get('q', '');
-        
-        $productos = Inventario::where('existencia', '>', 0)
-            ->where(function($query) use ($search) {
-                $query->where('nombre_producto', 'LIKE', "%{$search}%")
-                      ->orWhere('categoria', 'LIKE', "%{$search}%")
-                      ->orWhere('medida', 'LIKE', "%{$search}%");
+        $validated = $request->validate([
+            'q' => [
+                'nullable',
+                'string',
+                'max:150',
+            ],
+            'tipo_solicitud' => [
+                'nullable',
+                Rule::in(SolicitudMaterial::TIPOS_VALIDOS),
+            ],
+        ]);
+
+        $search = trim($validated['q'] ?? '');
+        $tipoSolicitud = $validated['tipo_solicitud']
+            ?? SolicitudMaterial::TIPO_ESTANDAR;
+
+        if (
+            $tipoSolicitud === SolicitudMaterial::TIPO_EPP
+            && !$request->user()->canManageValeEPP()
+        ) {
+            $tipoSolicitud = SolicitudMaterial::TIPO_ESTANDAR;
+        }
+
+        $productos = Inventario::query()
+            ->where('existencia', '>', 0)
+            ->when(
+                $tipoSolicitud === SolicitudMaterial::TIPO_EPP,
+                function ($query) {
+                    $query->whereRaw(
+                        'UPPER(TRIM(categoria)) = ?',
+                        ['SEGURIDAD']
+                    );
+                }
+            )
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($subquery) use ($search) {
+                    $subquery
+                        ->where(
+                            'nombre_producto',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'economico',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'categoria',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'medida',
+                            'like',
+                            "%{$search}%"
+                        );
+                });
             })
-            ->select('id', 'nombre_producto', 'categoria', 'medida', 'existencia')
-            ->limit(10)
+            ->select([
+                'id',
+                'nombre_producto',
+                'economico',
+                'categoria',
+                'medida',
+                'ubicacion',
+                'existencia',
+            ])
+            ->orderBy('nombre_producto')
+            ->limit(20)
             ->get();
 
         return response()->json($productos);
     }
 
-    // Método para obtener detalles de un producto específico
-    public function obtenerProducto(Request $request, $id)
+    /**
+     * Obtener un producto específico.
+     */
+    public function obtenerProducto(Request $request, int $id)
     {
-        $producto = Inventario::where('id', $id)
+        $validated = $request->validate([
+            'tipo_solicitud' => [
+                'nullable',
+                Rule::in(SolicitudMaterial::TIPOS_VALIDOS),
+            ],
+        ]);
+
+        $tipoSolicitud = $validated['tipo_solicitud']
+            ?? SolicitudMaterial::TIPO_ESTANDAR;
+
+        if (
+            $tipoSolicitud === SolicitudMaterial::TIPO_EPP
+            && !$request->user()->canManageValeEPP()
+        ) {
+            $tipoSolicitud = SolicitudMaterial::TIPO_ESTANDAR;
+        }
+
+        $producto = Inventario::query()
+            ->whereKey($id)
             ->where('existencia', '>', 0)
+            ->when(
+                $tipoSolicitud === SolicitudMaterial::TIPO_EPP,
+                function ($query) {
+                    $query->whereRaw(
+                        'UPPER(TRIM(categoria)) = ?',
+                        ['SEGURIDAD']
+                    );
+                }
+            )
             ->first();
 
         if (!$producto) {
-            return response()->json(['error' => 'Producto no encontrado o sin stock'], 404);
+            return response()->json([
+                'error' => 'Producto no encontrado o sin existencia.',
+            ], 404);
         }
 
         return response()->json([
             'id' => $producto->id,
             'nombre_producto' => $producto->nombre_producto,
+            'economico' => $producto->economico,
             'categoria' => $producto->categoria,
             'medida' => $producto->medida,
+            'ubicacion' => $producto->ubicacion,
             'existencia' => $producto->existencia,
             'precio_promedio' => $producto->getPrecioPromedio(),
         ]);
     }
 
-
-    // pdf
-
-   public function pdf(SolicitudMaterial $solicitud)
-{
-    $solicitud->load(['detalles.inventario', 'user']);
-    
-    // Firma del director/admin según estatus
-    $firmaAdminPath = $this->obtenerImagenEstatusSolicitud($solicitud->estatus);
-    $firmaAdminBase64 = file_exists($firmaAdminPath) 
-        ? base64_encode(file_get_contents($firmaAdminPath)) 
-        : null;
-
-    // Firma del solicitante
-    $firmaUserBase64 = null;
-    if ($solicitud->user && $solicitud->user->signature) {
-        $signaturePath = storage_path('app/public/' . $solicitud->user->signature);
-        if (file_exists($signaturePath)) {
-            $firmaUserBase64 = base64_encode(file_get_contents($signaturePath));
-        }
-    }
-
-    return view('solicitudes.pdf', compact('solicitud', 'firmaAdminBase64', 'firmaUserBase64'));
-}
-
-
-
-
-
-    // ✅ EXPORTACIÓN A EXCEL CON IMÁGENES CORRECTAS
-    public function exportExcel(SolicitudMaterial $solicitud)
+    /**
+     * Mostrar el PDF de la solicitud.
+     */
+    public function pdf(SolicitudMaterial $solicitud)
     {
-        $solicitud->load(['detalles.inventario', 'user']);
+        $solicitud->load([
+            'detalles.inventario',
+            'user',
+            'operadorPersonal',
+        ]);
 
-        // Ruta a la plantilla
-        $templatePath = storage_path('app/plantillas/SolicitudMateriales365.xlsx');
+        $firmaAdminPath = $this->obtenerImagenEstatusSolicitud(
+            (string) $solicitud->estatus
+        );
 
-        // Cargar plantilla existente
-        $spreadsheet = IOFactory::load($templatePath);
-        $sheet = $spreadsheet->getActiveSheet();
+        $firmaAdminBase64 = file_exists($firmaAdminPath)
+            ? base64_encode(file_get_contents($firmaAdminPath))
+            : null;
 
-        // 🔹 Rellena los datos donde corresponda
-        $sheet->setCellValue('F16', $solicitud->user->name);
-        $sheet->setCellValue('F14', $solicitud->user->role);
-        $sheet->setCellValue('F20', $solicitud->destino);
-        $sheet->setCellValue('F22', $solicitud->created_at->format('d/m/Y'));
-        $sheet->setCellValue('Q58', $solicitud->created_at->format('d/m/Y'));
-        $sheet->setCellValue('E47', $solicitud->comentario ?? 'N/A');
-        $sheet->setCellValue('F18', $solicitud->user->num_empleado ?? 'N/A');
+        $firmaUserBase64 = null;
 
-        // $sheet->setCellValue('M14', $solicitud->operador ?? 'N/A');
-        // $sheet->setCellValue('M16', $solicitud->categoria ?? 'N/A');
-        
-         $sheet->setCellValue('M14', $solicitud->operadorPersonal->nombre_completo ?? 'N/A');
-         $sheet->setCellValue('M16', $solicitud->operadorPersonal->grado ?? 'N/A');
-
-
-        // Supongamos que tus productos comienzan en la fila 10:
-    $row = 27;
-    foreach ($solicitud->detalles as $detalle) {
-        $sheet->setCellValue('D' . $row, $detalle->cantidad_solicitada);
-        $sheet->setCellValue('E' . $row, $detalle->inventario->medida ?? '-');
-        $sheet->setCellValue('F' . $row, $detalle->inventario->nombre_producto ?? 'N/A');
-        
-        
-        
-        // $sheet->setCellValue('B' . $row, $detalle->inventario->categoria ?? '-');
-        // $sheet->setCellValue('E' . $row, $detalle->precio_unitario);
-        $row++;
-    }
-
-
-
-
-    // ================= FIRMA =================
-       if ($solicitud->user && $solicitud->user->signature) {
-
-
-            $signaturePath = storage_path('app/public/'.$solicitud->user->signature);
+        if ($solicitud->user?->signature) {
+            $signaturePath = storage_path(
+                'app/public/' . $solicitud->user->signature
+            );
 
             if (file_exists($signaturePath)) {
-
-                $drawing = new Drawing();
-                $drawing->setPath($signaturePath);
-                $drawing->setCoordinates('o57'); // Posición de la firma
-                $drawing->setOffsetX(70);// derecha
-                $drawing->setOffsetY(-208);// abajo
-                $drawing->setHeight(150);// altura en píxeles
-                $drawing->setWidth(260);// ancho en píxeles (descomentar si necesitas)
-                $drawing->setWorksheet($sheet);
+                $firmaUserBase64 = base64_encode(
+                    file_get_contents($signaturePath)
+                );
             }
         }
 
+            $vistaPdf = $solicitud->esEpp()
+                ? 'solicitudes.pdf-epp'
+                : 'solicitudes.pdf';
 
-
-
-        // ================= ESTATUS SOLICITUD =================
-            $imgEstatus = $this->obtenerImagenEstatusSolicitud($solicitud->estatus);
-
-            if(file_exists($imgEstatus)){
-
-                $drawEstatus = new Drawing();
-                $drawEstatus->setName('Estatus Solicitud');
-                $drawEstatus->setDescription('Estatus de solicitud');
-                $drawEstatus->setPath($imgEstatus);
-
-                // 👇 AQUÍ PONES TU POSICIÓN EXACTA
-                $drawEstatus->setCoordinates('b53');
-
-                // Ajuste fino (igual que hicimos antes)
-                $drawEstatus->setOffsetX(40);
-                $drawEstatus->setOffsetY(-60);
-
-                $drawEstatus->setHeight(100);
-                $drawEstatus->setWidth(220);
-
-                $drawEstatus->setWorksheet($sheet);
-            }
-
-
-        // ✅ INSERTAR FOTO DE PERFIL COMO IMAGEN (OPCIONAL)
-        // if ($solicitud->user->profile_photo) {
-        //     $photoPath = storage_path('app/public/' . $solicitud->user->profile_photo);
-            
-        //     if (file_exists($photoPath)) {
-        //         $photoDrawing = new Drawing();
-        //         $photoDrawing->setName('Foto de Perfil');
-        //         $photoDrawing->setDescription('Foto del usuario');
-        //         $photoDrawing->setPath($photoPath);
-                
-        //         // Posicionar donde quieras la foto (por ejemplo F26)
-        //         $photoDrawing->setCoordinates('F26');
-                
-        //         // Ajustar tamaño
-        //         $photoDrawing->setHeight(100);
-                
-        //         // Agregar la imagen a la hoja
-        //         $photoDrawing->setWorksheet($sheet);
-        //     }
-        // }
-
-        // // Productos - comenzando en la fila 27
-        // $row = 27;
-        // foreach ($solicitud->detalles as $detalle) {
-        //     $sheet->setCellValue('D' . $row, $detalle->cantidad_solicitada);
-        //     $sheet->setCellValue('E' . $row, $detalle->inventario->medida ?? '-');
-        //     $sheet->setCellValue('F' . $row, $detalle->inventario->nombre_producto ?? 'N/A');
-        //     $row++;
-        // }
-
-        //  // Descargar el archivo final
-         $writer = new Xlsx($spreadsheet);
-         $filename = 'Solicitud_Materiales_' . $solicitud->id . '.xlsx';
-
-         return new StreamedResponse(function() use ($writer) {
-             $writer->save('php://output');
-         }, 200, [
-             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-             'Content-Disposition' => 'attachment;filename="' . $filename . '"',
-             'Cache-Control' => 'max-age=0',
-         ]);
+            return view(
+                $vistaPdf,
+                compact(
+                    'solicitud',
+                    'firmaAdminBase64',
+                    'firmaUserBase64'
+                )
+            );
     }
 }

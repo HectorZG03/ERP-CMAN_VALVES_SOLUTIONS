@@ -1,23 +1,23 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\AjusteInventarioController;
-use App\Http\Controllers\ProveedorController;
-use App\Http\Controllers\ClienteController;
-use App\Http\Controllers\EntradaController;
-use App\Http\Controllers\SalidaController;
-use App\Http\Controllers\SolicitudMaterialController;
-use App\Http\Controllers\RequisicionController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\PrestamoMaterialController;
-use App\Http\Controllers\PersonalController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BajaColaboradorController;
 use App\Http\Controllers\CambioPuestoSueldoController;
-use App\Http\Controllers\ValeppController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EntradaController;
+use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\OrdenCompraController;
+use App\Http\Controllers\PersonalController;
+use App\Http\Controllers\PrestamoMaterialController;
+use App\Http\Controllers\ProveedorController;
+use App\Http\Controllers\RequisicionController;
+use App\Http\Controllers\SalidaController;
+use App\Http\Controllers\SolicitudMaterialController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ValeppController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect('/dashboard');
@@ -118,13 +118,13 @@ Route::middleware(['auth'])->group(function () {
             [EntradaController::class, 'viewPDF']
         )->name('entradas.view-pdf');
 
-        // Búsqueda AJAX de solicitudes aprobadas con materiales pendientes
+        // Búsqueda AJAX de solicitudes con materiales pendientes
         Route::get(
             'salidas/buscar-solicitudes',
             [SalidaController::class, 'buscarSolicitudes']
         )->name('salidas.buscar-solicitudes');
 
-        // Obtener los datos y materiales pendientes de una solicitud aprobada
+        // Obtener los datos y materiales pendientes de una solicitud
         Route::get(
             'salidas/solicitudes/{solicitud}',
             [SalidaController::class, 'obtenerSolicitud']
@@ -143,7 +143,7 @@ Route::middleware(['auth'])->group(function () {
             'salidas/{salida}/view-pdf',
             [SalidaController::class, 'viewPDF']
         )->name('salidas.view-pdf');
-            });
+    });
 
     // Solicitudes de material
     Route::get(
@@ -277,11 +277,6 @@ Route::middleware(['auth'])->group(function () {
 
     // Exportaciones a Excel
     Route::get(
-        '/solicitudes/{solicitud}/excel',
-        [SolicitudMaterialController::class, 'exportExcel']
-    )->name('solicitudes.exportExcel');
-
-    Route::get(
         '/prestamos/{prestamo}/excel',
         [PrestamoMaterialController::class, 'exportExcel']
     )->name('prestamos.exportExcel');
@@ -338,27 +333,24 @@ Route::middleware(['auth', 'rh.access'])->group(function () {
 
 // Rutas protegidas para HSE
 Route::middleware(['auth', 'hse.access'])->group(function () {
-    Route::resource('valepp', ValeppController::class);
+    // Estas rutas deben declararse antes de valepp/{valepp}.
+    Route::get(
+        'valepp/solicitudes-epp/buscar',
+        [ValeppController::class, 'buscarSolicitudesEpp']
+    )->name('valepp.solicitudes-epp.buscar');
 
-    Route::post(
-        'valepp/{valepp}/aprobar',
-        [ValeppController::class, 'aprobar']
-    )->name('valepp.aprobar');
-
-    Route::post(
-        'valepp/{valepp}/entregar',
-        [ValeppController::class, 'entregar']
-    )->name('valepp.entregar');
+    Route::get(
+        'valepp/solicitudes-epp/{solicitud}',
+        [ValeppController::class, 'obtenerSolicitudEpp']
+    )->name('valepp.solicitudes-epp.show');
 
     Route::get(
         'valepp/{valepp}/pdf',
         [ValeppController::class, 'exportPDF']
     )->name('valepp.exportPDF');
 
-    Route::get(
-        'valepp/{valepp}/export/excel',
-        [ValeppController::class, 'exportExcel']
-    )->name('valepp.exportExcel');
+    Route::resource('valepp', ValeppController::class)
+        ->only(['index', 'create', 'store', 'show']);
 });
 
 // Órdenes de Compra - Solo Finanzas y Auxiliar Finanzas

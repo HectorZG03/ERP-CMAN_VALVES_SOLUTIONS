@@ -1,343 +1,321 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $solicitud = $valepp->solicitudMaterial;
+    $personal = $valepp->personal;
+    $totalAsignado = (int) $valepp->detalles->sum('cantidad');
+
+    $estatusVale = match ($valepp->estatus) {
+        'aprobado' => [
+            'texto' => 'Autorizado',
+            'clases' => 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+        ],
+        'rechazado' => [
+            'texto' => 'Rechazado',
+            'clases' => 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+        ],
+        default => [
+            'texto' => ucfirst($valepp->estatus ?? 'registrado'),
+            'clases' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+        ],
+    };
+@endphp
+
 <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex items-center space-x-4">
-        <a href="{{ route('valepp.index') }}" 
-           class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md transition-colors duration-200">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-            </svg>
-            Volver a Vales EPP
-        </a>
-        
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-            Vale PP {{ $valepp->numero_vale }}
-        </h1>
-        
-        <div class="ml-auto">
-            <span class="px-3 py-2 text-sm font-medium rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300">
-                Vale Entregado
-            </span>
+    @if(session('success'))
+        <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-800 dark:border-green-800 dark:bg-green-900/30 dark:text-green-200">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+                Vale de equipo de protección personal
+            </p>
+            <div class="mt-1 flex items-center gap-3">
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+                    {{ $valepp->numero_vale }}
+                </h1>
+                <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $estatusVale['clases'] }}">
+                    {{ $estatusVale['texto'] }}
+                </span>
+            </div>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Registro de asignación vinculado a una solicitud de almacén tipo EPP.
+            </p>
         </div>
 
-        {{-- descargar excel --}}
-        <a href="{{ route('valepp.exportExcel', $valepp->id) }}" 
-           class="inline-flex items-center px-4 py-2 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 text-sm font-medium rounded-md transition-colors duration-200">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-            Descargar Excel
-        </a>
+        <div class="flex items-center gap-3">
+            <a
+                href="{{ route('valepp.index') }}"
+                class="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+                Volver al listado
+            </a>
+
+            <a
+                href="{{ route('valepp.exportPDF', $valepp) }}"
+                class="rounded-lg bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700"
+            >
+                Descargar PDF
+            </a>
+        </div>
     </div>
 
-    <!-- Contenido Principal -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- Información Principal -->
-        <div class="lg:col-span-2 space-y-6">
-            <!-- Información del Colaborador -->
-            <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
-                <div class="px-4 py-5 sm:p-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
-                        Información del Colaborador
-                    </h3>
-                    
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                        <div class="flex items-center space-x-4 mb-4">
-                            <div class="w-16 h-16 bg-emerald-500 dark:bg-emerald-600 rounded-full flex items-center justify-center">
-                                <span class="text-2xl font-bold text-white">
-                                    {{ substr($valepp->personal->nombre_completo, 0, 2) }}
-                                </span>
-                            </div>
-                            <div>
-                                <h4 class="text-xl font-bold text-gray-900 dark:text-white">
-                                    {{ $valepp->personal->nombre_completo }}
-                                </h4>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $valepp->personal->area }}
-                                </p>
-                            </div>
-                        </div>
+    <div class="grid grid-cols-12 gap-6">
+        <div class="col-span-8 space-y-6">
+            <section class="overflow-hidden rounded-xl border border-orange-200 bg-white shadow-sm dark:border-orange-800 dark:bg-gray-800">
+                <div class="flex items-center justify-between border-b border-orange-200 bg-orange-50 px-5 py-4 dark:border-orange-800 dark:bg-orange-900/20">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-orange-600 dark:text-orange-300">
+                            Solicitud EPP vinculada
+                        </p>
+                        <h2 class="mt-1 text-xl font-bold text-gray-900 dark:text-white">
+                            @if($solicitud)
+                                Solicitud #{{ str_pad((string) $solicitud->id, 4, '0', STR_PAD_LEFT) }}
+                            @else
+                                Solicitud no disponible
+                            @endif
+                        </h2>
+                    </div>
 
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Área</dt>
-                                <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ $valepp->personal->area }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Departamento</dt>
-                                <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ $valepp->personal->departamento ?? 'N/A' }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Fecha Ingreso</dt>
-                                <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ $valepp->personal->fecha_ingreso->format('d/m/Y') }}</dd>
-                            </div>
-                            <div>
-                                <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">ID Colaborador</dt>
-                                <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ $valepp->personal->id }}</dd>
-                            </div>
-                        </div>
+                    @if($solicitud)
+                        <a
+                            href="{{ route('solicitudes.show', $solicitud) }}"
+                            class="rounded-lg border border-orange-300 bg-white px-4 py-2 text-sm font-semibold text-orange-700 transition hover:bg-orange-100 dark:border-orange-700 dark:bg-gray-800 dark:text-orange-300 dark:hover:bg-orange-900/30"
+                        >
+                            Ver solicitud
+                        </a>
+                    @endif
+                </div>
+
+                <div class="grid grid-cols-4 divide-x divide-gray-200 dark:divide-gray-700">
+                    <div class="px-5 py-4">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Tipo
+                        </p>
+                        <p class="mt-1 font-semibold text-orange-700 dark:text-orange-300">
+                            EPP
+                        </p>
+                    </div>
+
+                    <div class="px-5 py-4">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Estatus de solicitud
+                        </p>
+                        <p class="mt-1 font-semibold text-gray-900 dark:text-white">
+                            {{ ucfirst($solicitud?->estatus ?? 'No disponible') }}
+                        </p>
+                    </div>
+
+                    <div class="px-5 py-4">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Destino
+                        </p>
+                        <p class="mt-1 truncate font-semibold text-gray-900 dark:text-white" title="{{ $solicitud?->destino ?? $valepp->embarcacion }}">
+                            {{ $solicitud?->destino ?? $valepp->embarcacion ?? 'Sin destino' }}
+                        </p>
+                    </div>
+
+                    <div class="px-5 py-4">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Solicitante
+                        </p>
+                        <p class="mt-1 truncate font-semibold text-gray-900 dark:text-white" title="{{ $solicitud?->user?->name }}">
+                            {{ $solicitud?->user?->name ?? 'No disponible' }}
+                        </p>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Materiales Entregados -->
-            <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
-                <div class="px-4 py-5 sm:p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                            Materiales Entregados
-                        </h3>
-                        <span class="px-3 py-1 text-sm font-medium rounded-full bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">
-                            {{ $valepp->detalles->count() }} material(es)
-                        </span>
+            <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Equipos asignados en este vale
+                        </h2>
+                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                            Estas cantidades se descuentan de lo disponible para generar otros vales vinculados.
+                        </p>
                     </div>
-                    
-                    @if($valepp->detalles->count() > 0)
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg overflow-hidden">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                            <thead class="bg-gray-100 dark:bg-gray-600">
+
+                    <span class="rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
+                        {{ $totalAsignado }} {{ $totalAsignado === 1 ? 'unidad' : 'unidades' }}
+                    </span>
+                </div>
+
+                @if($valepp->detalles->isNotEmpty())
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-50 dark:bg-gray-900/40">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">#</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Material</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Categoría</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cantidad</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha Entrega</th>
+                                    <th class="w-12 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                        #
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                        Equipo
+                                    </th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                        Unidad
+                                    </th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                        Solicitado
+                                    </th>
+                                    <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                        Asignado
+                                    </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white dark:bg-gray-700 divide-y divide-gray-200 dark:divide-gray-600">
+                            <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
                                 @foreach($valepp->detalles as $detalle)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200">
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                        {{ $loop->iteration }}
-                                    </td>
-                                    <td class="px-4 py-3 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                            {{ $detalle->inventario->nombre_producto }}
-                                        </div>
-                                    </td>
-                                    <td class="px-4 py-3 whitespace-nowrap">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-                                            {{ $detalle->inventario->categoria }}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                        {{ $detalle->cantidad }}
-                                    </td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                        @if($detalle->fecha_entrega)
-                                            {{ $detalle->fecha_entrega->format('d/m/Y') }}
-                                        @else
-                                            <span class="text-gray-400 dark:text-gray-500">-</span>
-                                        @endif
-                                    </td>
-                                </tr>
+                                    <tr class="hover:bg-orange-50/40 dark:hover:bg-orange-900/10">
+                                        <td class="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            {{ $loop->iteration }}
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <p class="text-sm font-semibold text-gray-900 dark:text-white">
+                                                {{ $detalle->inventario?->nombre_producto ?? 'Producto no disponible' }}
+                                            </p>
+                                            <div class="mt-1 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                                <span>{{ $detalle->inventario?->economico ?? 'Sin económico' }}</span>
+                                                <span>·</span>
+                                                <span>{{ $detalle->inventario?->categoria ?? 'SEGURIDAD' }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300">
+                                            {{ $detalle->inventario?->medida ?? '—' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center text-sm text-gray-600 dark:text-gray-300">
+                                            {{ $detalle->solicitudMaterialDetalle?->cantidad_solicitada ?? '—' }}
+                                        </td>
+                                        <td class="px-4 py-3 text-center text-base font-bold text-orange-700 dark:text-orange-300">
+                                            {{ $detalle->cantidad }}
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tbody>
-                            <tfoot class="bg-gray-100 dark:bg-gray-600">
+                            <tfoot class="bg-gray-50 dark:bg-gray-900/40">
                                 <tr>
-                                    <td colspan="3" class="px-4 py-3 text-right text-sm font-medium text-gray-900 dark:text-white">
-                                        Total:
+                                    <td colspan="4" class="px-4 py-3 text-right text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        Total asignado en el vale
                                     </td>
-                                    <td class="px-4 py-3 text-sm font-bold text-gray-900 dark:text-white">
-                                        {{ $valepp->detalles->sum('cantidad') }}
+                                    <td class="px-4 py-3 text-center text-base font-bold text-orange-700 dark:text-orange-300">
+                                        {{ $totalAsignado }}
                                     </td>
-                                    <td class="px-4 py-3"></td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
-                    @else
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-8 text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                        </svg>
-                        <p class="text-gray-500 dark:text-gray-400">No hay materiales registrados en este vale</p>
+                @else
+                    <div class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                        Este vale no tiene equipos asignados.
                     </div>
-                    @endif
-                </div>
-            </div>
+                @endif
+            </section>
 
-            <!-- Observaciones -->
             @if($valepp->observaciones)
-            <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
-                <div class="px-4 py-5 sm:p-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
+                <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
                         Observaciones
-                    </h3>
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                        <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ $valepp->observaciones }}</p>
-                    </div>
-                </div>
-            </div>
+                    </h2>
+                    <p class="mt-3 whitespace-pre-line text-sm leading-6 text-gray-700 dark:text-gray-300">{{ $valepp->observaciones }}</p>
+                </section>
             @endif
         </div>
 
-        <!-- Información Lateral -->
-        <div class="space-y-6">
-            <!-- Información del Vale -->
-            <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
-                <div class="px-4 py-5 sm:p-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
-                        Información del Vale
-                    </h3>
-                    
-                    <dl class="space-y-3">
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Número de Vale</dt>
-                            <dd class="text-sm text-gray-900 dark:text-white font-medium">
-                                {{ $valepp->numero_vale }}
-                            </dd>
-                        </div>
-                        
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha de Solicitud</dt>
-                            <dd class="text-sm text-gray-900 dark:text-white font-medium">
-                                {{ $valepp->fecha_solicitud->format('d/m/Y') }}
-                            </dd>
-                            <dd class="text-xs text-gray-500 dark:text-gray-400">
-                                {{ $valepp->fecha_solicitud->diffForHumans() }}
-                            </dd>
-                        </div>
+        <aside class="col-span-4 space-y-6">
+            <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="border-b border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        Colaborador receptor
+                    </h2>
+                </div>
 
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha de Entrega</dt>
-                            <dd class="text-sm text-gray-900 dark:text-white font-medium">
-                                @if($valepp->detalles->first() && $valepp->detalles->first()->fecha_entrega)
-                                    {{ $valepp->detalles->first()->fecha_entrega->format('d/m/Y') }}
-                                @else
-                                    <span class="text-gray-400 dark:text-gray-500">N/A</span>
-                                @endif
-                            </dd>
+                <div class="p-5">
+                    <div class="flex items-center gap-4">
+                        <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-orange-600 text-lg font-bold text-white">
+                            {{ mb_strtoupper(mb_substr($personal?->nombre_completo ?? 'NA', 0, 2)) }}
                         </div>
-                        
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Registrado el</dt>
-                            <dd class="text-sm text-gray-900 dark:text-white font-medium">
-                                {{ $valepp->created_at->format('d/m/Y H:i:s') }}
-                            </dd>
+                        <div class="min-w-0">
+                            <p class="truncate text-lg font-bold text-gray-900 dark:text-white" title="{{ $personal?->nombre_completo }}">
+                                {{ $personal?->nombre_completo ?? 'No disponible' }}
+                            </p>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                {{ $personal?->employee_id ?? 'Sin número de empleado' }}
+                            </p>
                         </div>
+                    </div>
 
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Registrado por</dt>
-                            <dd class="text-sm text-gray-900 dark:text-white font-medium">
-                                {{ $valepp->user->name ?? 'Sistema' }}
+                    <dl class="mt-5 divide-y divide-gray-200 border-t border-gray-200 text-sm dark:divide-gray-700 dark:border-gray-700">
+                        <div class="flex justify-between gap-4 py-3">
+                            <dt class="text-gray-500 dark:text-gray-400">Área</dt>
+                            <dd class="text-right font-semibold text-gray-900 dark:text-white">
+                                {{ $personal?->area ?? 'N/A' }}
                             </dd>
                         </div>
-
-                        <div>
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Materiales</dt>
-                            <dd class="text-sm text-gray-900 dark:text-white font-medium">
-                                {{ $valepp->detalles->sum('cantidad') }}
+                        <div class="flex justify-between gap-4 py-3">
+                            <dt class="text-gray-500 dark:text-gray-400">Puesto / grado</dt>
+                            <dd class="text-right font-semibold text-gray-900 dark:text-white">
+                                {{ $personal?->grado ?? 'N/A' }}
+                            </dd>
+                        </div>
+                        <div class="flex justify-between gap-4 py-3">
+                            <dt class="text-gray-500 dark:text-gray-400">Departamento</dt>
+                            <dd class="text-right font-semibold text-gray-900 dark:text-white">
+                                {{ $personal?->departamento ?? 'N/A' }}
                             </dd>
                         </div>
                     </dl>
                 </div>
-            </div>
+            </section>
 
-            <!-- Acciones -->
-            <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
-                <div class="px-4 py-5 sm:p-6">
-                    <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4">
-                        Acciones
-                    </h3>
-                    
-                    <div class="space-y-3">
-                        <a href="{{ route('valepp.exportPDF', $valepp) }}" 
-                           target="_blank"
-                           class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                            Generar PDF
-                        </a>
-
-                        @if($valepp->estatus === 'pendiente')
-                        <a href="{{ route('valepp.edit', $valepp) }}" 
-                           class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                            </svg>
-                            Editar Vale
-                        </a>
-
-                        <form method="POST" action="{{ route('valepp.destroy', $valepp) }}">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" 
-                                    class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 transition-colors duration-200"
-                                    onclick="return confirm('¿Eliminar este vale? Esta acción no se puede deshacer.')">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                                Eliminar Vale
-                            </button>
-                        </form>
-                        @endif
-
-                        <button onclick="window.print()" 
-                                class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                            </svg>
-                            Imprimir
-                        </button>
-                    </div>
+            <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="border-b border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        Información del registro
+                    </h2>
                 </div>
+
+                <dl class="divide-y divide-gray-200 px-5 text-sm dark:divide-gray-700">
+                    <div class="flex justify-between gap-4 py-3">
+                        <dt class="text-gray-500 dark:text-gray-400">Fecha del vale</dt>
+                        <dd class="font-semibold text-gray-900 dark:text-white">
+                            {{ $valepp->fecha_solicitud?->format('d/m/Y') ?? 'N/A' }}
+                        </dd>
+                    </div>
+                    <div class="flex justify-between gap-4 py-3">
+                        <dt class="text-gray-500 dark:text-gray-400">Registrado</dt>
+                        <dd class="text-right font-semibold text-gray-900 dark:text-white">
+                            {{ $valepp->created_at?->format('d/m/Y H:i') ?? 'N/A' }}
+                        </dd>
+                    </div>
+                    <div class="flex justify-between gap-4 py-3">
+                        <dt class="text-gray-500 dark:text-gray-400">Registrado por</dt>
+                        <dd class="max-w-[220px] text-right font-semibold text-gray-900 dark:text-white">
+                            {{ $valepp->user?->name ?? 'Sistema' }}
+                        </dd>
+                    </div>
+                    <div class="flex justify-between gap-4 py-3">
+                        <dt class="text-gray-500 dark:text-gray-400">Renglones</dt>
+                        <dd class="font-semibold text-gray-900 dark:text-white">
+                            {{ $valepp->detalles->count() }}
+                        </dd>
+                    </div>
+                    <div class="flex justify-between gap-4 py-3">
+                        <dt class="text-gray-500 dark:text-gray-400">Total de unidades</dt>
+                        <dd class="font-bold text-orange-700 dark:text-orange-300">
+                            {{ $totalAsignado }}
+                        </dd>
+                    </div>
+                </dl>
+            </section>
+
+            <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-800 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
+                Este vale registra la distribución de la solicitud EPP. No representa por sí mismo una salida ni un descuento del inventario.
             </div>
-        </div>
+        </aside>
     </div>
 </div>
-
-<!-- Estilos para impresión -->
-<style>
-@media print {
-    .no-print {
-        display: none !important;
-    }
-    
-    body {
-        font-size: 12px;
-        line-height: 1.4;
-    }
-    
-    .bg-white, .bg-gray-50, .bg-gray-100 {
-        background-color: white !important;
-    }
-    
-    .text-gray-900, .text-gray-800, .text-gray-700 {
-        color: black !important;
-    }
-    
-    .border, .border-gray-200, .border-gray-300 {
-        border: 1px solid #ccc !important;
-    }
-    
-    .shadow, .shadow-lg, .shadow-md {
-        box-shadow: none !important;
-    }
-    
-    .rounded-lg, .rounded-md {
-        border-radius: 0 !important;
-    }
-    
-    .space-y-6 > * + * {
-        margin-top: 1rem !important;
-    }
-    
-    .grid {
-        display: block !important;
-    }
-    
-    .flex {
-        display: flex !important;
-    }
-    
-    .lg\:col-span-2 {
-        width: 100% !important;
-    }
-}
-</style>
 @endsection
