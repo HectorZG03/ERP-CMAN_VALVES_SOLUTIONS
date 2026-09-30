@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Destino;
 
 class SolicitudMaterial extends Model
 {
@@ -23,7 +24,7 @@ class SolicitudMaterial extends Model
     protected $fillable = [
         'user_id',
         'personal_id',
-        'destino',
+        'destino_id',
         'estatus',
         'comentario',
         'operador',
@@ -44,6 +45,13 @@ class SolicitudMaterial extends Model
         return $this->belongsTo(Personal::class, 'personal_id');
     }
 
+    /**
+     * Destino al que se envía el material.
+     */
+    public function destino()
+    {
+        return $this->belongsTo(Destino::class, 'destino_id')->withTrashed();
+    }
     /**
      * Usuario que generó la solicitud.
      */

@@ -421,17 +421,16 @@
                         </dd>
                     </div>
 
-                    <div class="grid grid-cols-[145px_1fr] gap-4 py-4">
-                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                            Destino
-                        </dt>
+                        <div class="grid grid-cols-[145px_1fr] gap-4 py-4">
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                Destino
+                            </dt>
 
-                        <dd class="text-sm font-semibold text-gray-900 dark:text-white">
-                            {{ $solicitud->destino ?: 'No disponible' }}
-                        </dd>
-                    </div>
-
-                    <div class="grid grid-cols-[145px_1fr] gap-4 py-4">
+                            <dd class="text-sm font-semibold text-gray-900 dark:text-white">
+                                {{ $solicitud->destino?->nombre ?: 'No disponible' }}
+                            </dd>
+                        </div>
+                                            <div class="grid grid-cols-[145px_1fr] gap-4 py-4">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                             Personal
                         </dt>

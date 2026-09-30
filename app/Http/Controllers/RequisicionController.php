@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Destino;
 use App\Models\Requisicion;
 use App\Models\RequisicionDetalle;
 use App\Models\Contrato;
 use Illuminate\Support\Facades\DB;
-
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -108,80 +108,85 @@ class RequisicionController extends Controller
     public function create()
     {
         $contratos = Contrato::all();
-        return view('requisiciones.create', compact('contratos'));
-    }
 
+        $destinos = Destino::query()
+            ->orderBy('nombre')
+            ->get(['id', 'nombre']);
+
+        return view('requisiciones.create', compact('contratos', 'destinos'));
+    }
     public function store(Request $request)
-{
-    // Mensajes personalizados en español
-    $messages = [
-        'nombre_solicitante.required' => 'El nombre del solicitante es obligatorio',
-        'departamento.required' => 'El departamento es obligatorio',
-        'tipo_requerimiento.required' => 'Debes seleccionar un tipo de requerimiento',
-        'tipo_requerimiento.in' => 'El tipo de requerimiento debe ser interno o externo',
-        'comentario.required' => 'Debes proporcionar un comentario o justificación',
-        'materiales.required' => 'Debes agregar al menos un material',
-        'materiales.min' => 'Debes agregar al menos un material',
-        'materiales.*.cantidad.required' => 'La cantidad es obligatoria',
-        'materiales.*.cantidad.integer' => 'La cantidad debe ser un número entero',
-        'materiales.*.cantidad.min' => 'La cantidad debe ser al menos 1',
-        'materiales.*.unidad.required' => 'La unidad es obligatoria',
-        'materiales.*.material.required' => 'La descripción del material es obligatoria',
-        'contrato_id.required' => 'Debes seleccionar un contrato',
-    ];
+    {
+        // Mensajes personalizados en español
+        $messages = [
+            'nombre_solicitante.required' => 'El nombre del solicitante es obligatorio',
+            'departamento.required' => 'El departamento es obligatorio',
+            'tipo_requerimiento.required' => 'Debes seleccionar un tipo de requerimiento',
+            'tipo_requerimiento.in' => 'El tipo de requerimiento debe ser interno o externo',
+            'comentario.required' => 'Debes proporcionar un comentario o justificación',
+            'materiales.required' => 'Debes agregar al menos un material',
+            'materiales.min' => 'Debes agregar al menos un material',
+            'materiales.*.cantidad.required' => 'La cantidad es obligatoria',
+            'materiales.*.cantidad.integer' => 'La cantidad debe ser un número entero',
+            'materiales.*.cantidad.min' => 'La cantidad debe ser al menos 1',
+            'materiales.*.unidad.required' => 'La unidad es obligatoria',
+            'materiales.*.material.required' => 'La descripción del material es obligatoria',
+            'contrato_id.required' => 'Debes seleccionar un contrato',
+            'destino_id.exists' => 'El destino seleccionado no es válido',
+        ];
 
-    $request->validate([
-        'nombre_solicitante' => 'required|string|max:255',
-        'departamento' => 'required|string|max:255',
-        // ✅ PLATAFORMA Y EMBARCACIÓN AHORA SON OPCIONALES (nullable)
-        'plataforma' => 'nullable|string|max:255',
-        'embarcacion' => 'nullable|string|max:255',
-        'tipo_requerimiento' => 'required|in:interno,externo',
-        'comentario' => 'required|string',
-        'contrato_id' => 'required|exists:contratos,id',
-        'materiales' => 'required|array|min:1',
-        'materiales.*.cantidad' => 'required|integer|min:1',
-        'materiales.*.unidad' => 'required|string|max:255',
-        'materiales.*.material' => 'required|string|max:255',
-    ], $messages);
+        $request->validate([
+            'nombre_solicitante' => 'required|string|max:255',
+            'departamento' => 'required|string|max:255',
+            // ✅ PLATAFORMA Y EMBARCACIÓN AHORA SON OPCIONALES (nullable)
+            'plataforma' => 'nullable|string|max:255',
+            'destino_id' => 'nullable|integer|exists:destinos,id',
+            'tipo_requerimiento' => 'required|in:interno,externo',
+            'comentario' => 'required|string',
+            'contrato_id' => 'required|exists:contratos,id',
+            'materiales' => 'required|array|min:1',
+            'materiales.*.cantidad' => 'required|integer|min:1',
+            'materiales.*.unidad' => 'required|string|max:255',
+            'materiales.*.material' => 'required|string|max:255',
+        ], $messages);
 
-    DB::beginTransaction();
+        DB::beginTransaction();
 
-    try {
-        $requisicion = Requisicion::create([
-            'nombre_solicitante' => $request->nombre_solicitante,
-            'departamento' => $request->departamento,
-            'proyecto' => $request->proyecto ?? 'N/A',
-            'sit' => $request->sit ?? 'N/A',
-            'partida' => $request->partida ?? 'N/A',
-            // ✅ Si plataforma o embarcación vienen vacíos, se guardan como N/A
-            'plataforma' => $request->plataforma ?: 'N/A',
-            'area' => $request->area ?? 'N/A',
-            'activo' => $request->activo ?? 'N/A',
-            'contrato_id' => $request->contrato_id,
-            'embarcacion' => $request->embarcacion ?: 'N/A',
-            'tipo_requerimiento' => $request->tipo_requerimiento,
-            'comentario' => $request->comentario,
-            'user_id' => auth()->id(),
-        ]);
-
-        foreach ($request->materiales as $material) {
-            RequisicionDetalle::create([
-                'requisicion_id' => $requisicion->id,
-                'cantidad' => $material['cantidad'],
-                'unidad' => $material['unidad'],
-                'material' => $material['material'],
+        try {
+            $requisicion = Requisicion::create([
+                'nombre_solicitante' => $request->nombre_solicitante,
+                'departamento' => $request->departamento,
+                'proyecto' => $request->proyecto ?? 'N/A',
+                'sit' => $request->sit ?? 'N/A',
+                'partida' => $request->partida ?? 'N/A',
+                // ✅ Si plataforma o embarcación vienen vacíos, se guardan como N/A
+                'plataforma' => $request->plataforma ?: 'N/A',
+                'area' => $request->area ?? 'N/A',
+                'activo' => $request->activo ?? 'N/A',
+                'contrato_id' => $request->contrato_id,
+                'destino_id' => $request->destino_id ?: null,
+                'tipo_requerimiento' => $request->tipo_requerimiento,
+                'comentario' => $request->comentario,
+                'user_id' => auth()->id(),
             ]);
+
+            foreach ($request->materiales as $material) {
+                RequisicionDetalle::create([
+                    'requisicion_id' => $requisicion->id,
+                    'cantidad' => $material['cantidad'],
+                    'unidad' => $material['unidad'],
+                    'material' => $material['material'],
+                ]);
+            }
+
+            DB::commit();
+            return redirect()->route('requisiciones.index')->with('success', 'Requisición enviada correctamente');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withErrors(['error' => 'Error al crear la requisición: ' . $e->getMessage()])->withInput();
         }
-
-        DB::commit();
-        return redirect()->route('requisiciones.index')->with('success', 'Requisición enviada correctamente');
-
-    } catch (\Exception $e) {
-        DB::rollback();
-        return back()->withErrors(['error' => 'Error al crear la requisición: ' . $e->getMessage()])->withInput();
     }
-}
 
     public function show(Requisicion $requisicion)
     {
@@ -194,7 +199,7 @@ class RequisicionController extends Controller
             abort(403);
         }
 
-        $requisicion->load(['user', 'detalles', 'contrato', 'aprobadorFinanzas']);
+        $requisicion->load(['user', 'detalles', 'contrato', 'aprobadorFinanzas', 'destino']);
         return view('requisiciones.show', compact('requisicion'));
     }
 
@@ -236,37 +241,37 @@ class RequisicionController extends Controller
     // pdf
 
     public function pdf(Requisicion $requisicion)
-{
-    $requisicion->load(['user', 'detalles', 'contrato', 'aprobadorFinanzas']);
+    {
+        $requisicion->load(['user', 'detalles', 'contrato', 'aprobadorFinanzas', 'destino']);
 
-    // Firma del solicitante
-    $firmaUsuarioBase64 = null;
-    if ($requisicion->user->signature) {
-        $path = storage_path('app/public/' . $requisicion->user->signature);
-        if (file_exists($path)) {
-            $firmaUsuarioBase64 = base64_encode(file_get_contents($path));
+        // Firma del solicitante
+        $firmaUsuarioBase64 = null;
+        if ($requisicion->user->signature) {
+            $path = storage_path('app/public/' . $requisicion->user->signature);
+            if (file_exists($path)) {
+                $firmaUsuarioBase64 = base64_encode(file_get_contents($path));
+            }
         }
+
+        // Firma de Finanzas (según estatus_finanzas)
+        $firmaFinanzasPath = $this->obtenerImagenEstatus($requisicion->estatus_finanzas, 'finanzas');
+        $firmaFinanzasBase64 = file_exists($firmaFinanzasPath)
+            ? base64_encode(file_get_contents($firmaFinanzasPath))
+            : null;
+
+        // Firma de Dirección (según estatus)
+        $firmaDireccionPath = $this->obtenerImagenEstatus($requisicion->estatus, 'direccion');
+        $firmaDireccionBase64 = file_exists($firmaDireccionPath)
+            ? base64_encode(file_get_contents($firmaDireccionPath))
+            : null;
+
+        return view('requisiciones.pdf', compact(
+            'requisicion',
+            'firmaUsuarioBase64',
+            'firmaFinanzasBase64',
+            'firmaDireccionBase64'
+        ));
     }
-
-    // Firma de Finanzas (según estatus_finanzas)
-    $firmaFinanzasPath = $this->obtenerImagenEstatus($requisicion->estatus_finanzas, 'finanzas');
-    $firmaFinanzasBase64 = file_exists($firmaFinanzasPath)
-        ? base64_encode(file_get_contents($firmaFinanzasPath))
-        : null;
-
-    // Firma de Dirección (según estatus)
-    $firmaDireccionPath = $this->obtenerImagenEstatus($requisicion->estatus, 'direccion');
-    $firmaDireccionBase64 = file_exists($firmaDireccionPath)
-        ? base64_encode(file_get_contents($firmaDireccionPath))
-        : null;
-
-    return view('requisiciones.pdf', compact(
-        'requisicion',
-        'firmaUsuarioBase64',
-        'firmaFinanzasBase64',
-        'firmaDireccionBase64'
-    ));
-}
 
 
     // ===============================
@@ -274,7 +279,7 @@ class RequisicionController extends Controller
     // ===============================
     public function exportExcel(Requisicion $requisicion)
     {
-        $requisicion->load(['user','contrato','detalles']);
+        $requisicion->load(['user','contrato','detalles','destino']);
 
         $templatePath = storage_path('app/plantillas/Requisicion.xlsx');
         $spreadsheet = IOFactory::load($templatePath);
@@ -287,7 +292,7 @@ class RequisicionController extends Controller
         $sheet->setCellValue('C13', strtoupper($requisicion->sit ?? 'N/A'));
         $sheet->setCellValue('C14', strtoupper($requisicion->partida ?? 'N/A'));
         $sheet->setCellValue('C15', strtoupper($requisicion->plataforma ?? 'N/A'));
-        $sheet->setCellValue('C16', strtoupper($requisicion->embarcacion ?? 'N/A'));
+        $sheet->setCellValue('C16', strtoupper($requisicion->destino?->nombre ?? 'N/A'));
         $sheet->setCellValue('C17', strtoupper($requisicion->area ?? 'N/A'));
         $sheet->setCellValue('C18', strtoupper($requisicion->activo ?? 'N/A'));
         $sheet->setCellValue('F36', $requisicion->user->name);

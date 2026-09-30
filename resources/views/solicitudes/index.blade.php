@@ -246,21 +246,21 @@
                                 ? $solicitud->created_at->format('d/m/Y H:i')
                                 : '';
 
-                            $textoBusqueda = implode(' ', [
+                           $textoBusqueda = implode(' ', [
+                            $solicitud->id,
+                            str_pad(
                                 $solicitud->id,
-                                str_pad(
-                                    $solicitud->id,
-                                    4,
-                                    '0',
-                                    STR_PAD_LEFT
-                                ),
-                                $fechaBusqueda,
-                                $solicitud->destino,
-                                $nombreSolicitante,
-                                $rolSolicitante,
-                                $solicitud->estatus,
-                                $esEpp ? 'epp seguridad' : 'estandar',
-                            ]);
+                                4,
+                                '0',
+                                STR_PAD_LEFT
+                            ),
+                            $fechaBusqueda,
+                            $solicitud->destino?->nombre,
+                            $nombreSolicitante,
+                            $rolSolicitante,
+                            $solicitud->estatus,
+                            $esEpp ? 'epp seguridad' : 'estandar',
+                        ]);
                         @endphp
 
                         <tr
@@ -326,9 +326,9 @@
                                     <div class="min-w-0">
                                         <p
                                             class="truncate text-sm font-semibold text-gray-900 dark:text-white"
-                                            title="{{ $solicitud->destino }}"
+                                            title="{{ $solicitud->destino?->nombre }}"
                                         >
-                                            {{ $solicitud->destino
+                                            {{ $solicitud->destino?->nombre
                                                 ?: 'Destino no disponible' }}
                                         </p>
 

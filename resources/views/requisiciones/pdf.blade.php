@@ -355,8 +355,8 @@
                         <span class="field-value">{{ $requisicion->plataforma ?? 'N/A' }}</span>
                     </div>
                     <div class="field-row">
-                        <span class="field-label">Embarcación</span>
-                        <span class="field-value">{{ $requisicion->embarcacion ?? 'N/A' }}</span>
+                        <span class="field-label">Destino</span>
+                        <span class="field-value">{{ $requisicion->destino?->nombre ?? 'N/A' }}</span>
                     </div>
                     <div class="field-row">
                         <span class="field-label">Área</span>

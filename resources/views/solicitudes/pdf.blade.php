@@ -695,7 +695,7 @@
                     </div>
                     <div class="field-row">
                         <span class="field-label">Destino</span>
-                        <span class="field-value">{{ $solicitud->destino ?? 'No especificado' }}</span>
+                        <span class="field-value">{{ $solicitud->destino?->nombre ?? 'No especificado' }}</span>
                     </div>
                     <div class="field-row">
                         <span class="field-label">Estatus</span>

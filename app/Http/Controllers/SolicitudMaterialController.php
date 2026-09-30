@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Destino;
 use App\Models\Inventario;
 use App\Models\Personal;
 use App\Models\SolicitudMaterial;
@@ -55,8 +56,8 @@ class SolicitudMaterialController extends Controller
                 'detalles.inventario',
                 'user',
                 'operadorPersonal',
+                'destino',
             ]);
-
         $countQuery = SolicitudMaterial::query();
 
         if (!$puedeVerTodas) {
@@ -115,10 +116,16 @@ class SolicitudMaterialController extends Controller
                 'area',
             ]);
 
+        // Solo destinos activos (SoftDeletes filtrado por el scope por defecto)
+        $destinos = Destino::query()
+            ->orderBy('nombre')
+            ->get(['id', 'nombre']);
+
         $puedeCrearEpp = $request->user()->canManageValeEPP();
 
         return view('solicitudes.create', compact(
             'personal',
+            'destinos',
             'puedeCrearEpp'
         ));
     }
@@ -135,10 +142,10 @@ class SolicitudMaterialController extends Controller
                 'nullable',
                 'exists:personal,id',
             ],
-            'destino' => [
+            'destino_id' => [
                 'required',
-                'string',
-                'max:255',
+                'integer',
+                'exists:destinos,id',
             ],
             'comentario' => [
                 'nullable',
@@ -175,7 +182,8 @@ class SolicitudMaterialController extends Controller
                 'min:1',
             ],
         ], [
-            'destino.required' => 'Debe seleccionar un destino.',
+            'destino_id.required' => 'Debe seleccionar un destino.',
+            'destino_id.exists' => 'El destino seleccionado no es válido.',
             'tipo_solicitud.in' => 'El tipo de solicitud no es válido.',
             'productos.required' => 'Debe agregar al menos un producto a la solicitud.',
             'productos.min' => 'Debe agregar al menos un producto a la solicitud.',
@@ -250,7 +258,7 @@ class SolicitudMaterialController extends Controller
                 $solicitud = SolicitudMaterial::create([
                     'user_id' => $user->id,
                     'personal_id' => $validated['personal_id'] ?? null,
-                    'destino' => $validated['destino'],
+                    'destino_id' => $validated['destino_id'],
                     'comentario' => $validated['comentario'] ?? null,
                     'operador' => $validated['operador'] ?? 'N/A',
                     'categoria' => $validated['categoria'] ?? 'N/A',

@@ -19,7 +19,7 @@ class Valepp extends Model
         'estatus',
         'observaciones',
         'user_id',
-        'embarcacion',
+
     ];
 
     protected $casts = [
