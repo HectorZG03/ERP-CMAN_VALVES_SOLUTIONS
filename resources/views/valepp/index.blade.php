@@ -198,8 +198,8 @@
                             </td>
 
                             <td class="px-5 py-4">
-                                <p class="max-w-[210px] truncate text-sm font-medium text-gray-700 dark:text-gray-300" title="{{ $solicitud?->destino ?? $vale->embarcacion }}">
-                                    {{ $solicitud?->destino ?? $vale->embarcacion ?? 'Sin destino' }}
+                                <p class="max-w-[210px] truncate text-sm font-medium text-gray-700 dark:text-gray-300" title="{{ $solicitud?->destino?->nombre }}">
+                                    {{ $solicitud?->destino?->nombre ?? 'Sin destino' }}
                                 </p>
                             </td>
 

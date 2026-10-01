@@ -36,7 +36,8 @@ class ValeppController extends Controller
             ->with([
                 'personal:id,nombre_completo,employee_id,area,grado',
                 'user:id,name,email',
-                'solicitudMaterial:id,user_id,destino,estatus,tipo_solicitud,created_at',
+                'solicitudMaterial:id,user_id,destino_id,estatus,tipo_solicitud,created_at',
+                'solicitudMaterial.destino',
             ])
             ->withCount('detalles')
             ->withSum(
@@ -64,7 +65,9 @@ class ValeppController extends Controller
                         ->orWhereHas('solicitudMaterial', function ($solicitudQuery) use ($search) {
                             $solicitudQuery->where(function ($query) use ($search) {
                                 $query
-                                    ->where('destino', 'like', "%{$search}%")
+                                    ->whereHas('destino', function ($destinoQuery) use ($search) {
+                                        $destinoQuery->where('nombre', 'like', "%{$search}%");
+                                    })
                                     ->orWhereHas('user', function ($userQuery) use ($search) {
                                         $userQuery->where('name', 'like', "%{$search}%");
                                     });
@@ -153,6 +156,7 @@ class ValeppController extends Controller
             ])
             ->with([
                 'user:id,name,email',
+                'destino',
                 'detalles' => function ($query) {
                     $query
                         ->with([
@@ -173,7 +177,9 @@ class ValeppController extends Controller
                     $folioBuscado
                 ) {
                     $subquery
-                        ->where('destino', 'like', "%{$search}%")
+                        ->whereHas('destino', function ($destinoQuery) use ($search) {
+                            $destinoQuery->where('nombre', 'like', "%{$search}%");
+                        })
                         ->orWhere('comentario', 'like', "%{$search}%")
                         ->orWhereHas('user', function ($userQuery) use ($search) {
                             $userQuery->where(function ($query) use ($search) {
@@ -187,6 +193,7 @@ class ValeppController extends Controller
                         $subquery->orWhere('id', (int) $folioBuscado);
                     }
                 });
+                
             })
             ->when($fecha, function ($query) use ($fecha) {
                 $query->whereDate('created_at', $fecha);
@@ -212,7 +219,7 @@ class ValeppController extends Controller
                     'id' => $solicitud->id,
                     'folio' => sprintf('#%04d', $solicitud->id),
                     'fecha' => $solicitud->created_at?->format('d/m/Y H:i'),
-                    'destino' => $solicitud->destino,
+                    'destino' => $solicitud->destino?->nombre,
                     'estatus' => $solicitud->estatus,
                     'solicitante' => $solicitud->user?->name,
                     'productos' => $solicitud->detalles->count(),
@@ -246,6 +253,7 @@ class ValeppController extends Controller
 
         $solicitud->load([
             'user:id,name,email',
+            'destino',
             'detalles' => function ($query) {
                 $query
                     ->with([
@@ -283,7 +291,7 @@ class ValeppController extends Controller
                 'id' => $solicitud->id,
                 'folio' => sprintf('#%04d', $solicitud->id),
                 'fecha' => $solicitud->created_at?->format('d/m/Y H:i'),
-                'destino' => $solicitud->destino,
+                'destino' => $solicitud->destino?->nombre,
                 'estatus' => $solicitud->estatus,
                 'solicitante' => $solicitud->user?->name,
                 'detalles' => $detalles,
@@ -424,7 +432,6 @@ class ValeppController extends Controller
                     'fecha_solicitud' => $validated['fecha_solicitud'],
                     'estatus' => 'aprobado',
                     'observaciones' => $validated['observaciones'] ?? null,
-                    'embarcacion' => $solicitud->destino,
                     'user_id' => $request->user()->id,
                 ]);
 

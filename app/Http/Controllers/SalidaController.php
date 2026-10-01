@@ -93,13 +93,14 @@ class SalidaController extends Controller
                 'id',
                 'user_id',
                 'personal_id',
-                'destino',
+                'destino_id',
                 'estatus',
                 'created_at',
             ])
             ->with([
                 'user:id,name,email,num_empleado',
                 'operadorPersonal:id,nombre_completo,employee_id',
+                'destino',
                 'detalles:id,solicitud_material_id,inventario_id,cantidad_solicitada',
                 'salidas:id,solicitud_material_id',
                 'salidas.detalles:id,salida_id,inventario_id,cantidad',
@@ -117,11 +118,9 @@ class SalidaController extends Controller
                  * Se inicia con destino para construir correctamente
                  * el grupo de condiciones OR.
                  */
-                $query->where(
-                    'destino',
-                    'LIKE',
-                    "%{$termino}%"
-                );
+                $query->whereHas('destino', function ($destinoQuery) use ($termino) {
+                    $destinoQuery->where('nombre', 'LIKE', "%{$termino}%");
+                });
 
                 if ($solicitudId !== null) {
                     $query->orWhere(
@@ -244,7 +243,7 @@ class SalidaController extends Controller
                         'N/A',
 
                     'destino' =>
-                        $solicitud->destino ??
+                        $solicitud->destino?->nombre ??
                         'Sin destino',
 
                     'fecha_solicitud' =>
@@ -299,6 +298,7 @@ class SalidaController extends Controller
         $solicitud->load([
             'user:id,name,email,num_empleado,role',
             'operadorPersonal:id,nombre_completo,employee_id,area,grado',
+            'destino',
             'detalles.inventario:id,nombre_producto,economico,categoria,medida,existencia,precio_total',
             'salidas.detalles',
         ]);
@@ -398,7 +398,7 @@ class SalidaController extends Controller
                 $solicitud->estatus,
 
             'destino' =>
-                $solicitud->destino,
+                $solicitud->destino?->nombre,
 
             'comentario' =>
                 $solicitud->comentario,
@@ -727,7 +727,7 @@ class SalidaController extends Controller
             $destino =
                 $salida
                     ->solicitudMaterial
-                    ?->destino ??
+                    ?->destino?->nombre ??
                 'N/A';
 
             /*
