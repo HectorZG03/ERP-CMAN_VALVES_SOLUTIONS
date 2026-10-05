@@ -8,6 +8,11 @@
     <!-- Favicons -->
     <link rel="icon" href="{{ asset('img/logo/logo.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ asset('img/logo_cman.png') }}">
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    >
+
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -399,5 +404,6 @@
         // Initialize on load
         document.addEventListener('DOMContentLoaded', initializeTheme);
     </script>
+    @stack('scripts')
 </body>
 </html>
