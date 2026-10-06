@@ -58,6 +58,7 @@ class SolicitudMaterialController extends Controller
                 'operadorPersonal',
                 'destino',
             ]);
+
         $countQuery = SolicitudMaterial::query();
 
         if (!$puedeVerTodas) {
@@ -142,40 +143,48 @@ class SolicitudMaterialController extends Controller
                 'nullable',
                 'exists:personal,id',
             ],
+
             'destino_id' => [
                 'required',
                 'integer',
                 'exists:destinos,id',
             ],
+
             'comentario' => [
                 'nullable',
                 'string',
             ],
+
             'operador' => [
                 'nullable',
                 'string',
                 'max:255',
             ],
+
             'categoria' => [
                 'nullable',
                 'string',
                 'max:255',
             ],
+
             'tipo_solicitud' => [
                 'nullable',
                 Rule::in(SolicitudMaterial::TIPOS_VALIDOS),
             ],
+
             'productos' => [
                 'required',
                 'array',
                 'min:1',
             ],
+
             'productos.*.inventario_id' => [
                 'required',
                 'integer',
                 'distinct',
                 'exists:inventarios,id',
             ],
+
             'productos.*.cantidad_solicitada' => [
                 'required',
                 'integer',
@@ -325,6 +334,7 @@ class SolicitudMaterialController extends Controller
             'detalles.inventario',
             'user',
             'operadorPersonal',
+            'destino',
         ]);
 
         return view('solicitudes.show', compact('solicitud'));
@@ -374,6 +384,7 @@ class SolicitudMaterialController extends Controller
                 'string',
                 'max:150',
             ],
+
             'tipo_solicitud' => [
                 'nullable',
                 Rule::in(SolicitudMaterial::TIPOS_VALIDOS),
@@ -530,17 +541,17 @@ class SolicitudMaterialController extends Controller
             }
         }
 
-            $vistaPdf = $solicitud->esEpp()
-                ? 'solicitudes.pdf-epp'
-                : 'solicitudes.pdf';
+        $vistaPdf = $solicitud->esEpp()
+            ? 'solicitudes.pdf-epp'
+            : 'solicitudes.pdf';
 
-            return view(
-                $vistaPdf,
-                compact(
-                    'solicitud',
-                    'firmaAdminBase64',
-                    'firmaUserBase64'
-                )
-            );
+        return view(
+            $vistaPdf,
+            compact(
+                'solicitud',
+                'firmaAdminBase64',
+                'firmaUserBase64'
+            )
+        );
     }
 }
