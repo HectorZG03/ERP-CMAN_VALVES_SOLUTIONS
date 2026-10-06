@@ -1,114 +1,301 @@
 @forelse($inventarios as $inventario)
-<tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 inventory-row" 
-    data-stock="{{ $inventario->existencia > 0 ? 'with-stock' : 'without-stock' }}">
-    <td class="px-6 py-4 whitespace-nowrap">
-        <div class="flex items-center">
-            <div class="flex-shrink-0 h-10 w-10">
-                <div class="h-10 w-10 rounded-lg bg-blue-500 dark:bg-blue-600 flex items-center justify-center shadow-sm">
-                    <span class="text-sm font-medium text-white">
-                        {{ substr($inventario->nombre_producto, 0, 2) }}
-                    </span>
-                </div>
-            </div>
-            <div class="ml-4">
-                <div class="text-sm font-medium text-gray-800 dark:text-white">
-                    {{ $inventario->nombre_producto }}
-                </div>
-            </div>
-        </div>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-300">
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-            {{ $inventario->economico }}
-        </span>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap">
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
-            {{ $inventario->categoria }}
-        </span>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-300">
-        <div class="flex items-center">
-            <svg class="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
-            </svg>
-            {{ $inventario->medida }}
-        </div>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap">
-        <div class="flex items-center">
-            @if($inventario->existencia > 10)
-                <div class="flex-shrink-0 h-2 w-2 bg-green-400 dark:bg-green-500 rounded-full mr-2"></div>
-                <span class="text-sm font-semibold text-green-600 dark:text-green-400">{{ $inventario->existencia }}</span>
-            @elseif($inventario->existencia > 0)
-                <div class="flex-shrink-0 h-2 w-2 bg-yellow-400 dark:bg-yellow-500 rounded-full mr-2"></div>
-                <span class="text-sm font-semibold text-yellow-600 dark:text-yellow-400">{{ $inventario->existencia }}</span>
-            @else
-                <div class="flex-shrink-0 h-2 w-2 bg-red-400 dark:bg-red-500 rounded-full mr-2"></div>
-                <span class="text-sm font-semibold text-red-600 dark:text-red-400">{{ $inventario->existencia }}</span>
-            @endif
-        </div>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-300">
-        <div class="flex items-center">
-            <svg class="w-4 h-4 mr-1 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-            </svg>
-            <span class="font-medium">${{ number_format($inventario->getPrecioPromedio(), 2) }}</span>
-        </div>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-300">
-        <span class="font-semibold text-blue-600 dark:text-blue-400">
-            ${{ number_format($inventario->precio_total, 2) }}
-        </span>
-    </td>
-    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-        <div class="flex items-center space-x-2">
-            <!-- Botón Ver -->
-            <a href="{{ route('inventario.show', $inventario) }}" 
-               class="inline-flex items-center px-2 py-1 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-800 dark:text-blue-300 text-xs font-medium rounded-md transition-colors duration-200 shadow-sm">
-                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                    <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                </svg>
-                Ver
-            </a>
 
-            @if(auth()->user()->canManageInventory())
-                <!-- Botón Editar -->
-                <a href="{{ route('inventario.edit', $inventario) }}" 
-                   class="inline-flex items-center px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 text-xs font-medium rounded-md transition-colors duration-200 shadow-sm">
-                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+    @php
+
+        $stock = (int) $inventario->existencia;
+
+        if ($stock > 10) {
+
+            $stockClass = 'text-green-600 dark:text-green-400';
+            $stockDot = 'bg-green-500';
+            $stockLabel = 'Disponible';
+            $stockBadge = 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
+
+        } elseif ($stock > 0) {
+
+            $stockClass = 'text-yellow-600 dark:text-yellow-400';
+            $stockDot = 'bg-yellow-500';
+            $stockLabel = 'Stock bajo';
+            $stockBadge = 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300';
+
+        } else {
+
+            $stockClass = 'text-red-600 dark:text-red-400';
+            $stockDot = 'bg-red-500';
+            $stockLabel = 'Agotado';
+            $stockBadge = 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300';
+
+        }
+
+        $nombreProducto = trim($inventario->nombre_producto ?? 'Producto');
+
+        $avatar = strtoupper(substr($nombreProducto, 0, 2));
+
+    @endphp
+
+
+    <tr class="inventory-row transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/40"
+        data-stock="{{ $stock > 0 ? 'with-stock' : 'without-stock' }}">
+
+
+        {{-- ========================================================
+             PRODUCTO
+        ========================================================= --}}
+        <td class="px-5 py-4">
+
+            <div class="flex min-w-0 items-center gap-3">
+
+                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-xs font-bold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+
+                    {{ $avatar }}
+
+                </div>
+
+
+                <div class="min-w-0">
+
+                    <a href="{{ route('inventario.show', $inventario) }}"
+                       class="block truncate text-sm font-semibold text-gray-900 transition hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+                       title="{{ $inventario->nombre_producto }}">
+
+                        {{ $inventario->nombre_producto }}
+
+                    </a>
+
+
+                    <div class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+
+                        ID #{{ str_pad($inventario->id, 4, '0', STR_PAD_LEFT) }}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </td>
+
+
+        {{-- ========================================================
+             ECONÓMICO
+        ========================================================= --}}
+        <td class="px-3 py-4">
+
+            <span class="block max-w-full truncate rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                  title="{{ $inventario->economico }}">
+
+                {{ $inventario->economico ?: 'Sin asignar' }}
+
+            </span>
+
+        </td>
+
+
+        {{-- ========================================================
+             CATEGORÍA
+        ========================================================= --}}
+        <td class="px-3 py-4">
+
+            <span class="block max-w-full truncate rounded-md bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
+                  title="{{ $inventario->categoria }}">
+
+                {{ $inventario->categoria }}
+
+            </span>
+
+        </td>
+
+
+        {{-- ========================================================
+             MEDIDA
+        ========================================================= --}}
+        <td class="px-3 py-4">
+
+            <div class="flex min-w-0 items-center gap-1.5 text-sm text-gray-700 dark:text-gray-300">
+
+                <svg class="h-4 w-4 flex-shrink-0 text-gray-400"
+                     fill="none"
+                     stroke="currentColor"
+                     viewBox="0 0 24 24">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2zM9 7h6M9 11h6M9 15h4"/>
+
+                </svg>
+
+                <span class="truncate">
+                    {{ $inventario->medida }}
+                </span>
+
+            </div>
+
+        </td>
+
+
+        {{-- ========================================================
+             EXISTENCIA
+        ========================================================= --}}
+        <td class="px-3 py-4">
+
+            <div class="flex items-center gap-2">
+
+                <span class="h-2 w-2 flex-shrink-0 rounded-full {{ $stockDot }}"></span>
+
+                <span class="font-bold {{ $stockClass }}">
+                    {{ $stock }}
+                </span>
+
+                <span class="hidden rounded-md px-2 py-0.5 text-[10px] font-semibold xl:inline-flex {{ $stockBadge }}">
+                    {{ $stockLabel }}
+                </span>
+
+            </div>
+
+        </td>
+
+
+        {{-- ========================================================
+             PRECIO UNITARIO
+        ========================================================= --}}
+        <td class="px-3 py-4 text-right whitespace-nowrap">
+
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                ${{ number_format($inventario->getPrecioPromedio(), 2) }}
+            </span>
+
+        </td>
+
+
+        {{-- ========================================================
+             ACCIONES
+        ========================================================= --}}
+        <td class="px-3 py-4">
+
+            <div class="flex items-center justify-end gap-1">
+
+                {{-- Ver --}}
+                <a href="{{ route('inventario.show', $inventario) }}"
+                   title="Ver producto"
+                   aria-label="Ver producto"
+                   class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-blue-50 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-blue-900/20 dark:hover:text-blue-400">
+
+                    <svg class="h-4 w-4"
+                         fill="none"
+                         stroke="currentColor"
+                         viewBox="0 0 24 24">
+
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+
+                        <path stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+
                     </svg>
-                    Editar
+
                 </a>
 
-                <!-- Botón Eliminar -->
-                <form method="POST" action="{{ route('inventario.destroy', $inventario) }}" 
-                      class="inline" onsubmit="return confirm('¿Estás seguro de eliminar este producto?\n\nEsta acción no se puede deshacer.')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" 
-                            class="inline-flex items-center px-2 py-1 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 text-xs font-medium rounded-md transition-colors duration-200 shadow-sm">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+
+                @if(auth()->user()->canManageInventory())
+
+                    {{-- Editar --}}
+                    <a href="{{ route('inventario.edit', $inventario) }}"
+                       title="Editar producto"
+                       aria-label="Editar producto"
+                       class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-yellow-50 hover:text-yellow-600 dark:text-gray-400 dark:hover:bg-yellow-900/20 dark:hover:text-yellow-400">
+
+                        <svg class="h-4 w-4"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+
+                            <path stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h5m4-14l2.5 2.5M14 4l6 6-8 8H9v-3l8-8z"/>
+
                         </svg>
-                        Eliminar
-                    </button>
-                </form>
-            @endif
-        </div>
-    </td>
-</tr>
+
+                    </a>
+
+
+                    {{-- Eliminar --}}
+                    <form method="POST"
+                          action="{{ route('inventario.destroy', $inventario) }}"
+                          class="inline"
+                          onsubmit="return confirm('¿Estás seguro de eliminar este producto?\n\nEsta acción no se puede deshacer.')">
+
+                        @csrf
+                        @method('DELETE')
+
+                        <button type="submit"
+                                title="Eliminar producto"
+                                aria-label="Eliminar producto"
+                                class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-gray-500 transition hover:bg-red-50 hover:text-red-600 dark:text-gray-400 dark:hover:bg-red-900/20 dark:hover:text-red-400">
+
+                            <svg class="h-4 w-4"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 viewBox="0 0 24 24">
+
+                                <path stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                      stroke-width="2"
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v-5m-1-3V4a1 1 0 011-1h2a1 1 0 011 1v2m-8 0h10"/>
+
+                            </svg>
+
+                        </button>
+
+                    </form>
+
+                @endif
+
+            </div>
+
+        </td>
+
+    </tr>
+
+
 @empty
-<tr>
-    <td colspan="8" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-        </svg>
-        <h3 class="mt-2 text-sm font-medium text-gray-800 dark:text-white">No se encontraron productos</h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Intenta con otros términos de búsqueda o filtros.</p>
-    </td>
-</tr>
+
+    <tr>
+
+        <td colspan="7"
+            class="px-6 py-16 text-center">
+
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500">
+
+                <svg class="h-7 w-7"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor">
+
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="1.7"
+                          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+
+                </svg>
+
+            </div>
+
+            <h3 class="mt-4 text-sm font-semibold text-gray-900 dark:text-white">
+                No se encontraron productos
+            </h3>
+
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Intenta modificar los términos de búsqueda o los filtros seleccionados.
+            </p>
+
+        </td>
+
+    </tr>
+
 @endforelse
