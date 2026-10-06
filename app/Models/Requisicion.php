@@ -17,7 +17,7 @@ class Requisicion extends Model
         'nombre_solicitante',
         'departamento',
         'plataforma',
-        'embarcacion',
+        'destino_id',
         'proyecto',
         'sit',
         'partida',
@@ -76,6 +76,13 @@ class Requisicion extends Model
         return $this->belongsTo(Contrato::class);
     }
 
+    /**
+     * Destino general (embarcación, base, oficina, etc.).
+     */
+    public function destino()
+    {
+        return $this->belongsTo(Destino::class, 'destino_id')->withTrashed();
+    }
     // ✅ Relación con usuario que aprobó en finanzas
     public function aprobadorFinanzas()
     {

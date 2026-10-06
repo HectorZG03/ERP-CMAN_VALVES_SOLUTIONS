@@ -1,339 +1,350 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="space-y-6">
-    <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Nuevo Vale de EPP</h1>
-        <a href="{{ route('valepp.index') }}" 
-           class="bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
-            Volver
+<div
+    id="valepp-create-app"
+    class="space-y-6"
+    data-search-url="{{ route('valepp.solicitudes-epp.buscar') }}"
+    data-detail-url-template="{{ route('valepp.solicitudes-epp.show', ['solicitud' => '__SOLICITUD__']) }}"
+    data-old-solicitud-id="{{ old('solicitud_material_id') }}"
+    data-old-detalles='@json(old('detalles', []))'
+>
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+                Seguridad · Equipo de protección personal
+            </p>
+            <h1 class="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
+                Nuevo Vale EPP
+            </h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Asigne a un colaborador los equipos disponibles de una solicitud EPP.
+            </p>
+        </div>
+
+        <a
+            href="{{ route('valepp.index') }}"
+            class="rounded-lg bg-gray-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-gray-700"
+        >
+            Volver al listado
         </a>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">
-        <form method="POST" action="{{ route('valepp.store') }}" id="valeForm">
-            @csrf
-            
-            <!-- Información del Vale -->
-            <div class="mb-6 bg-emerald-50 dark:bg-emerald-900/30 p-4 rounded-lg">
-                <div class="flex items-center justify-between">
+    @if($errors->any())
+        <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800 dark:border-red-800 dark:bg-red-900/30 dark:text-red-200">
+            <p class="font-semibold">No fue posible registrar el Vale EPP:</p>
+            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form
+        method="POST"
+        action="{{ route('valepp.store') }}"
+        id="valepp-form"
+        class="space-y-6"
+    >
+        @csrf
+
+        <input
+            type="hidden"
+            name="solicitud_material_id"
+            id="solicitud_material_id"
+            value="{{ old('solicitud_material_id') }}"
+        >
+
+        <div class="grid grid-cols-12 gap-6">
+            <section class="col-span-5 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="border-b border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                1. Seleccionar solicitud EPP
+                            </h2>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                Solicitudes pendientes o aprobadas con cantidades por asignar.
+                            </p>
+                        </div>
+
+                        <span class="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700 dark:bg-orange-900/40 dark:text-orange-300">
+                            Tipo EPP
+                        </span>
+                    </div>
+                </div>
+
+                <div class="space-y-4 p-5">
                     <div>
-                        <h3 class="text-sm font-medium text-emerald-900 dark:text-emerald-200">Número de Vale</h3>
-                        <p class="text-2xl font-bold text-emerald-700 dark:text-emerald-300">{{ $numeroVale }}</p>
+                        <label for="buscar-solicitud" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Buscar por ID, destino, comentario o solicitante
+                        </label>
+                        <input
+                            type="search"
+                            id="buscar-solicitud"
+                            class="w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            placeholder="Ejemplo: 61, Base Operativa o Wendy"
+                            autocomplete="off"
+                        >
                     </div>
-                    <div class="text-right">
-                        <p class="text-sm text-emerald-700 dark:text-emerald-300">Fecha</p>
-                        <p class="text-lg font-semibold text-emerald-900 dark:text-emerald-200">{{ date('d/m/Y') }}</p>
+
+                    <div class="grid grid-cols-5 gap-3">
+                        <div class="col-span-3">
+                            <label for="fecha-solicitud-filtro" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Fecha de creación
+                            </label>
+                            <input
+                                type="date"
+                                id="fecha-solicitud-filtro"
+                                class="w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                            >
+                        </div>
+
+                        <div class="col-span-2 flex items-end gap-2">
+                            <button
+                                type="button"
+                                id="buscar-solicitudes-btn"
+                                class="flex-1 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700"
+                            >
+                                Buscar
+                            </button>
+
+                            <button
+                                type="button"
+                                id="limpiar-busqueda-btn"
+                                class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                                title="Limpiar búsqueda"
+                            >
+                                Limpiar
+                            </button>
+                        </div>
                     </div>
+
+                    <div
+                        id="estado-busqueda"
+                        class="hidden rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300"
+                    ></div>
+
+                    <div
+                        id="resultados-solicitudes"
+                        class="max-h-[520px] space-y-3 overflow-y-auto pr-1"
+                    >
+                        <div class="rounded-lg border border-dashed border-gray-300 px-5 py-10 text-center dark:border-gray-600">
+                            <p class="font-medium text-gray-700 dark:text-gray-300">
+                                Buscando solicitudes disponibles…
+                            </p>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                También puede buscar por fecha o número de solicitud.
+                            </p>
+                        </div>
+                    </div>
+
+                    @error('solicitud_material_id')
+                        <p class="text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
                 </div>
-            </div>
+            </section>
 
-            <!-- Seleccionar Colaborador -->
-            <div class="mb-6">
-                <label for="personal_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Colaborador <span class="text-red-500">*</span>
-                </label>
-                <select name="personal_id" id="personal_id" required
-                        class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200">
-                    <option value="">Seleccione un colaborador</option>
-                    @foreach($personalActivo as $persona)
-                        <option value="{{ $persona->id }}" {{ old('personal_id') == $persona->id ? 'selected' : '' }}>
-                            {{ $persona->nombre_completo }} - {{ $persona->area }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('personal_id')
-                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                @enderror
-            </div>
+            <section class="col-span-7 space-y-6">
+                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div class="border-b border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            2. Datos del vale
+                        </h2>
+                    </div>
 
-            <!-- Fecha de Solicitud -->
-            <div class="mb-6">
-                <label for="fecha_solicitud" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Fecha de Solicitud <span class="text-red-500">*</span>
-                </label>
-                <input type="date" name="fecha_solicitud" id="fecha_solicitud" required
-                       value="{{ old('fecha_solicitud', date('Y-m-d')) }}"
-                       class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200">
-                @error('fecha_solicitud')
-                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                @enderror
-            </div>
+                    <div class="p-5">
+                        <div class="mb-5 grid grid-cols-3 gap-4 rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-800 dark:bg-orange-900/20">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-300">
+                                    Próximo vale
+                                </p>
+                                <p class="mt-1 text-xl font-bold text-gray-900 dark:text-white">
+                                    {{ $numeroVale }}
+                                </p>
+                            </div>
 
-            <!-- Materiales / Equipos -->
-            <div class="mb-8">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Materiales de EPP</h3>
-                    <span class="text-sm text-gray-500 dark:text-gray-400" id="contador-materiales">0 materiales agregados</span>
-                </div>
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-300">
+                                    Solicitud vinculada
+                                </p>
+                                <p id="resumen-folio" class="mt-1 text-xl font-bold text-gray-900 dark:text-white">
+                                    Sin seleccionar
+                                </p>
+                            </div>
 
-                <!-- Buscador de Materiales -->
-                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-4 transition-colors duration-200">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Buscar Material
-                    </label>
-                    <div class="relative">
-                        <input type="text" 
-                               id="buscador-material" 
-                               class="w-full bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200"
-                               placeholder="Buscar casco, guantes, botas...">
-                        
-                        <div id="resultados-materiales" 
-                             class="absolute z-10 w-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg mt-1 hidden max-h-60 overflow-y-auto transition-colors duration-200">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-300">
+                                    Destino
+                                </p>
+                                <p id="resumen-destino" class="mt-1 truncate text-sm font-semibold text-gray-900 dark:text-white">
+                                    —
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-5">
+                            <div>
+                                <label for="personal_id" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Colaborador que recibe <span class="text-red-500">*</span>
+                                </label>
+                                <select
+                                    name="personal_id"
+                                    id="personal_id"
+                                    required
+                                    class="w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                >
+                                    <option value="">Seleccione un colaborador</option>
+                                    @foreach($personalActivo as $persona)
+                                        <option
+                                            value="{{ $persona->id }}"
+                                            @selected((string) old('personal_id') === (string) $persona->id)
+                                        >
+                                            {{ $persona->nombre_completo }} · {{ $persona->employee_id }} · {{ $persona->area }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('personal_id')
+                                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label for="fecha_solicitud" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Fecha del vale <span class="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="date"
+                                    name="fecha_solicitud"
+                                    id="fecha_solicitud"
+                                    value="{{ old('fecha_solicitud', now()->format('Y-m-d')) }}"
+                                    max="{{ now()->format('Y-m-d') }}"
+                                    required
+                                    class="w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                >
+                                @error('fecha_solicitud')
+                                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="mt-5">
+                            <label for="observaciones" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                Observaciones
+                            </label>
+                            <textarea
+                                name="observaciones"
+                                id="observaciones"
+                                rows="3"
+                                maxlength="2000"
+                                class="w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                placeholder="Anotaciones relacionadas con la asignación de EPP"
+                            >{{ old('observaciones') }}</textarea>
+                            @error('observaciones')
+                                <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
                 </div>
 
-                <!-- Lista de materiales agregados -->
-                <div id="materiales-agregados" class="space-y-3">
-                    <!-- Los materiales se agregarán dinámicamente aquí -->
-                </div>
+                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+                        <div>
+                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                3. Equipos que recibirá el colaborador
+                            </h2>
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                La cantidad disponible considera todos los vales vinculados previamente.
+                            </p>
+                        </div>
 
-                <div id="mensaje-inicial" class="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                    </svg>
-                    <p class="font-medium">No hay materiales agregados</p>
-                    <p class="text-sm">Busca y agrega los equipos de protección personal</p>
-                </div>
-            </div>
+                        <span id="resumen-asignacion" class="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                            0 equipos asignados
+                        </span>
+                    </div>
 
-            <!-- Observaciones -->
-            <div class="mb-6">
-                <label for="observaciones" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Observaciones
-                </label>
-                <textarea name="observaciones" id="observaciones" rows="3"
-                          class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200"
-                          placeholder="Notas adicionales...">{{ old('observaciones') }}</textarea>
-                @error('observaciones')
-                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <!-- embarcacion -->
-            <div class="mb-6">
-                <label for="embarcacion" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Embarcación <span class="text-red-500">*</span>
-                </label>
-                <input type="text" name="embarcacion" id="embarcacion" required
-                       value="{{ old('embarcacion') }}"
-                       class="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200"
-                       placeholder="Número de embarcación">
-                @error('embarcacion')
-                    <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <!-- Información -->
-            <div class="mb-6 bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg transition-colors duration-200">
-                <div class="flex items-start">
-                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                    </svg>
-                    <div>
-                        <h3 class="text-sm font-medium text-blue-900 dark:text-blue-200">Información importante</h3>
-                        <p class="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                            Al guardar el vale, los materiales se descontarán automáticamente del inventario.<br>
-                            Este proceso no se puede revertir.
+                    <div id="detalle-solicitud-vacio" class="px-6 py-14 text-center">
+                        <p class="font-medium text-gray-700 dark:text-gray-300">
+                            Seleccione una solicitud EPP
+                        </p>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            Aquí se mostrarán solamente los equipos con cantidades pendientes.
                         </p>
                     </div>
-                </div>
-            </div>
 
-            <!-- Botones -->
-            <div class="flex justify-end space-x-3">
-                <a href="{{ route('valepp.index') }}" 
-                   class="bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+                    <div id="detalle-solicitud-contenido" class="hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-900/40">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                            Equipo
+                                        </th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                            Unidad
+                                        </th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                            Solicitado
+                                        </th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                            Asignado
+                                        </th>
+                                        <th class="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                            Disponible
+                                        </th>
+                                        <th class="w-28 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                            Entregar
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody
+                                    id="detalle-solicitud-filas"
+                                    class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800"
+                                ></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="detalles-hidden"></div>
+
+                    <div id="error-asignacion" class="hidden border-t border-red-200 bg-red-50 px-5 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300"></div>
+
+                    @error('detalles')
+                        <p class="border-t border-red-200 bg-red-50 px-5 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300">
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+            </section>
+        </div>
+
+        <div class="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-6 py-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <p class="max-w-3xl text-sm text-gray-500 dark:text-gray-400">
+                El vale quedará vinculado a la solicitud EPP y autorizado para efectos del registro histórico.
+                Esta operación no descuenta inventario ni genera una salida de almacén.
+            </p>
+
+            <div class="flex items-center gap-3">
+                <a
+                    href="{{ route('valepp.index') }}"
+                    class="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                >
                     Cancelar
                 </a>
-                <button type="submit" 
-                        id="btn-enviar"
-                        class="bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50 transition-colors duration-200"
-                        disabled>
-                    Crear y Entregar Vale
+
+                <button
+                    type="submit"
+                    id="guardar-vale-btn"
+                    disabled
+                    class="rounded-lg bg-orange-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    Registrar Vale EPP
                 </button>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 
-<!-- Template para material agregado -->
-<template id="template-material">
-    <div class="material-item bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4 hover:shadow-md transition-all duration-200">
-        <div class="flex items-center justify-between">
-            <div class="flex-1">
-                <div class="flex items-center justify-between mb-2">
-                    <h4 class="font-semibold text-gray-900 dark:text-white material-nombre"></h4>
-                    <button type="button" 
-                            class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 btn-eliminar transition-colors duration-200"
-                            onclick="eliminarMaterial(this)">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                    <div>
-                        <p class="text-sm text-gray-600 dark:text-gray-300">Categoría: <span class="material-categoria"></span></p>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Cantidad</label>
-                        <input type="number" 
-                               class="cantidad-input w-full text-sm bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white transition-colors duration-200" 
-                               min="1" 
-                               value="1"
-                               required>
-                    </div>
-                    
-                    <div class="text-center">
-                        <p class="text-xs text-gray-600 dark:text-gray-400">Disponible</p>
-                        <p class="font-semibold text-green-600 dark:text-green-400 material-stock"></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <input type="hidden" name="inventario_id[]" class="inventario-id">
-        <input type="hidden" name="cantidad[]" class="cantidad-hidden">
-    </div>
-</template>
-
-<script>
-let materialesAgregados = [];
-let contadorMateriales = 0;
-let timeoutBusqueda;
-
-const inventarios = @json($inventarios);
-
-document.addEventListener('DOMContentLoaded', function() {
-    const buscador = document.getElementById('buscador-material');
-    
-    buscador.addEventListener('input', function() {
-        clearTimeout(timeoutBusqueda);
-        timeoutBusqueda = setTimeout(() => {
-            buscarMateriales(this.value);
-        }, 300);
-    });
-
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('#buscador-material') && !e.target.closest('#resultados-materiales')) {
-            document.getElementById('resultados-materiales').classList.add('hidden');
-        }
-    });
-});
-
-function buscarMateriales(termino) {
-    const resultados = document.getElementById('resultados-materiales');
-    
-    if (termino.length < 2) {
-        resultados.classList.add('hidden');
-        return;
-    }
-
-    const materiales = inventarios.filter(item => 
-        item.nombre_producto.toLowerCase().includes(termino.toLowerCase()) ||
-        item.categoria.toLowerCase().includes(termino.toLowerCase())
-    );
-
-    mostrarResultados(materiales);
-}
-
-function mostrarResultados(materiales) {
-    const resultados = document.getElementById('resultados-materiales');
-    
-    if (materiales.length === 0) {
-        resultados.innerHTML = '<div class="p-3 text-gray-500 dark:text-gray-400 text-center">No se encontraron materiales</div>';
-        resultados.classList.remove('hidden');
-        return;
-    }
-
-    let html = '';
-    materiales.forEach(material => {
-        const yaAgregado = materialesAgregados.some(m => m.id === material.id);
-        const claseDisabled = yaAgregado ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer';
-        
-        html += `
-            <div class="p-3 border-b border-gray-100 dark:border-gray-600 ${claseDisabled} transition-colors duration-200" 
-                 ${!yaAgregado ? `onclick='agregarMaterial(${JSON.stringify(material)})'` : ''}>
-                <div class="flex justify-between items-center">
-                    <div>
-                        <div class="font-medium text-gray-900 dark:text-white">${material.nombre_producto}</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-400">${material.categoria}</div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-sm font-medium ${material.existencia > 5 ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}">
-                            Stock: ${material.existencia}
-                        </div>
-                        ${yaAgregado ? '<span class="text-xs text-gray-400 dark:text-gray-500">Ya agregado</span>' : ''}
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-
-    resultados.innerHTML = html;
-    resultados.classList.remove('hidden');
-}
-
-function agregarMaterial(material) {
-    if (materialesAgregados.some(m => m.id === material.id)) return;
-
-    const template = document.getElementById('template-material');
-    const clone = template.content.cloneNode(true);
-
-    clone.querySelector('.material-nombre').textContent = material.nombre_producto;
-    clone.querySelector('.material-categoria').textContent = material.categoria;
-    clone.querySelector('.material-stock').textContent = material.existencia;
-    clone.querySelector('.inventario-id').value = material.id;
-    clone.querySelector('.cantidad-hidden').value = 1;
-
-    const inputCantidad = clone.querySelector('.cantidad-input');
-    const cantidadHidden = clone.querySelector('.cantidad-hidden');
-    
-    inputCantidad.max = material.existencia;
-    inputCantidad.addEventListener('input', function() {
-        cantidadHidden.value = this.value;
-    });
-
-    document.getElementById('materiales-agregados').appendChild(clone);
-    materialesAgregados.push(material);
-
-    actualizarContador();
-    limpiarBuscador();
-}
-
-function eliminarMaterial(boton) {
-    const item = boton.closest('.material-item');
-    const inventarioId = parseInt(item.querySelector('.inventario-id').value);
-    
-    materialesAgregados = materialesAgregados.filter(m => m.id !== inventarioId);
-    item.remove();
-    
-    actualizarContador();
-}
-
-function actualizarContador() {
-    const contador = document.getElementById('contador-materiales');
-    const mensaje = document.getElementById('mensaje-inicial');
-    const btnEnviar = document.getElementById('btn-enviar');
-    
-    contador.textContent = `${materialesAgregados.length} material${materialesAgregados.length !== 1 ? 'es' : ''} agregado${materialesAgregados.length !== 1 ? 's' : ''}`;
-    
-    if (materialesAgregados.length === 0) {
-        mensaje.classList.remove('hidden');
-        btnEnviar.disabled = true;
-    } else {
-        mensaje.classList.add('hidden');
-        btnEnviar.disabled = false;
-    }
-}
-
-function limpiarBuscador() {
-    document.getElementById('buscador-material').value = '';
-    document.getElementById('resultados-materiales').classList.add('hidden');
-}
-</script>
+<script src="{{ asset('js/valepp/create.js') }}" defer></script>
 @endsection

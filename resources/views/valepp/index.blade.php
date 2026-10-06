@@ -2,207 +2,261 @@
 
 @section('content')
 <div class="space-y-6">
-    <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Vales de EPP</h1>
-        <a href="{{ route('valepp.create') }}" 
-           class="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+    @if(session('success'))
+        <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-800 dark:border-green-800 dark:bg-green-900/30 dark:text-green-200">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-sm font-semibold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+                Seguridad · Equipo de protección personal
+            </p>
+            <h1 class="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
+                Vales EPP
+            </h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Distribución de equipos vinculada a solicitudes de almacén tipo EPP.
+            </p>
+        </div>
+
+        <a
+            href="{{ route('valepp.create') }}"
+            class="rounded-lg bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700"
+        >
             Nuevo Vale EPP
         </a>
     </div>
 
-    <!-- Estadística simple -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
-        <div class="flex items-center">
-            <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                </svg>
-            </div>
-            <div class="ml-4">
-                <p class="text-sm text-gray-500 dark:text-gray-400">Total de Vales</p>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalVales }}</p>
-            </div>
+    <div class="grid grid-cols-4 gap-5">
+        <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                Total de vales
+            </p>
+            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+                {{ $totalVales }}
+            </p>
+        </div>
+
+        <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                Resultados encontrados
+            </p>
+            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+                {{ $valepp->total() }}
+            </p>
+        </div>
+
+        <div class="col-span-2 rounded-xl border border-orange-200 bg-orange-50 p-5 shadow-sm dark:border-orange-800 dark:bg-orange-900/20">
+            <p class="text-xs font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-300">
+                Flujo actual
+            </p>
+            <p class="mt-2 text-sm leading-6 text-orange-900 dark:text-orange-200">
+                Cada vale distribuye cantidades de una solicitud EPP. Registrar el vale no descuenta inventario ni crea una salida de almacén.
+            </p>
         </div>
     </div>
 
-    <!-- Tabla -->
-    <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md transition-colors duration-200">
-        <div class="px-4 py-5 sm:p-6">
-            <!-- Buscador -->
-            <div class="mb-6">
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
-                    <input type="text" id="search" placeholder="Buscar por número de vale o colaborador..." 
-                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200">
-                </div>
+    <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <form method="GET" action="{{ route('valepp.index') }}" class="grid grid-cols-12 gap-4">
+            <div class="col-span-7">
+                <label for="search" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Buscar vale
+                </label>
+                <input
+                    type="search"
+                    name="search"
+                    id="search"
+                    value="{{ $search }}"
+                    maxlength="150"
+                    class="w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    placeholder="Número o ID de vale, solicitud, colaborador, empleado, área o destino"
+                >
             </div>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Vale / Fecha</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Colaborador</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Materiales</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Entregado</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @forelse($valepp as $vale)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                            <!-- Vale / Fecha -->
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">
+            <div class="col-span-3">
+                <label for="fecha" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Fecha del vale
+                </label>
+                <input
+                    type="date"
+                    name="fecha"
+                    id="fecha"
+                    value="{{ $fecha }}"
+                    class="w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
+            </div>
+
+            <div class="col-span-2 flex items-end gap-2">
+                <button
+                    type="submit"
+                    class="flex-1 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700"
+                >
+                    Buscar
+                </button>
+
+                @if($search !== '' || $fecha)
+                    <a
+                        href="{{ route('valepp.index') }}"
+                        class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                    >
+                        Limpiar
+                    </a>
+                @endif
+            </div>
+        </form>
+    </section>
+
+    <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-900/40">
+                    <tr>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Vale / Fecha
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Solicitud EPP
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Colaborador
+                        </th>
+                        <th class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Destino
+                        </th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Asignación
+                        </th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Estatus
+                        </th>
+                        <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            Acciones
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-200 bg-white dark:divide-gray-700 dark:bg-gray-800">
+                    @forelse($valepp as $vale)
+                        @php
+                            $solicitud = $vale->solicitudMaterial;
+                            $estatus = match ($vale->estatus) {
+                                'aprobado' => [
+                                    'texto' => 'Autorizado',
+                                    'clases' => 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
+                                ],
+                                'rechazado' => [
+                                    'texto' => 'Rechazado',
+                                    'clases' => 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+                                ],
+                                default => [
+                                    'texto' => ucfirst($vale->estatus ?? 'registrado'),
+                                    'clases' => 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300',
+                                ],
+                            };
+                        @endphp
+
+                        <tr class="transition hover:bg-orange-50/40 dark:hover:bg-orange-900/10">
+                            <td class="whitespace-nowrap px-5 py-4">
+                                <p class="font-bold text-gray-900 dark:text-white">
                                     {{ $vale->numero_vale }}
-                                </div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">
-                                    {{ $vale->fecha_solicitud->format('d/m/Y') }}
-                                </div>
-                                <div class="text-xs text-gray-400 dark:text-gray-500">
-                                    {{ $vale->fecha_solicitud->diffForHumans() }}
-                                </div>
+                                </p>
+                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                                    {{ $vale->fecha_solicitud?->format('d/m/Y') ?? 'Sin fecha' }}
+                                </p>
+                                <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
+                                    ID #{{ $vale->id }}
+                                </p>
                             </td>
 
-                            <!-- Colaborador -->
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10">
-                                        <div class="h-10 w-10 rounded-full bg-emerald-500 dark:bg-emerald-600 flex items-center justify-center">
-                                            <span class="text-white font-medium">
-                                                {{ substr($vale->personal->nombre_completo, 0, 2) }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                            {{ $vale->personal->nombre_completo }}
-                                        </div>
-                                        <div class="text-sm text-gray-500 dark:text-gray-400">
-                                            {{ $vale->personal->area }}
-                                        </div>
-                                    </div>
-                                </div>
+                            <td class="whitespace-nowrap px-5 py-4">
+                                @if($solicitud)
+                                    <a
+                                        href="{{ route('solicitudes.show', $solicitud) }}"
+                                        class="font-bold text-orange-700 hover:text-orange-900 dark:text-orange-300 dark:hover:text-orange-200"
+                                    >
+                                        #{{ str_pad((string) $solicitud->id, 4, '0', STR_PAD_LEFT) }}
+                                    </a>
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        {{ ucfirst($solicitud->estatus) }} · EPP
+                                    </p>
+                                @else
+                                    <span class="text-sm text-gray-400 dark:text-gray-500">
+                                        No disponible
+                                    </span>
+                                @endif
                             </td>
 
-                            <!-- Materiales -->
-<td class="px-6 py-4">
-    <div class="space-y-1">
-        @foreach($vale->detalles->take(3) as $index => $detalle)
-            <div class="text-sm text-gray-900 dark:text-white flex items-center gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-gray-400 dark:bg-gray-500 flex-shrink-0"></span>
-                <span class="truncate max-w-[140px]" title="{{ $detalle->inventario->nombre_producto }}">
-                    {{ Str::limit($detalle->inventario->nombre_producto, 18) }}
-                </span>
-                <span class="text-gray-500 dark:text-gray-400 flex-shrink-0">({{ $detalle->cantidad }})</span>
-            </div>
-        @endforeach
-
-        @if($vale->detalles->count() > 3)
-            <div class="text-xs text-blue-500 dark:text-blue-400 font-medium pl-1">
-                +{{ $vale->detalles->count() - 3 }} más...
-            </div>
-        @endif
-    </div>
-</td>
-
-                            <!-- Fecha de Entrega -->
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900 dark:text-white">
-                                    @if($vale->detalles->first() && $vale->detalles->first()->fecha_entrega)
-                                        {{ $vale->detalles->first()->fecha_entrega->format('d/m/Y') }}
-                                    @else
-                                        <span class="text-gray-400 dark:text-gray-500">-</span>
-                                    @endif
-                                </div>
+                            <td class="px-5 py-4">
+                                <p class="max-w-[260px] truncate font-semibold text-gray-900 dark:text-white" title="{{ $vale->personal?->nombre_completo }}">
+                                    {{ $vale->personal?->nombre_completo ?? 'No disponible' }}
+                                </p>
+                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                    {{ $vale->personal?->employee_id ?? 'Sin número' }} · {{ $vale->personal?->area ?? 'Sin área' }}
+                                </p>
                             </td>
 
-                            <!-- Acciones -->
-<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-    <div class="flex items-center space-x-2">
+                            <td class="px-5 py-4">
+                                <p class="max-w-[210px] truncate text-sm font-medium text-gray-700 dark:text-gray-300" title="{{ $solicitud?->destino?->nombre }}">
+                                    {{ $solicitud?->destino?->nombre ?? 'Sin destino' }}
+                                </p>
+                            </td>
 
-        <!-- Ver -->
-        <a href="{{ route('valepp.show', $vale) }}" 
-           class="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-            Ver
-        </a>
+                            <td class="whitespace-nowrap px-5 py-4 text-center">
+                                <p class="text-lg font-bold text-orange-700 dark:text-orange-300">
+                                   {{ (int) ($vale->unidades_asignadas ?? 0) }}
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    {{ $vale->detalles_count }} {{ $vale->detalles_count === 1 ? 'renglón' : 'renglones' }}
+                                </p>
+                            </td>
 
-        <!-- PDF -->
-        <a href="{{ route('valepp.exportPDF', $vale) }}" 
-           target="_blank"
-           class="inline-flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 13h6M9 17h4" />
-            </svg>
-            PDF
-        </a>
+                            <td class="whitespace-nowrap px-5 py-4 text-center">
+                                <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $estatus['clases'] }}">
+                                    {{ $estatus['texto'] }}
+                                </span>
+                            </td>
 
-        <!-- Excel -->
-        <a href="{{ route('valepp.exportExcel', $vale) }}" 
-           target="_blank"
-           class="inline-flex items-center gap-1 text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18M10 3v18M3 6a3 3 0 013-3h12a3 3 0 013 3v12a3 3 0 01-3 3H6a3 3 0 01-3-3V6z" />
-            </svg>
-            Excel
-        </a>
+                            <td class="whitespace-nowrap px-5 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a
+                                        href="{{ route('valepp.show', $vale) }}"
+                                        class="rounded-lg border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+                                    >
+                                        Ver detalle
+                                    </a>
 
-    </div>
-</td>
+                                    <a
+                                        href="{{ route('valepp.exportPDF', $vale) }}"
+                                        class="rounded-lg bg-orange-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-orange-700"
+                                    >
+                                        PDF
+                                    </a>
+                                </div>
+                            </td>
                         </tr>
-                        @empty
+                    @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                                <p class="font-medium">No hay vales registrados</p>
+                            <td colspan="7" class="px-6 py-14 text-center">
+                                <p class="font-semibold text-gray-700 dark:text-gray-300">
+                                    No se encontraron Vales EPP
+                                </p>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    Cree un nuevo vale o modifique los criterios de búsqueda.
+                                </p>
                             </td>
                         </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
-            <!-- Paginación -->
-            <div class="mt-6">
+        @if($valepp->hasPages())
+            <div class="border-t border-gray-200 px-5 py-4 dark:border-gray-700">
                 {{ $valepp->links() }}
             </div>
-        </div>
-    </div>
+        @endif
+    </section>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const searchInput = document.getElementById('search');
-    const tableRows = document.querySelectorAll('tbody tr');
-    
-    if (searchInput) {
-        searchInput.addEventListener('keyup', function () {
-            const searchTerm = this.value.toLowerCase();
-            let visibleCount = 0;
-
-            tableRows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                
-                if (searchTerm === '' || text.includes(searchTerm)) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-    }
-});
-</script>
 @endsection

@@ -4,21 +4,32 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Destino;
 
 class SolicitudMaterial extends Model
 {
     use HasFactory;
+
+    public const TIPO_ESTANDAR = 'estandar';
+
+    public const TIPO_EPP = 'epp';
+
+    public const TIPOS_VALIDOS = [
+        self::TIPO_ESTANDAR,
+        self::TIPO_EPP,
+    ];
 
     protected $table = 'solicitud_materiales';
 
     protected $fillable = [
         'user_id',
         'personal_id',
-        'destino',
+        'destino_id',
         'estatus',
         'comentario',
         'operador',
         'categoria',
+        'tipo_solicitud',
     ];
 
     protected $casts = [
@@ -34,6 +45,13 @@ class SolicitudMaterial extends Model
         return $this->belongsTo(Personal::class, 'personal_id');
     }
 
+    /**
+     * Destino al que se envía el material.
+     */
+    public function destino()
+    {
+        return $this->belongsTo(Destino::class, 'destino_id')->withTrashed();
+    }
     /**
      * Usuario que generó la solicitud.
      */
@@ -55,7 +73,21 @@ class SolicitudMaterial extends Model
      */
     public function salidas()
     {
-        return $this->hasMany(Salida::class, 'solicitud_material_id');
+        return $this->hasMany(
+            Salida::class,
+            'solicitud_material_id'
+        );
+    }
+
+    /**
+     * Vales EPP vinculados a esta solicitud.
+     */
+    public function valesEpp()
+    {
+        return $this->hasMany(
+            Valepp::class,
+            'solicitud_material_id'
+        );
     }
 
     /**
@@ -64,7 +96,8 @@ class SolicitudMaterial extends Model
     public function getTotalAttribute()
     {
         return $this->detalles->sum(function ($detalle) {
-            return $detalle->cantidad_solicitada * ($detalle->precio_unitario ?? 0);
+            return $detalle->cantidad_solicitada
+                * ($detalle->precio_unitario ?? 0);
         });
     }
 
@@ -93,7 +126,7 @@ class SolicitudMaterial extends Model
     }
 
     /**
-     * Solicitudes pendientes.
+     * Filtrar solicitudes pendientes.
      */
     public function scopePendientes($query)
     {
@@ -101,10 +134,40 @@ class SolicitudMaterial extends Model
     }
 
     /**
-     * Solicitudes aprobadas.
+     * Filtrar solicitudes aprobadas.
      */
     public function scopeAprobadas($query)
     {
         return $query->where('estatus', 'aprobado');
+    }
+
+    /**
+     * Determinar si la solicitud corresponde a EPP.
+     */
+    public function esEpp(): bool
+    {
+        return $this->tipo_solicitud === self::TIPO_EPP;
+    }
+
+    /**
+     * Filtrar únicamente solicitudes estándar.
+     */
+    public function scopeEstandar($query)
+    {
+        return $query->where(
+            'tipo_solicitud',
+            self::TIPO_ESTANDAR
+        );
+    }
+
+    /**
+     * Filtrar únicamente solicitudes de EPP.
+     */
+    public function scopeEpp($query)
+    {
+        return $query->where(
+            'tipo_solicitud',
+            self::TIPO_EPP
+        );
     }
 }

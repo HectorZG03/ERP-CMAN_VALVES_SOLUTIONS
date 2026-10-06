@@ -1,20 +1,30 @@
+@php
+    $esSolicitudEpp = ($forzarTemaEpp ?? false) || $solicitud->esEpp();
+    $tipoSolicitudTexto = $esSolicitudEpp ? 'EPP' : 'ESTÁNDAR';
+    $descripcionTipoSolicitud = $esSolicitudEpp
+        ? 'Equipo de Protección Personal'
+        : 'Materiales de Almacén';
+@endphp
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Solicitud #{{ str_pad($solicitud->id, 4, '0', STR_PAD_LEFT) }}</title>
+    <title>Solicitud {{ $tipoSolicitudTexto }} #{{ str_pad($solicitud->id, 4, '0', STR_PAD_LEFT) }}</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;700&display=swap');
 
         :root {
-            --navy:   #0a1628;
-            --navy2:  #0f2044;
-            --gold:   #c8922a;
-            --gold2:  #e6a832;
-            --light:  #f4f6f9;
-            --border: #d0d7e3;
-            --text:   #1a2035;
-            --muted:  #5a6478;
+            /* ── Paleta EPP (naranjas suaves, sin marrones) ── */
+            --navy:   {{ $esSolicitudEpp ? '#d35400' : '#0a1628' }};
+            --navy2:  {{ $esSolicitudEpp ? '#e67e22' : '#0f2044' }};
+            --gold:   {{ $esSolicitudEpp ? '#f39c12' : '#c8922a' }};
+            --gold2:  {{ $esSolicitudEpp ? '#fad7a0' : '#e6a832' }};
+            --light:  {{ $esSolicitudEpp ? '#fef9e7' : '#f4f6f9' }};
+            --border: {{ $esSolicitudEpp ? '#f5cba7' : '#d0d7e3' }};
+            --text:   {{ $esSolicitudEpp ? '#1a1a1a' : '#1a2035' }};
+            --muted:  {{ $esSolicitudEpp ? '#a04000' : '#5a6478' }};
+            --page-bg: {{ $esSolicitudEpp ? '#fdf2e9' : '#e8ecf2' }};
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -23,7 +33,7 @@
             font-family: 'IBM Plex Sans', 'Segoe UI', Arial, sans-serif;
             font-size: 11px;
             color: var(--text);
-            background: #e8ecf2;
+            background: var(--page-bg);
         }
 
         /* ── BARRA DE ACCIONES ── */
@@ -32,21 +42,40 @@
             background: var(--navy); border-bottom: 2px solid var(--gold);
             padding: 9px 28px; display: flex; align-items: center; justify-content: space-between;
         }
-        .doc-ref { color: #8a9bbf; font-size: 12px; font-family: 'IBM Plex Mono', monospace; }
-        .doc-ref strong { color: #e2e8f2; }
+        .doc-ref {
+            color: #fff;  /* antes #8a9bbf */
+            font-size: 12px;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+        .doc-ref strong { color: #fff; } /* antes #e2e8f2 */
         .btns { display: flex; gap: 10px; }
         .btn-print {
-            background: var(--gold); color: var(--navy); border: none;
-            padding: 6px 20px; font-size: 12px; font-weight: 700;
-            cursor: pointer; border-radius: 3px; letter-spacing: 0.3px;
+            background: var(--gold);
+            color: var(--text);
+            border: none;
+            padding: 6px 20px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 3px;
+            letter-spacing: 0.3px;
         }
         .btn-print:hover { background: var(--gold2); }
         .btn-back {
-            background: transparent; color: #8a9bbf; border: 1px solid #2a3a5e;
-            padding: 6px 18px; font-size: 12px; font-weight: 500; cursor: pointer;
-            text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border-radius: 3px;
+            background: transparent;
+            color: #fff; /* antes #8a9bbf */
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px 18px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 3px;
         }
-        .btn-back:hover { background: #1a2a4e; color: #c8d4ea; }
+        .btn-back:hover { background: rgba(255,255,255,0.1); }
 
         /* ── CONTENEDOR ── */
         .page-wrapper {
@@ -58,27 +87,69 @@
         /* ── ENCABEZADO ── */
         .header { background: var(--navy); display: flex; align-items: stretch; }
         .header-logo-zone {
-            background: var(--navy2); border-right: 1px solid rgba(200,146,42,0.25);
-            padding: 18px 24px; display: flex; align-items: center; justify-content: center; min-width: 160px;
+            background: var(--navy2);
+            border-right: 1px solid var(--border);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 160px;
         }
         .header-logo-zone img { max-height: 52px; max-width: 140px; object-fit: contain; filter: brightness(0) invert(1); }
         .logo-fallback { color: #fff; font-size: 16px; font-weight: 800; letter-spacing: 1px; text-align: center; line-height: 1.2; }
         .logo-fallback span { display: block; font-size: 9px; font-weight: 400; color: var(--gold2); letter-spacing: 2px; margin-top: 3px; }
-        .header-company { flex: 1; padding: 18px 22px; border-right: 1px solid rgba(200,146,42,0.2); }
+        .header-company {
+            flex: 1;
+            padding: 18px 22px;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
         .company-name { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: 0.5px; }
-        .company-sub { font-size: 9px; color: var(--gold2); letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
-        .company-tagline { font-size: 9px; color: #5a7aaa; margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+        .company-sub { font-size: 9px; color: var(--gold2); letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; } /* ya era dorado claro */
+        .company-tagline {
+            font-size: 9px;
+            color: #fff; /* antes #5a7aaa */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 6px;
+            opacity: 0.8;
+        }
         .header-doc { padding: 18px 24px; text-align: right; display: flex; flex-direction: column; justify-content: center; min-width: 200px; }
         .doc-type-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); margin-bottom: 4px; }
         .doc-folio { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 700; color: #fff; letter-spacing: 2px; line-height: 1; }
-        .doc-date-small { font-size: 9px; color: #5a7aaa; margin-top: 5px; }
+        .doc-date-small {
+            font-size: 9px;
+            color: #fff; /* antes #5a7aaa */
+            opacity: 0.7;
+            margin-top: 5px;
+        }
 
         /* ── STATUS BAR ── */
         .status-bar {
-            background: var(--navy2); border-bottom: 2px solid var(--gold);
-            padding: 7px 28px; display: flex; align-items: center; justify-content: space-between;
+            background: var(--navy2);
+            border-bottom: 2px solid var(--gold);
+            padding: 7px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
         }
-        .status-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: #5a7aaa; }
+        .status-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #fff; /* antes #5a7aaa */
+            opacity: 0.9;
+        }
+        .status-folio {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 2px;
+            font-size: 11px;
+            opacity: 0.95;
+        }
         .badge {
             display: inline-flex; align-items: center; gap: 5px;
             padding: 3px 14px; font-size: 10px; font-weight: 700;
@@ -125,7 +196,16 @@
         /* ── TABLA ── */
         table.tbl { width: 100%; border-collapse: collapse; font-size: 10.5px; margin-bottom: 20px; border: 1px solid var(--border); }
         table.tbl thead tr { background: var(--navy); }
-        table.tbl thead th { padding: 9px 12px; color: #c8d4ea; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-align: left; border-right: 1px solid rgba(255,255,255,0.08); }
+        table.tbl thead th {
+            padding: 9px 12px;
+            color: #fff; /* antes #c8d4ea */
+            font-size: 9px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: left;
+            border-right: 1px solid rgba(255,255,255,0.08);
+        }
         table.tbl thead th:last-child { border-right: none; text-align: right; }
         table.tbl tbody tr:nth-child(even) { background: #fafbfd; }
         table.tbl tbody tr:nth-child(odd)  { background: #fff; }
@@ -152,12 +232,20 @@
         .t-row.final {
             border-top: 1.5px solid var(--gold); border-bottom: none;
             margin-top: 6px; padding-top: 8px;
-            font-size: 13px; font-weight: 800; color: var(--navy);
+            font-size: 13px; font-weight: 800; color: var(--text);
         }
 
         /* ── OBSERVACIONES ── */
-        .obs-block { border: 1px solid #e8d59a; border-left: 3px solid var(--gold); background: #fffdf2; padding: 12px 16px; margin-bottom: 24px; font-size: 10.5px; line-height: 1.5; }
-        .obs-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #a07010; margin-bottom: 5px; }
+        .obs-block {
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--gold);
+            background: var(--light);
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            font-size: 10.5px;
+            line-height: 1.5;
+        }
+        .obs-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 5px; }
 
         /* ── FIRMAS ── */
         .sign-section { border: 1px solid var(--border); margin-top: 4px; }
@@ -175,11 +263,18 @@
 
         /* ── FOOTER ── */
         .doc-footer {
-            background: var(--navy); border-top: 2px solid var(--gold);
-            padding: 10px 28px; display: flex; justify-content: space-between; align-items: center;
-            font-size: 9px; color: #4a6088; font-family: 'IBM Plex Mono', monospace;
+            background: var(--navy);
+            border-top: 2px solid var(--gold);
+            padding: 10px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 9px;
+            color: #fff; /* antes #4a6088 */
+            font-family: 'IBM Plex Mono', monospace;
+            opacity: 0.85;
         }
-        .fc { color: #6a80a8; font-family: 'IBM Plex Sans', sans-serif; letter-spacing: 0.5px; }
+        .fc { font-family: 'IBM Plex Sans', sans-serif; letter-spacing: 0.5px; }
 
         @page {
             size: Letter portrait;
@@ -511,6 +606,7 @@
         <span class="doc-ref">
             SOL &nbsp;<strong>#{{ str_pad($solicitud->id, 4, '0', STR_PAD_LEFT) }}</strong>
             &nbsp;/&nbsp; {{ $solicitud->created_at->format('d.m.Y') }}
+            &nbsp;/&nbsp; TIPO: <strong>{{ $tipoSolicitudTexto }}</strong>
             &nbsp;/&nbsp;
             @if($solicitud->estatus === 'aprobado')
                 <span style="color:#10b981; font-weight:700;">&#9679; APROBADO</span>
@@ -544,48 +640,23 @@
             <div class="header-company">
                 <div class="company-name">CMAN GLOBAL CONSTRUCTION</div>
                 <div class="company-sub">Control de Inventario &nbsp;&middot;&nbsp; Almacén</div>
-                <div class="company-tagline">Solicitud de Material</div>
+                <div class="company-tagline">
+                    Solicitud de Material &nbsp;&middot;&nbsp; {{ $tipoSolicitudTexto }}
+                </div>
             </div>
             <div class="header-doc">
-                <div class="doc-type-label">No. de Solicitud</div>
+                <div class="doc-type-label">Solicitud {{ $tipoSolicitudTexto }}</div>
                 <div class="doc-folio">#{{ str_pad($solicitud->id, 4, '0', STR_PAD_LEFT) }}</div>
                 <div class="doc-date-small">Generado: {{ now()->format('d/m/Y H:i') }} hrs</div>
             </div>
         </div>
 
-
-        {{-- CSS DEL FOLIO DEL DOCUMENTO  --}}
-
-        <style>
-            .status-bar {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .status-folio {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: 2px;
-            font-size: 11px;
-            opacity: 0.95;
-        
-        }
-
-        </style>
-
-        
-
         {{-- ── STATUS BAR ── --}}
         <div class="status-bar">
-            <span class="status-label">Estatus General del Documento</span>
-
+            <span class="status-label">
+                Tipo: {{ $tipoSolicitudTexto }} &nbsp;&middot;&nbsp; {{ $descripcionTipoSolicitud }}
+            </span>
             <span class="status-folio">FOR-03-PRO-ALM-001</span>
-
             @if($solicitud->estatus === 'pendiente')
                 <span class="badge badge-pendiente">&#9679; Pendiente</span>
             @elseif($solicitud->estatus === 'aprobado')
@@ -603,10 +674,16 @@
 
                 {{-- Datos de la solicitud --}}
                 <div class="info-block">
-                    <div class="info-block-title">Datos de la Solicitud</div>
+                    <div class="info-block-title">
+                        Datos de la Solicitud {{ $tipoSolicitudTexto }}
+                    </div>
                     <div class="field-row">
                         <span class="field-label">Folio</span>
                         <span class="field-value" style="font-family:'IBM Plex Mono',monospace;">#{{ str_pad($solicitud->id, 4, '0', STR_PAD_LEFT) }}</span>
+                    </div>
+                    <div class="field-row">
+                        <span class="field-label">Tipo</span>
+                        <span class="field-value">{{ $tipoSolicitudTexto }} - {{ $descripcionTipoSolicitud }}</span>
                     </div>
                     <div class="field-row">
                         <span class="field-label">Fecha creación</span>
@@ -618,7 +695,7 @@
                     </div>
                     <div class="field-row">
                         <span class="field-label">Destino</span>
-                        <span class="field-value">{{ $solicitud->destino ?? 'No especificado' }}</span>
+                        <span class="field-value">{{ $solicitud->destino?->nombre ?? 'No especificado' }}</span>
                     </div>
                     <div class="field-row">
                         <span class="field-label">Estatus</span>
@@ -667,7 +744,9 @@
             </div>
 
             {{-- ── TABLA DE PRODUCTOS ── --}}
-            <div class="section-title">Relación de Productos Solicitados</div>
+            <div class="section-title">
+                Relación de Productos Solicitados - {{ $tipoSolicitudTexto }}
+            </div>
 
             <table class="tbl">
                 <thead>
@@ -789,7 +868,7 @@
         {{-- ── FOOTER ── --}}
         <div class="doc-footer">
             <span>#{{ str_pad($solicitud->id, 4, '0', STR_PAD_LEFT) }} &nbsp;/&nbsp; {{ $solicitud->created_at->format('d.m.Y') }}</span>
-            <span class="fc">CMAN GLOBAL CONSTRUCTION &nbsp;&middot;&nbsp; DOCUMENTO OFICIAL</span>
+            <span class="fc">CMAN GLOBAL CONSTRUCTION &nbsp;&middot;&nbsp; SOLICITUD {{ $tipoSolicitudTexto }}</span>
             <span>{{ now()->format('d/m/Y H:i') }}</span>
         </div>
 

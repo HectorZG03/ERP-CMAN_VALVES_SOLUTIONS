@@ -62,7 +62,7 @@
                             $solicitante = $solicitud?->user?->name
                                 ?? $salida->cliente?->nombre
                                 ?? 'No disponible';
-                            $destino = $solicitud?->destino
+                            $destino = $solicitud?->destino?->nombre
                                 ?? $salida->cliente?->area
                                 ?? 'No disponible';
                             $folio = $salida->numero_factura

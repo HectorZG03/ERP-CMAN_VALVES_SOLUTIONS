@@ -16,7 +16,6 @@ class AjusteInventarioController extends Controller
     public function index(Request $request)
     {
         $filters = $request->validate([
-            'inventario_id' => ['nullable', 'integer', 'exists:inventarios,id'],
             'user_id' => ['nullable', 'integer', 'exists:users,id'],
             'tipo' => ['nullable', Rule::in(['incremento', 'disminucion', 'revaluacion'])],
             'fecha_desde' => ['nullable', 'date'],
@@ -26,7 +25,6 @@ class AjusteInventarioController extends Controller
 
         $ajustes = AjusteInventario::query()
             ->with(['inventario', 'user'])
-            ->when($filters['inventario_id'] ?? null, fn ($query, $id) => $query->where('inventario_id', $id))
             ->when($filters['user_id'] ?? null, fn ($query, $id) => $query->where('user_id', $id))
             ->when($filters['tipo'] ?? null, fn ($query, $tipo) => $query->where('tipo', $tipo))
             ->when($filters['fecha_desde'] ?? null, fn ($query, $fecha) => $query->whereDate('created_at', '>=', $fecha))
@@ -42,16 +40,22 @@ class AjusteInventarioController extends Controller
             ->paginate(20)
             ->withQueryString();
 
-        $productos = Inventario::query()
-            ->orderBy('nombre_producto')
-            ->get(['id', 'nombre_producto', 'economico']);
-
         $usuarios = User::query()
-            ->whereIn('id', AjusteInventario::query()->whereNotNull('user_id')->select('user_id')->distinct())
+            ->whereIn(
+                'id',
+                AjusteInventario::query()
+                    ->whereNotNull('user_id')
+                    ->select('user_id')
+                    ->distinct()
+            )
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        return view('inventario.ajustes.index', compact('ajustes', 'productos', 'usuarios', 'filters'));
+        return view('inventario.ajustes.index', compact(
+            'ajustes',
+            'usuarios',
+            'filters'
+        ));
     }
 
     public function store(StoreAjusteInventarioRequest $request, Inventario $inventario)

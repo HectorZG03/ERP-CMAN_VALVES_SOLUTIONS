@@ -12,39 +12,75 @@ class Valepp extends Model
     protected $table = 'valepp';
 
     protected $fillable = [
+        'solicitud_material_id',
         'numero_vale',
         'personal_id',
         'fecha_solicitud',
+        'estatus',
         'observaciones',
         'user_id',
-        'embarcacion',
+
     ];
 
     protected $casts = [
         'fecha_solicitud' => 'date',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
-    // Relaciones
+    /**
+     * Solicitud EPP que dio origen al vale.
+     */
+    public function solicitudMaterial()
+    {
+        return $this->belongsTo(
+            SolicitudMaterial::class,
+            'solicitud_material_id'
+        );
+    }
+
+    /**
+     * Trabajador que recibe el equipo.
+     */
     public function personal()
     {
         return $this->belongsTo(Personal::class);
     }
 
+    /**
+     * Usuario de HSE que registró el vale.
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Equipos asignados en el vale.
+     */
     public function detalles()
     {
         return $this->hasMany(ValeppDetalle::class);
     }
 
-    // Método para generar número de vale automáticamente
-    public static function generarNumeroVale()
+    /**
+     * Generar el siguiente número de vale.
+     */
+    public static function generarNumeroVale(): string
     {
-        $ultimo = self::latest('id')->first();
-        $numero = $ultimo ? intval(substr($ultimo->numero_vale, 2)) + 1 : 1;
-        return 'VP' . str_pad($numero, 6, '0', STR_PAD_LEFT);
+        $ultimoVale = self::query()
+            ->latest('id')
+            ->first();
+
+        $numero = $ultimoVale
+            ? (int) substr($ultimoVale->numero_vale, 2) + 1
+            : 1;
+
+        return 'VP' . str_pad(
+            (string) $numero,
+            6,
+            '0',
+            STR_PAD_LEFT
+        );
     }
 }
