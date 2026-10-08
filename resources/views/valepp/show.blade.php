@@ -114,8 +114,8 @@
                         <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                             Destino
                         </p>
-                        <p class="mt-1 truncate font-semibold text-gray-900 dark:text-white" title="{{ $solicitud?->destino?->nombre }}">
-                            {{ $solicitud?->destino?->nombre ?? 'Sin destino' }}
+                        <p class="mt-1 truncate font-semibold text-gray-900 dark:text-white" title="{{ $solicitud?->destino }}">
+                            {{ $solicitud?->destino ?? 'Sin destino' }}
                         </p>
                     </div>
 

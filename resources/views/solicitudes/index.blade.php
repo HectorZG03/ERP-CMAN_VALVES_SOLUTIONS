@@ -255,7 +255,7 @@
                                 STR_PAD_LEFT
                             ),
                             $fechaBusqueda,
-                            $solicitud->destino?->nombre,
+                            $solicitud->destino,
                             $nombreSolicitante,
                             $rolSolicitante,
                             $solicitud->estatus,
@@ -326,9 +326,9 @@
                                     <div class="min-w-0">
                                         <p
                                             class="truncate text-sm font-semibold text-gray-900 dark:text-white"
-                                            title="{{ $solicitud->destino?->nombre }}"
+                                            title="{{ $solicitud->destino }}"
                                         >
-                                            {{ $solicitud->destino?->nombre
+                                            {{ $solicitud->destino
                                                 ?: 'Destino no disponible' }}
                                         </p>
 

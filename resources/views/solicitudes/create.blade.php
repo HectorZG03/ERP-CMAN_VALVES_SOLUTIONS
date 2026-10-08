@@ -364,32 +364,26 @@
                         <div class="space-y-5 p-5">
                             {{-- Destino --}}
                             <div>
-                                <label for="destino_id" class="{{ $etiquetaCampo }}">
+                                <label for="destino" class="{{ $etiquetaCampo }}">
                                     Ubicación de destino
                                     <span class="text-red-500" aria-hidden="true">*</span>
                                     <span class="sr-only">(obligatorio)</span>
                                 </label>
 
-                                <select
-                                    name="destino_id"
-                                    id="destino_id"
+                                <input
+                                    type="text"
+                                    name="destino"
+                                    id="destino"
+                                    value="{{ old('destino') }}"
+                                    maxlength="255"
                                     required
-                                    @error('destino_id') aria-invalid="true" aria-describedby="error-destino" @enderror
-                                    class="{{ $campoBase }} h-11 px-3 {{ $errors->has('destino_id') ? $campoError : $campoOk }}"
+                                    autocomplete="off"
+                                    placeholder="Ej: Grand Canyon / Ocean Intrepid"
+                                    @error('destino') aria-invalid="true" aria-describedby="error-destino" @enderror
+                                    class="{{ $campoBase }} h-11 px-3 {{ $errors->has('destino') ? $campoError : $campoOk }}"
                                 >
-                                    <option value="">Seleccione una ubicación</option>
 
-                                    @foreach($destinos as $destino)
-                                        <option
-                                            value="{{ $destino->id }}"
-                                            @selected((string) old('destino_id') === (string) $destino->id)
-                                        >
-                                            {{ $destino->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select>
-
-                                @error('destino_id')
+                                @error('destino')
                                     <p id="error-destino" class="{{ $textoError }}">{{ $message }}</p>
                                 @enderror
                             </div>

@@ -222,7 +222,6 @@ class SalidaService
                     ->refresh()
                     ->load([
                         'solicitudMaterial.user',
-                        'solicitudMaterial.destino',
                         'detalles.inventario',
                     ]);
             }

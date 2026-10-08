@@ -188,26 +188,22 @@
                         </div>
                     @endforeach
 
-                    {{-- Destino (select desde catálogo) --}}
+                   {{-- Destino (texto libre) --}}
                     <div class="sm:col-span-6 lg:col-span-3">
-                        <label for="destino_id" class="{{ $etiqueta }}">
+                        <label for="destino" class="{{ $etiqueta }}">
                             Destino
                         </label>
 
-                        <select name="destino_id"
-                                id="destino_id"
-                                class="{{ $clase('destino_id') }}">
-                            <option value="">— Sin destino / N/A —</option>
-
-                            @foreach($destinos as $destino)
-                                <option value="{{ $destino->id }}"
-                                        @selected((string) old('destino_id') === (string) $destino->id)>
-                                    {{ $destino->nombre }}
-                                </option>
-                            @endforeach
-                        </select>
-
-                        @error('destino_id')
+                        <input
+                            type="text"
+                            name="destino"
+                            id="destino"
+                            class="{{ $clase('destino') }}"
+                            value="{{ old('destino') }}"
+                            maxlength="255"
+                            placeholder="Ej: Grand Canyon / Ocean Intrepid"
+                        >
+                        @error('destino')
                             <p class="{{ $textoError }}">{{ $message }}</p>
                         @enderror
                     </div>

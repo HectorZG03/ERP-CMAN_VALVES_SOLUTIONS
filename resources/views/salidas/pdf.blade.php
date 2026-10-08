@@ -334,7 +334,7 @@
     $areaSolicitante = $usuarioSolicitante?->role
         ?? $salida->cliente?->area
         ?? 'N/A';
-    $destino = $solicitud?->destino?->nombre
+    $destino = $solicitud?->destino
         ?? $salida->cliente?->area
         ?? 'N/A';
     $operadorNombre = $operadorAsignado?->nombre_completo

@@ -10,14 +10,14 @@ class Requisicion extends Model
     use HasFactory;
 
     protected $table = 'requisiciones';
-    
+
     public $timestamps = true;
 
     protected $fillable = [
         'nombre_solicitante',
         'departamento',
         'plataforma',
-        'destino_id',
+        'destino',
         'proyecto',
         'sit',
         'partida',
@@ -48,7 +48,7 @@ class Requisicion extends Model
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function ($requisicion) {
             $requisicion->folio = self::generarFolio($requisicion);
         });
@@ -62,7 +62,7 @@ class Requisicion extends Model
         $año = date('y');
         $ultimoId = self::max('id') ?? 0;
         $nuevoId = $ultimoId + 1;
-        
+
         return "{$rol}/{$mes}/{$año}-{$nuevoId}";
     }
 
@@ -76,13 +76,6 @@ class Requisicion extends Model
         return $this->belongsTo(Contrato::class);
     }
 
-    /**
-     * Destino general (embarcación, base, oficina, etc.).
-     */
-    public function destino()
-    {
-        return $this->belongsTo(Destino::class, 'destino_id')->withTrashed();
-    }
     // ✅ Relación con usuario que aprobó en finanzas
     public function aprobadorFinanzas()
     {

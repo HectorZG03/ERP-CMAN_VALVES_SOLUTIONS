@@ -36,8 +36,7 @@ class ValeppController extends Controller
             ->with([
                 'personal:id,nombre_completo,employee_id,area,grado',
                 'user:id,name,email',
-                'solicitudMaterial:id,user_id,destino_id,estatus,tipo_solicitud,created_at',
-                'solicitudMaterial.destino',
+                'solicitudMaterial:id,user_id,destino,estatus,tipo_solicitud,created_at',
             ])
             ->withCount('detalles')
             ->withSum(
@@ -53,23 +52,45 @@ class ValeppController extends Controller
                     $folioBuscado
                 ) {
                     $subquery
-                        ->where('numero_vale', 'like', "%{$search}%")
+                        ->where(
+                            'numero_vale',
+                            'like',
+                            "%{$search}%"
+                        )
                         ->orWhereHas('personal', function ($personalQuery) use ($search) {
                             $personalQuery->where(function ($query) use ($search) {
                                 $query
-                                    ->where('nombre_completo', 'like', "%{$search}%")
-                                    ->orWhere('employee_id', 'like', "%{$search}%")
-                                    ->orWhere('area', 'like', "%{$search}%");
+                                    ->where(
+                                        'nombre_completo',
+                                        'like',
+                                        "%{$search}%"
+                                    )
+                                    ->orWhere(
+                                        'employee_id',
+                                        'like',
+                                        "%{$search}%"
+                                    )
+                                    ->orWhere(
+                                        'area',
+                                        'like',
+                                        "%{$search}%"
+                                    );
                             });
                         })
                         ->orWhereHas('solicitudMaterial', function ($solicitudQuery) use ($search) {
                             $solicitudQuery->where(function ($query) use ($search) {
                                 $query
-                                    ->whereHas('destino', function ($destinoQuery) use ($search) {
-                                        $destinoQuery->where('nombre', 'like', "%{$search}%");
-                                    })
+                                    ->where(
+                                        'destino',
+                                        'like',
+                                        "%{$search}%"
+                                    )
                                     ->orWhereHas('user', function ($userQuery) use ($search) {
-                                        $userQuery->where('name', 'like', "%{$search}%");
+                                        $userQuery->where(
+                                            'name',
+                                            'like',
+                                            "%{$search}%"
+                                        );
                                     });
                             });
                         });
@@ -77,7 +98,10 @@ class ValeppController extends Controller
                     if (ctype_digit($folioBuscado)) {
                         $subquery
                             ->orWhere('id', (int) $folioBuscado)
-                            ->orWhere('solicitud_material_id', (int) $folioBuscado);
+                            ->orWhere(
+                                'solicitud_material_id',
+                                (int) $folioBuscado
+                            );
                     }
                 });
             })
@@ -156,7 +180,6 @@ class ValeppController extends Controller
             ])
             ->with([
                 'user:id,name,email',
-                'destino',
                 'detalles' => function ($query) {
                     $query
                         ->with([
@@ -177,23 +200,39 @@ class ValeppController extends Controller
                     $folioBuscado
                 ) {
                     $subquery
-                        ->whereHas('destino', function ($destinoQuery) use ($search) {
-                            $destinoQuery->where('nombre', 'like', "%{$search}%");
-                        })
-                        ->orWhere('comentario', 'like', "%{$search}%")
+                        ->where(
+                            'destino',
+                            'like',
+                            "%{$search}%"
+                        )
+                        ->orWhere(
+                            'comentario',
+                            'like',
+                            "%{$search}%"
+                        )
                         ->orWhereHas('user', function ($userQuery) use ($search) {
                             $userQuery->where(function ($query) use ($search) {
                                 $query
-                                    ->where('name', 'like', "%{$search}%")
-                                    ->orWhere('email', 'like', "%{$search}%");
+                                    ->where(
+                                        'name',
+                                        'like',
+                                        "%{$search}%"
+                                    )
+                                    ->orWhere(
+                                        'email',
+                                        'like',
+                                        "%{$search}%"
+                                    );
                             });
                         });
 
                     if (ctype_digit($folioBuscado)) {
-                        $subquery->orWhere('id', (int) $folioBuscado);
+                        $subquery->orWhere(
+                            'id',
+                            (int) $folioBuscado
+                        );
                     }
                 });
-                
             })
             ->when($fecha, function ($query) use ($fecha) {
                 $query->whereDate('created_at', $fecha);
@@ -219,7 +258,7 @@ class ValeppController extends Controller
                     'id' => $solicitud->id,
                     'folio' => sprintf('#%04d', $solicitud->id),
                     'fecha' => $solicitud->created_at?->format('d/m/Y H:i'),
-                    'destino' => $solicitud->destino?->nombre,
+                    'destino' => $solicitud->destino,
                     'estatus' => $solicitud->estatus,
                     'solicitante' => $solicitud->user?->name,
                     'productos' => $solicitud->detalles->count(),
@@ -253,7 +292,6 @@ class ValeppController extends Controller
 
         $solicitud->load([
             'user:id,name,email',
-            'destino',
             'detalles' => function ($query) {
                 $query
                     ->with([
@@ -291,7 +329,7 @@ class ValeppController extends Controller
                 'id' => $solicitud->id,
                 'folio' => sprintf('#%04d', $solicitud->id),
                 'fecha' => $solicitud->created_at?->format('d/m/Y H:i'),
-                'destino' => $solicitud->destino?->nombre,
+                'destino' => $solicitud->destino,
                 'estatus' => $solicitud->estatus,
                 'solicitante' => $solicitud->user?->name,
                 'detalles' => $detalles,
@@ -315,32 +353,38 @@ class ValeppController extends Controller
                 'integer',
                 'exists:solicitud_materiales,id',
             ],
+
             'personal_id' => [
                 'required',
                 'integer',
                 'exists:personal,id',
             ],
+
             'fecha_solicitud' => [
                 'required',
                 'date',
                 'before_or_equal:today',
             ],
+
             'observaciones' => [
                 'nullable',
                 'string',
                 'max:2000',
             ],
+
             'detalles' => [
                 'required',
                 'array',
                 'min:1',
             ],
+
             'detalles.*.solicitud_material_detalle_id' => [
                 'required',
                 'integer',
                 'distinct',
                 'exists:solicitud_material_detalles,id',
             ],
+
             'detalles.*.cantidad' => [
                 'required',
                 'integer',
@@ -391,6 +435,7 @@ class ValeppController extends Controller
                 foreach ($validated['detalles'] as $indice => $asignacion) {
                     $detalleId = (int) $asignacion['solicitud_material_detalle_id'];
                     $cantidad = (int) $asignacion['cantidad'];
+
                     $detalleSolicitud = $detallesSolicitud->get($detalleId);
                     $inventario = $detalleSolicitud->inventario;
 

@@ -240,7 +240,7 @@
                                 <div>
                                     <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Destino</dt>
                                     <dd class="text-lg font-semibold text-gray-900 dark:text-white">
-                                        {{ $requisicion->destino?->nombre ?? 'N/A' }}
+                                        {{ $requisicion->destino ?? 'N/A' }}
                                     </dd>
                                 </div>
                             </div>

@@ -6,7 +6,7 @@
     $solicitante = $solicitud?->user?->name
         ?? $salida->cliente?->nombre
         ?? 'No disponible';
-    $destino = $solicitud?->destino?->nombre
+    $destino = $solicitud?->destino
         ?? $salida->cliente?->area
         ?? 'No disponible';
     $operador = $solicitud?->operadorPersonal?->nombre_completo
