@@ -377,7 +377,7 @@
             </td>
             <td class="info-label">Embarcación:</td>
             <td class="info-value" colspan="2">
-                {{ mb_strtoupper($solicitud?->destino?->nombre ?? 'N/A') }}
+                {{ mb_strtoupper($solicitud?->destino ?? 'N/A') }}
             </td>
         </tr>
         <tr>

@@ -48,14 +48,13 @@ class SolicitudSalidaService
                 'id',
                 'user_id',
                 'personal_id',
-                'destino_id',
+                'destino',
                 'estatus',
                 'created_at',
             ])
             ->with([
                 'user:id,name,email,num_empleado',
                 'operadorPersonal:id,nombre_completo,employee_id',
-                'destino',
                 'detalles:id,solicitud_material_id,inventario_id,cantidad_solicitada',
                 'salidas:id,solicitud_material_id',
                 'salidas.detalles:id,salida_id,inventario_id,cantidad',
@@ -69,17 +68,10 @@ class SolicitudSalidaService
                 $solicitudId,
                 $fechaBusqueda
             ) {
-                $query->whereHas(
+                $query->where(
                     'destino',
-                    function ($destinoQuery) use (
-                        $termino
-                    ) {
-                        $destinoQuery->where(
-                            'nombre',
-                            'LIKE',
-                            "%{$termino}%"
-                        );
-                    }
+                    'LIKE',
+                    "%{$termino}%"
                 );
 
                 if ($solicitudId !== null) {
@@ -197,7 +189,7 @@ class SolicitudSalidaService
                             'N/A',
 
                         'destino' =>
-                            $solicitud->destino?->nombre ??
+                            $solicitud->destino ??
                             'Sin destino',
 
                         'fecha_solicitud' =>
@@ -250,7 +242,6 @@ class SolicitudSalidaService
         $solicitud->load([
             'user:id,name,email,num_empleado,role',
             'operadorPersonal:id,nombre_completo,employee_id,area,grado',
-            'destino',
             'detalles.inventario:id,nombre_producto,economico,categoria,medida,existencia,precio_total',
             'salidas.detalles',
         ]);
@@ -349,7 +340,8 @@ class SolicitudSalidaService
                 $solicitud->estatus,
 
             'destino' =>
-                $solicitud->destino?->nombre,
+                $solicitud->destino ??
+                'Sin destino',
 
             'comentario' =>
                 $solicitud->comentario,

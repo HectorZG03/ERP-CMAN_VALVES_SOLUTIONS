@@ -427,7 +427,7 @@
                             </dt>
 
                             <dd class="text-sm font-semibold text-gray-900 dark:text-white">
-                                {{ $solicitud->destino?->nombre ?: 'No disponible' }}
+                                {{ $solicitud->destino ?: 'No disponible' }}
                             </dd>
                         </div>
                                             <div class="grid grid-cols-[145px_1fr] gap-4 py-4">

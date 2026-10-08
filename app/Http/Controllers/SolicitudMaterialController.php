@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Destino;
 use App\Models\Inventario;
 use App\Models\Personal;
 use App\Models\SolicitudMaterial;
@@ -56,7 +55,6 @@ class SolicitudMaterialController extends Controller
                 'detalles.inventario',
                 'user',
                 'operadorPersonal',
-                'destino',
             ]);
 
         $countQuery = SolicitudMaterial::query();
@@ -68,12 +66,15 @@ class SolicitudMaterialController extends Controller
 
         $counts = [
             'all' => (clone $countQuery)->count(),
+
             'pendiente' => (clone $countQuery)
                 ->where('estatus', 'pendiente')
                 ->count(),
+
             'aprobado' => (clone $countQuery)
                 ->where('estatus', 'aprobado')
                 ->count(),
+
             'denegado' => (clone $countQuery)
                 ->where('estatus', 'denegado')
                 ->count(),
@@ -117,16 +118,10 @@ class SolicitudMaterialController extends Controller
                 'area',
             ]);
 
-        // Solo destinos activos (SoftDeletes filtrado por el scope por defecto)
-        $destinos = Destino::query()
-            ->orderBy('nombre')
-            ->get(['id', 'nombre']);
-
         $puedeCrearEpp = $request->user()->canManageValeEPP();
 
         return view('solicitudes.create', compact(
             'personal',
-            'destinos',
             'puedeCrearEpp'
         ));
     }
@@ -144,10 +139,10 @@ class SolicitudMaterialController extends Controller
                 'exists:personal,id',
             ],
 
-            'destino_id' => [
+            'destino' => [
                 'required',
-                'integer',
-                'exists:destinos,id',
+                'string',
+                'max:255',
             ],
 
             'comentario' => [
@@ -191,14 +186,19 @@ class SolicitudMaterialController extends Controller
                 'min:1',
             ],
         ], [
-            'destino_id.required' => 'Debe seleccionar un destino.',
-            'destino_id.exists' => 'El destino seleccionado no es válido.',
+            'destino.required' => 'Debe indicar un destino.',
+            'destino.string' => 'El destino debe ser un texto válido.',
+            'destino.max' => 'El destino no puede superar los 255 caracteres.',
+
             'tipo_solicitud.in' => 'El tipo de solicitud no es válido.',
+
             'productos.required' => 'Debe agregar al menos un producto a la solicitud.',
             'productos.min' => 'Debe agregar al menos un producto a la solicitud.',
+
             'productos.*.inventario_id.required' => 'Debe seleccionar un producto válido.',
             'productos.*.inventario_id.distinct' => 'No puede agregar el mismo producto más de una vez.',
             'productos.*.inventario_id.exists' => 'Uno de los productos seleccionados no existe.',
+
             'productos.*.cantidad_solicitada.required' => 'La cantidad es obligatoria.',
             'productos.*.cantidad_solicitada.integer' => 'La cantidad debe ser un número entero.',
             'productos.*.cantidad_solicitada.min' => 'La cantidad debe ser mayor a cero.',
@@ -236,6 +236,7 @@ class SolicitudMaterialController extends Controller
                 foreach ($validated['productos'] as $indice => $producto) {
                     $inventarioId = (int) $producto['inventario_id'];
                     $cantidad = (int) $producto['cantidad_solicitada'];
+
                     $inventario = $inventarios->get($inventarioId);
 
                     if (!$inventario) {
@@ -267,7 +268,7 @@ class SolicitudMaterialController extends Controller
                 $solicitud = SolicitudMaterial::create([
                     'user_id' => $user->id,
                     'personal_id' => $validated['personal_id'] ?? null,
-                    'destino_id' => $validated['destino_id'],
+                    'destino' => trim($validated['destino']),
                     'comentario' => $validated['comentario'] ?? null,
                     'operador' => $validated['operador'] ?? 'N/A',
                     'categoria' => $validated['categoria'] ?? 'N/A',
@@ -282,10 +283,8 @@ class SolicitudMaterialController extends Controller
                     SolicitudMaterialDetalle::create([
                         'solicitud_material_id' => $solicitud->id,
                         'inventario_id' => $inventarioId,
-                        'cantidad_solicitada'
-                            => (int) $producto['cantidad_solicitada'],
-                        'precio_unitario'
-                            => $inventario->getPrecioPromedio(),
+                        'cantidad_solicitada' => (int) $producto['cantidad_solicitada'],
+                        'precio_unitario' => $inventario->getPrecioPromedio(),
                     ]);
                 }
             });
@@ -334,7 +333,6 @@ class SolicitudMaterialController extends Controller
             'detalles.inventario',
             'user',
             'operadorPersonal',
-            'destino',
         ]);
 
         return view('solicitudes.show', compact('solicitud'));
@@ -392,6 +390,7 @@ class SolicitudMaterialController extends Controller
         ]);
 
         $search = trim($validated['q'] ?? '');
+
         $tipoSolicitud = $validated['tipo_solicitud']
             ?? SolicitudMaterial::TIPO_ESTANDAR;
 

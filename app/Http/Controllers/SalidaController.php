@@ -154,7 +154,6 @@ class SalidaController extends Controller
             $destino =
                 $salida
                     ->solicitudMaterial
-                    ?->destino
                     ?->nombre ??
                 'N/A';
 
