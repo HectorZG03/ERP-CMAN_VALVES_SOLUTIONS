@@ -1,215 +1,383 @@
+
 @extends('layouts.app')
 
 @section('content')
 <div class="space-y-6">
-    <div class="flex justify-between items-center">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Proveedores</h1>
-        <a href="{{ route('proveedores.create') }}" 
-           class="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
-            Nuevo Proveedor
+
+    <!-- Encabezado -->
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+                Proveedores
+            </h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Administra los proveedores y consulta su información y categoría.
+            </p>
+        </div>
+
+        <a href="{{ route('proveedores.create') }}"
+           class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 dark:bg-blue-500 dark:hover:bg-blue-600">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 4v16m8-8H4"/>
+            </svg>
+            Nuevo proveedor
         </a>
     </div>
 
     <!-- Estadísticas -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+        <!-- Total de proveedores -->
+        <div class="rounded-2xl border border-blue-200 bg-blue-50 p-5 transition dark:border-blue-900/60 dark:bg-blue-900/20">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-blue-600 dark:text-blue-400">Total Proveedores</p>
-                    <p class="text-2xl font-bold text-blue-900 dark:text-blue-100">{{ $proveedores->total() }}</p>
+                    <p class="text-sm font-medium text-blue-700 dark:text-blue-300">
+                        Total de proveedores
+                    </p>
+                    <p class="mt-2 text-3xl font-bold text-blue-900 dark:text-blue-100">
+                        {{ $proveedores->total() }}
+                    </p>
                 </div>
-                <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                </svg>
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                              d="M16 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2m6-10a4 4 0 100-8 4 4 0 000 8zm10 1v6m3-3h-6"/>
+                    </svg>
+                </div>
             </div>
         </div>
 
-        <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+        <!-- Registros de la página -->
+        <div class="rounded-2xl border border-green-200 bg-green-50 p-5 transition dark:border-green-900/60 dark:bg-green-900/20">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-green-600 dark:text-green-400">Activos</p>
-                    <p class="text-2xl font-bold text-green-900 dark:text-green-100">{{ $proveedores->count() }}</p>
+                    <p class="text-sm font-medium text-green-700 dark:text-green-300">
+                        En esta página
+                    </p>
+                    <p class="mt-2 text-3xl font-bold text-green-900 dark:text-green-100">
+                        {{ $proveedores->count() }}
+                    </p>
                 </div>
-                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
             </div>
         </div>
 
-        <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+        <!-- Paginación -->
+        <div class="rounded-2xl border border-purple-200 bg-purple-50 p-5 transition dark:border-purple-900/60 dark:bg-purple-900/20">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-purple-600 dark:text-purple-400">Página Actual</p>
-                    <p class="text-2xl font-bold text-purple-900 dark:text-purple-100">{{ $proveedores->currentPage() }} / {{ $proveedores->lastPage() }}</p>
+                    <p class="text-sm font-medium text-purple-700 dark:text-purple-300">
+                        Página actual
+                    </p>
+                    <p class="mt-2 text-3xl font-bold text-purple-900 dark:text-purple-100">
+                        {{ $proveedores->currentPage() }}
+                        <span class="text-lg font-medium text-purple-500 dark:text-purple-300">
+                            / {{ $proveedores->lastPage() }}
+                        </span>
+                    </p>
                 </div>
-                <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                </svg>
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                              d="M12 6v12m-6-6h12"/>
+                    </svg>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-md transition-colors duration-200">
-        <div class="px-4 py-5 sm:p-6">
-            <div class="mb-6">
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+    <!-- Listado -->
+    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+
+        <!-- Barra de búsqueda -->
+        <div class="border-b border-gray-200 p-5 dark:border-gray-700 sm:p-6">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        Directorio de proveedores
+                    </h2>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        Busca por nombre, económico, categoría o dirección.
+                    </p>
+                </div>
+
+                <div class="relative w-full sm:max-w-sm">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </div>
-                    <input type="text" id="search" placeholder="Buscar proveedores..." 
-                           class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors duration-200">
+                    <input
+                        type="text"
+                        id="search"
+                        placeholder="Buscar proveedores..."
+                        class="block w-full rounded-xl border border-gray-300 bg-white py-3 pl-11 pr-4 text-sm text-gray-900 shadow-sm outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-blue-400"
+                    >
                 </div>
             </div>
+        </div>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                ID
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Proveedor
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Dirección
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Fecha Registro
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Acciones
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                        @forelse($proveedores as $proveedor)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200">
-                            {{-- <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    #{{ str_pad($proveedor->id, 4, '0', STR_PAD_LEFT) }}
-                                </div>
-                            </td> --}}
+        <!-- Tabla -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
 
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                    {{ $proveedor->economico }}
-                                </div>
+                <thead class="bg-gray-50 dark:bg-gray-700/70">
+                    <tr>
+                        <th scope="col" class="whitespace-nowrap px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                            Económico
+                        </th>
+
+                        <th scope="col" class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                            Proveedor
+                        </th>
+
+                        <th scope="col" class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                            Categoría
+                        </th>
+
+                        <th scope="col" class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                            Dirección
+                        </th>
+
+                        <th scope="col" class="whitespace-nowrap px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                            Fecha de registro
+                        </th>
+
+                        <th scope="col" class="whitespace-nowrap px-5 py-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                            Acciones
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody id="proveedores-table-body" class="divide-y divide-gray-100 bg-white dark:divide-gray-700 dark:bg-gray-800">
+
+                    @forelse($proveedores as $proveedor)
+                        <tr class="provider-row transition-colors duration-150 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+
+                            <!-- Económico -->
+                            <td class="whitespace-nowrap px-5 py-4">
+                                <span class="inline-flex items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm font-semibold text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                                    {{ $proveedor->economico ?: 'Sin asignar' }}
+                                </span>
                             </td>
 
-                            <td class="px-6 py-4">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10">
-                                        <div class="h-10 w-10 rounded-full bg-blue-500 dark:bg-blue-600 flex items-center justify-center">
-                                            <span class="text-sm font-medium text-white">
-                                                {{ substr($proveedor->proveedor, 0, 2) }}
-                                            </span>
-                                        </div>
+                            <!-- Nombre -->
+                            <td class="px-5 py-4">
+                                <div class="flex min-w-[190px] items-center gap-3">
+                                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-sm font-bold uppercase text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                                        {{ \Illuminate\Support\Str::substr($proveedor->proveedor ?? 'P', 0, 2) }}
                                     </div>
-                                    <div class="ml-4">
-                                        <div class="text-sm font-medium text-gray-800 dark:text-white truncate max-w-xs">
+
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-semibold text-gray-900 dark:text-white"
+                                           title="{{ $proveedor->proveedor }}">
                                             {{ $proveedor->proveedor }}
-                                        </div>
+                                        </p>
+                                        <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            Registro #{{ $proveedor->id }}
+                                        </p>
                                     </div>
                                 </div>
                             </td>
 
-                            <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900 dark:text-white truncate max-w-md">
-                                    {{ $proveedor->direccion }}
-                                </div>
+                            <!-- Categoría -->
+                            <td class="px-5 py-4">
+                                @if($proveedor->categoria)
+                                    <span class="inline-flex max-w-[200px] items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                        <span class="mr-2 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500"></span>
+                                        <span class="truncate" title="{{ $proveedor->categoria }}">
+                                            {{ $proveedor->categoria }}
+                                        </span>
+                                    </span>
+                                @else
+                                    <span class="text-sm italic text-gray-400 dark:text-gray-500">
+                                        Sin categoría
+                                    </span>
+                                @endif
                             </td>
 
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900 dark:text-white">
-                                    {{ $proveedor->created_at->format('d/m/Y') }}
-                                </div>
-                                <div class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ $proveedor->created_at->diffForHumans() }}
-                                </div>
+                            <!-- Dirección -->
+                            <td class="px-5 py-4">
+                                <p class="max-w-xs truncate text-sm text-gray-600 dark:text-gray-300"
+                                   title="{{ $proveedor->direccion }}">
+                                    {{ $proveedor->direccion ?: 'Sin dirección registrada' }}
+                                </p>
                             </td>
 
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center space-x-2">
-                                    <!-- Botón Ver -->
-                                    <a href="{{ route('proveedores.show', $proveedor) }}" 
-                                    class="inline-flex items-center px-2 py-1 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-800 dark:text-blue-300 text-xs font-medium rounded-md transition-colors duration-200 shadow-sm">
-                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+                            <!-- Fecha -->
+                            <td class="whitespace-nowrap px-5 py-4">
+                                <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                    {{ $proveedor->created_at?->format('d/m/Y') ?? 'Sin fecha' }}
+                                </p>
+                                @if($proveedor->created_at)
+                                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                        {{ $proveedor->created_at->diffForHumans() }}
+                                    </p>
+                                @endif
+                            </td>
+
+                            <!-- Acciones -->
+                            <td class="whitespace-nowrap px-5 py-4">
+                                <div class="flex items-center justify-center gap-2">
+
+                                    <!-- Ver -->
+                                    <a href="{{ route('proveedores.show', $proveedor) }}"
+                                       title="Ver proveedor"
+                                       aria-label="Ver proveedor"
+                                       class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-700 transition hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/60">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                                  d="M2.25 12s3.5-7 9.75-7 9.75 7 9.75 7-3.5 7-9.75 7-9.75-7-9.75-7z"/>
+                                            <circle cx="12" cy="12" r="3" stroke-width="1.8"/>
                                         </svg>
-                                        Ver
                                     </a>
 
                                     @if(auth()->user()->canManageInventory())
-                                        <!-- Botón Editar -->
-                                        <a href="{{ route('proveedores.edit', $proveedor) }}" 
-                                        class="inline-flex items-center px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 hover:bg-yellow-200 dark:hover:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 text-xs font-medium rounded-md transition-colors duration-200 shadow-sm">
-                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+
+                                        <!-- Editar -->
+                                        <a href="{{ route('proveedores.edit', $proveedor) }}"
+                                           title="Editar proveedor"
+                                           aria-label="Editar proveedor"
+                                           class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700 transition hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-900/60">
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                                      d="M16.862 4.487l2.651 2.651M4 20l4.5-1 11-11a1.875 1.875 0 00-2.65-2.65l-11 11L4 20z"/>
                                             </svg>
-                                            Editar
                                         </a>
 
-                                        <!-- Botón Eliminar -->
-                                        <form method="POST" action="{{ route('proveedores.destroy', $proveedor) }}" 
-                                            class="inline" onsubmit="return confirm('¿Estás seguro de eliminar este proveedor?\n\nEsta acción no se puede deshacer.')">
+                                        <!-- Eliminar -->
+                                        <form method="POST"
+                                              action="{{ route('proveedores.destroy', $proveedor) }}"
+                                              onsubmit="return confirm('¿Estás seguro de eliminar este proveedor?\n\nEsta acción no se puede deshacer.');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" 
-                                                    class="inline-flex items-center px-2 py-1 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 text-xs font-medium rounded-md transition-colors duration-200 shadow-sm">
-                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+
+                                            <button type="submit"
+                                                    title="Eliminar proveedor"
+                                                    aria-label="Eliminar proveedor"
+                                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-700 transition hover:bg-red-100 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/60">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                                          d="M4 7h16m-10 4v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3"/>
                                                 </svg>
-                                                Eliminar
                                             </button>
                                         </form>
+
                                     @endif
                                 </div>
                             </td>
-                                                    </tr>
-                        @empty
+                        </tr>
+                    @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                                <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                                </svg>
-                                <p class="font-medium">No hay proveedores registrados</p>
+                            <td colspan="6" class="px-6 py-16 text-center">
+                                <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500">
+                                    <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
+                                              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                                    </svg>
+                                </div>
+                                <h3 class="mt-4 text-base font-semibold text-gray-900 dark:text-white">
+                                    No hay proveedores registrados
+                                </h3>
+                                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    Registra un proveedor para comenzar a construir tu directorio.
+                                </p>
+                                <a href="{{ route('proveedores.create') }}"
+                                   class="mt-5 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Registrar proveedor
+                                </a>
                             </td>
                         </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                    @endforelse
 
-            <div class="mt-6">
+                    <!-- Sin coincidencias en la búsqueda -->
+                    <tr id="no-search-results" style="display: none;">
+                        <td colspan="6" class="px-6 py-12 text-center">
+                            <svg class="mx-auto h-10 w-10 text-gray-400 dark:text-gray-500"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle cx="11" cy="11" r="7" stroke-width="1.8"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                      d="M16 16l5 5"/>
+                            </svg>
+                            <p class="mt-3 font-medium text-gray-800 dark:text-gray-200">
+                                No se encontraron coincidencias
+                            </p>
+                            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                Intenta con otro nombre, categoría o número económico.
+                            </p>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pie y paginación -->
+        <div class="flex flex-col gap-3 border-t border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-800/80 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                Mostrando
+                <span class="font-semibold text-gray-800 dark:text-gray-200">
+                    {{ $proveedores->firstItem() ?? 0 }}–{{ $proveedores->lastItem() ?? 0 }}
+                </span>
+                de
+                <span class="font-semibold text-gray-800 dark:text-gray-200">
+                    {{ $proveedores->total() }}
+                </span>
+                proveedores
+            </p>
+
+            <div>
                 {{ $proveedores->links() }}
             </div>
         </div>
     </div>
 </div>
 
+<!-- Búsqueda local -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('search');
-    const tableRows = document.querySelectorAll('tbody tr');
+    const tableBody = document.getElementById('proveedores-table-body');
+    const noResults = document.getElementById('no-search-results');
 
-    if (searchInput) {
-        searchInput.addEventListener('keyup', function () {
-            const searchTerm = this.value.toLowerCase();
-
-            tableRows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
+    if (!searchInput || !tableBody || !noResults) {
+        return;
     }
+
+    const rows = Array.from(tableBody.querySelectorAll('tr.provider-row'));
+
+    searchInput.addEventListener('input', function () {
+        const searchTerm = this.value
+            .trim()
+            .toLocaleLowerCase('es');
+
+        let visibleRows = 0;
+
+        rows.forEach(function (row) {
+            const rowText = row.textContent.toLocaleLowerCase('es');
+            const matches = rowText.includes(searchTerm);
+
+            row.style.display = matches ? '' : 'none';
+
+            if (matches) {
+                visibleRows++;
+            }
+        });
+
+        noResults.style.display =
+            rows.length > 0 && visibleRows === 0 ? '' : 'none';
+    });
 });
 </script>
 @endsection
