@@ -135,15 +135,25 @@ Route::middleware(['auth'])->group(function () {
 
         // Entradas
 
+        // Búsquedas AJAX: declarar antes de las rutas del recurso.
+        Route::get(
+            'entradas/buscar-proveedores',
+            [EntradaController::class, 'buscarProveedores']
+        )->name('entradas.buscar-proveedores');
+
+        Route::get(
+            'entradas/buscar-productos',
+            [EntradaController::class, 'buscarProductos']
+        )->name('entradas.buscar-productos');
+
+        // Rutas del recurso de entradas
         Route::resource('entradas', EntradaController::class)
             ->only(['index', 'create', 'store', 'show']);
-
 
         Route::get(
             'entradas/{entrada}/pdf',
             [EntradaController::class, 'generatePDF']
         )->name('entradas.pdf');
-
 
         Route::get(
             'entradas/{entrada}/view-pdf',

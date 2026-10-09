@@ -11,23 +11,128 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class EntradaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $entradas = Entrada::with(['proveedor', 'user', 'detalles.inventario'])
+        $buscar = trim($request->input('buscar', ''));
+        $periodo = $request->input('periodo', 'todos');
+
+        $query = Entrada::with([
+            'proveedor',
+            'user',
+            'detalles.inventario',
+        ]);
+
+        // Buscar por proveedor, usuario o fecha.
+        if ($buscar !== '') {
+            $query->where(function ($q) use ($buscar) {
+                $q->whereHas('proveedor', function ($proveedor) use ($buscar) {
+                    $proveedor->where('proveedor', 'like', "%{$buscar}%");
+                })
+                ->orWhereHas('user', function ($usuario) use ($buscar) {
+                    $usuario->where('name', 'like', "%{$buscar}%");
+                });
+
+                // Permite buscar fechas con formato dd/mm/yyyy.
+                try {
+                    $fecha = \Carbon\Carbon::createFromFormat('d/m/Y', $buscar);
+
+                    if ($fecha && $fecha->format('d/m/Y') === $buscar) {
+                        $q->orWhereDate('created_at', $fecha->format('Y-m-d'));
+                    }
+                } catch (\Throwable $e) {
+                    // Si no es una fecha válida, continúa con la búsqueda textual.
+                }
+
+                // También permite buscar por año-mes-día.
+                if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $buscar)) {
+                    $q->orWhereDate('created_at', $buscar);
+                }
+            });
+        }
+
+        // Filtrar por periodo.
+        switch ($periodo) {
+            case 'hoy':
+                $query->whereDate('created_at', today());
+                break;
+
+            case 'semana':
+                $query->where('created_at', '>=', now()->subDays(6)->startOfDay());
+                break;
+
+            case 'mes':
+                $query->whereBetween('created_at', [
+                    now()->startOfMonth(),
+                    now()->endOfMonth(),
+                ]);
+                break;
+        }
+
+        $entradas = $query
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
-        
+            ->paginate(15)
+            ->withQueryString();
+
         return view('entradas.index', compact('entradas'));
     }
 
+
     public function create()
     {
-        $inventarios = Inventario::all();
-        $proveedores = Proveedor::all();
-        
         $entradaReciente = session('entrada_reciente', null);
-        
-        return view('entradas.create', compact('inventarios', 'proveedores', 'entradaReciente'));
+
+        return view('entradas.create', compact('entradaReciente'));
+    }
+
+    /**
+     * Buscar proveedores para el selector de entradas.
+     */
+    public function buscarProveedores(Request $request)
+    {
+        $termino = trim($request->input('search', ''));
+
+        $proveedores = Proveedor::query()
+            ->select(['id', 'proveedor'])
+            ->when($termino !== '', function ($query) use ($termino) {
+                $query->where(
+                    'proveedor',
+                    'like',
+                    "%{$termino}%"
+                );
+            })
+            ->orderBy('proveedor')
+            ->limit(20)
+            ->get();
+
+        return response()->json($proveedores);
+    }
+
+    /**
+     * Buscar productos para el selector de entradas.
+     */
+    public function buscarProductos(Request $request)
+    {
+        $termino = trim($request->input('search', ''));
+
+        $inventarios = Inventario::query()
+            ->select([
+                'id',
+                'nombre_producto',
+                'categoria',
+                'existencia',
+                'medida',
+            ])
+            ->when($termino !== '', function ($query) use ($termino) {
+                $query->where(function ($q) use ($termino) {
+                    $q->where('nombre_producto', 'like', "%{$termino}%")
+                        ->orWhere('categoria', 'like', "%{$termino}%");
+                });
+            })
+            ->orderBy('nombre_producto')
+            ->limit(20)
+            ->get();
+
+        return response()->json($inventarios);
     }
 
     public function store(Request $request)
