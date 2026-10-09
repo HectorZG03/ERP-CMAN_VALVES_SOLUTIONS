@@ -19,6 +19,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ValeppController;
 use Illuminate\Support\Facades\Route;
 
+
 Route::get('/', function () {
     return redirect('/dashboard');
 });
@@ -131,26 +132,28 @@ Route::middleware(['auth'])->group(function () {
 
         Route::resource('clientes', ClienteController::class);
 
-        // Entradas
-        Route::resource('entradas', EntradaController::class)
-            ->only(['index', 'create', 'store', 'show']);
 
         // Entradas
 
-        Route::resource('entradas', EntradaController::class)
-            ->only(['index', 'create', 'store', 'show']);
-
-        // Búsqueda AJAX de solicitudes aprobadas con materiales pendientes
+        // Búsquedas AJAX: declarar antes de las rutas del recurso.
         Route::get(
-            'salidas/buscar-solicitudes',
-            [SalidaController::class, 'buscarSolicitudes']
-        )->name('salidas.buscar-solicitudes');
+            'entradas/buscar-proveedores',
+            [EntradaController::class, 'buscarProveedores']
+        )->name('entradas.buscar-proveedores');
+
+        Route::get(
+            'entradas/buscar-productos',
+            [EntradaController::class, 'buscarProductos']
+        )->name('entradas.buscar-productos');
+
+        // Rutas del recurso de entradas
+        Route::resource('entradas', EntradaController::class)
+            ->only(['index', 'create', 'store', 'show']);
 
         Route::get(
             'entradas/{entrada}/pdf',
             [EntradaController::class, 'generatePDF']
         )->name('entradas.pdf');
-
 
         Route::get(
             'entradas/{entrada}/view-pdf',
@@ -347,13 +350,6 @@ Route::middleware(['auth'])->group(function () {
 
     });
 
-    // Aprobación de requisiciones por Finanzas
-    Route::patch(
-        '/requisiciones/{requisicion}/estatus-finanzas',
-        [RequisicionController::class, 'updateEstatusFinanzas']
-    )
-        ->name('requisiciones.updateEstatusFinanzas')
-        ->middleware('auth');
 
     // Aprobación de requisiciones por Finanzas
 
@@ -364,10 +360,6 @@ Route::middleware(['auth'])->group(function () {
         ->name('requisiciones.updateEstatusFinanzas')
         ->middleware('auth');
 
-    Route::get(
-        '/prestamos/{prestamo}/excel',
-        [PrestamoMaterialController::class, 'exportExcel']
-    )->name('prestamos.exportExcel');
 
     // Exportaciones a Excel
 
