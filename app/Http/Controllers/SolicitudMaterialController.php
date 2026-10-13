@@ -110,10 +110,12 @@ class SolicitudMaterialController extends Controller
     public function create(Request $request)
     {
         $personal = Personal::activo()
-            ->orderBy('nombre_completo')
+            ->orderBy('ape_pat')->orderBy('ape_mat')->orderBy('nombre')
             ->get([
                 'id',
-                'nombre_completo',
+                'nombre',
+                'ape_pat',
+                'ape_mat',
                 'employee_id',
                 'area',
             ]);

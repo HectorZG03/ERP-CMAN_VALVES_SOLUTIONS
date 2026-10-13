@@ -17,6 +17,7 @@ class Entrada extends Model
         'cantidad_total',
         'precio_unitario_promedio',
         'precio_total',
+        'descuento_global',
         'iva',
         'total_con_iva',
         'user_id',
@@ -27,11 +28,13 @@ class Entrada extends Model
         'cantidad_total' => 'integer',
         'precio_unitario_promedio' => 'decimal:2',
         'precio_total' => 'decimal:2',
+        'descuento_global' => 'decimal:2',
         'iva' => 'decimal:2',
         'total_con_iva' => 'decimal:2',
     ];
 
-    // Generar número de factura automáticamente
+    private const TASA_IVA = 0.16;
+
     protected static function boot()
     {
         parent::boot();
@@ -40,17 +43,19 @@ class Entrada extends Model
             if (empty($model->numero_factura)) {
                 $year = date('Y');
                 $count = Entrada::whereYear('created_at', $year)->count() + 1;
-                $model->numero_factura = 'ENT-' . $year . '-' . str_pad($count, 5, '0', STR_PAD_LEFT);
+
+                $model->numero_factura = 'ENT-'
+                    . $year
+                    . '-'
+                    . str_pad($count, 5, '0', STR_PAD_LEFT);
             }
         });
 
         static::created(function ($model) {
-            // Recalcular totales después de crear
             $model->calcularTotalesDesdeDetalles();
         });
 
         static::updated(function ($model) {
-            // Si se actualizan los detalles, recalcular totales
             if ($model->isDirty() && $model->detalles()->exists()) {
                 $model->calcularTotalesDesdeDetalles();
             }
@@ -72,38 +77,67 @@ class Entrada extends Model
         return $this->hasMany(EntradaDetalle::class);
     }
 
-    // Calcular totales de la entrada basado en detalles
-    public function calcularTotalesDesdeDetalles()
+    /**
+     * Calcula y guarda los totales de la cabecera.
+     *
+     * El descuento es global: no modifica precios ni subtotales
+     * individuales de los detalles.
+     */
+    public function calcularTotalesDesdeDetalles(): void
     {
-        $this->load('detalles'); // Asegurar que los detalles estén cargados
-        
-        if ($this->detalles->count() > 0) {
-            // Calcular desde los detalles
-            $this->cantidad_total = $this->detalles->sum('cantidad');
-            $this->precio_total = $this->detalles->sum('precio_total');
-            $this->iva = $this->detalles->sum('iva');
-            $this->total_con_iva = $this->detalles->sum('total_con_iva');
-            
-            // Para precio unitario promedio
-            if ($this->cantidad_total > 0) {
-                $this->precio_unitario_promedio = $this->precio_total / $this->cantidad_total;
-            } else {
-                $this->precio_unitario_promedio = 0;
-            }
-        } else {
-            // Si no hay detalles, poner valores en cero
+        $detalles = $this->detalles()->get();
+
+        if ($detalles->isEmpty()) {
             $this->cantidad_total = 0;
             $this->precio_unitario_promedio = 0;
             $this->precio_total = 0;
             $this->iva = 0;
             $this->total_con_iva = 0;
+
+            $this->saveQuietly();
+
+            return;
         }
-        
-        // Guardar sin disparar eventos para evitar bucle infinito
+
+        $cantidadTotal = (int) $detalles->sum('cantidad');
+        $subtotal = round((float) $detalles->sum('precio_total'), 2);
+        $descuento = round((float) ($this->descuento_global ?? 0), 2);
+        $subtotalConDescuento = round(max(0, $subtotal - $descuento), 2);
+
+        /*
+         * Sin descuento se conserva el IVA sumado desde los detalles
+         * para mantener los importes actuales de entradas existentes.
+         * Con descuento, se calcula el IVA sobre la base descontada.
+         */
+        $iva = $descuento > 0
+            ? round($subtotalConDescuento * self::TASA_IVA, 2)
+            : round((float) $detalles->sum('iva'), 2);
+
+        $this->cantidad_total = $cantidadTotal;
+        $this->precio_total = $subtotal;
+        $this->iva = $iva;
+        $this->total_con_iva = round($subtotalConDescuento + $iva, 2);
+
+        // El descuento global no cambia el costo unitario de los productos.
+        $this->precio_unitario_promedio = $cantidadTotal > 0
+            ? round($subtotal / $cantidadTotal, 2)
+            : 0;
+
         $this->saveQuietly();
     }
 
-    // Alias para compatibilidad con vistas existentes
+    /**
+     * Base de la entrada después de restar el descuento global.
+     */
+    public function getSubtotalConDescuentoAttribute(): float
+    {
+        return round(
+            max(0, (float) $this->precio_total - (float) $this->descuento_global),
+            2
+        );
+    }
+
+    // Alias para compatibilidad con vistas existentes.
     public function getCantidadAttribute()
     {
         return $this->cantidad_total;
@@ -114,7 +148,6 @@ class Entrada extends Model
         return $this->precio_unitario_promedio;
     }
 
-    // Obtener productos asociados
     public function getProductosAttribute()
     {
         return $this->detalles->map(function ($detalle) {
@@ -129,49 +162,46 @@ class Entrada extends Model
         });
     }
 
-    // Obtener cantidad total de productos
     public function getCantidadTotalAttribute()
     {
         if ($this->relationLoaded('detalles') && $this->detalles->count() > 0) {
             return $this->detalles->sum('cantidad');
-        } else {
-            return $this->attributes['cantidad_total'] ?? 0;
         }
+
+        return $this->attributes['cantidad_total'] ?? 0;
     }
 
-    // Obtener cantidad de productos diferentes
     public function getCantidadProductosAttribute()
     {
         return $this->detalles->count();
     }
 
-    // Accessor para precio_total que siempre se calcule desde detalles
+    /**
+     * El subtotal de líneas se conserva sin restarle el descuento.
+     */
     public function getPrecioTotalAttribute()
     {
         if ($this->relationLoaded('detalles') && $this->detalles->count() > 0) {
             return $this->detalles->sum('precio_total');
-        } else {
-            return $this->attributes['precio_total'] ?? 0;
         }
+
+        return $this->attributes['precio_total'] ?? 0;
     }
 
-    // Accessor para iva que siempre se calcule desde detalles
+    /**
+     * El IVA de cabecera puede diferir del IVA de los renglones
+     * cuando existe descuento global.
+     */
     public function getIvaAttribute()
     {
-        if ($this->relationLoaded('detalles') && $this->detalles->count() > 0) {
-            return $this->detalles->sum('iva');
-        } else {
-            return $this->attributes['iva'] ?? 0;
-        }
+        return $this->attributes['iva'] ?? 0;
     }
 
-    // Accessor para total_con_iva que siempre se calcule desde detalles
+    /**
+     * Devuelve el total final guardado en la cabecera.
+     */
     public function getTotalConIvaAttribute()
     {
-        if ($this->relationLoaded('detalles') && $this->detalles->count() > 0) {
-            return $this->detalles->sum('total_con_iva');
-        } else {
-            return $this->attributes['total_con_iva'] ?? 0;
-        }
+        return $this->attributes['total_con_iva'] ?? 0;
     }
 }

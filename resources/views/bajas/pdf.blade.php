@@ -167,7 +167,7 @@
             <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>B{{ str_pad($baja->id, 4, '0', STR_PAD_LEFT) }}</td>
-                <td>{{ $baja->personal->nombre_completo }}</td>
+                <td>{{ $baja->personal->nombre_mostrar }}</td>
                 <td>{{ $baja->personal->area }}<br><small>{{ $baja->personal->departamento }}</small></td>
                 <td>{{ $baja->personal->fecha_ingreso->format('d/m/Y') }}</td>
                 <td>{{ $baja->fecha_baja->format('d/m/Y') }}</td>

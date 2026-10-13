@@ -18,14 +18,14 @@
             @else
             <div class="h-16 w-16 bg-blue-500 dark:bg-blue-600 rounded-full flex items-center justify-center border-2 border-gray-300 dark:border-gray-600">
                 <span class="text-2xl font-bold text-white">
-                    {{ substr($personal->nombre_completo, 0, 2) }}
+                    {{ substr($personal->nombre_mostrar, 0, 2) }}
                 </span>
             </div>
             @endif
 
             <div>
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-                    {{ $personal->nombre_completo }}
+                    {{ $personal->nombre_mostrar }}
                 </h1>
                 @if($personal->employee_id && $personal->employee_id !== 'N/A')
                 <p class="text-sm text-gray-500 dark:text-gray-400">ID: {{ $personal->employee_id }}</p>

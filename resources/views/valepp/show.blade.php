@@ -236,11 +236,11 @@
                 <div class="p-5">
                     <div class="flex items-center gap-4">
                         <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-orange-600 text-lg font-bold text-white">
-                            {{ mb_strtoupper(mb_substr($personal?->nombre_completo ?? 'NA', 0, 2)) }}
+                            {{ mb_strtoupper(mb_substr($personal?->nombre_mostrar ?? 'NA', 0, 2)) }}
                         </div>
                         <div class="min-w-0">
-                            <p class="truncate text-lg font-bold text-gray-900 dark:text-white" title="{{ $personal?->nombre_completo }}">
-                                {{ $personal?->nombre_completo ?? 'No disponible' }}
+                            <p class="truncate text-lg font-bold text-gray-900 dark:text-white" title="{{ $personal?->nombre_mostrar }}">
+                                {{ $personal?->nombre_mostrar ?? 'No disponible' }}
                             </p>
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                 {{ $personal?->employee_id ?? 'Sin número de empleado' }}

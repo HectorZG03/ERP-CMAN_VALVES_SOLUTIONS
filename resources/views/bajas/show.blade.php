@@ -39,12 +39,12 @@
                         <div class="flex items-center space-x-4 mb-4">
                             <div class="w-16 h-16 bg-red-500 dark:bg-red-600 rounded-full flex items-center justify-center">
                                 <span class="text-2xl font-bold text-white">
-                                    {{ substr($baja->personal->nombre_completo, 0, 2) }}
+                                    {{ substr($baja->personal->nombre_mostrar, 0, 2) }}
                                 </span>
                             </div>
                             <div>
                                 <h4 class="text-xl font-bold text-gray-900 dark:text-white">
-                                    {{ $baja->personal->nombre_completo }}
+                                    {{ $baja->personal->nombre_mostrar }}
                                 </h4>
                                 <p class="text-sm text-gray-500 dark:text-gray-400">
                                     {{ $baja->personal->grado ?? 'N/A' }}

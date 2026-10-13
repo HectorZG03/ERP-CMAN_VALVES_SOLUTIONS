@@ -34,7 +34,7 @@ class ValeppController extends Controller
 
         $query = Valepp::query()
             ->with([
-                'personal:id,nombre_completo,employee_id,area,grado',
+                'personal:id,nombre,ape_pat,ape_mat,employee_id,area,grado',
                 'user:id,name,email',
                 'solicitudMaterial:id,user_id,destino,estatus,tipo_solicitud,created_at',
             ])
@@ -60,11 +60,7 @@ class ValeppController extends Controller
                         ->orWhereHas('personal', function ($personalQuery) use ($search) {
                             $personalQuery->where(function ($query) use ($search) {
                                 $query
-                                    ->where(
-                                        'nombre_completo',
-                                        'like',
-                                        "%{$search}%"
-                                    )
+                                    ->whereRaw("CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?", ["%{$search}%"])
                                     ->orWhere(
                                         'employee_id',
                                         'like',
@@ -136,10 +132,12 @@ class ValeppController extends Controller
         );
 
         $personalActivo = Personal::activo()
-            ->orderBy('nombre_completo')
+            ->orderBy('ape_pat')->orderBy('ape_mat')->orderBy('nombre')
             ->get([
                 'id',
-                'nombre_completo',
+                'nombre',
+                'ape_pat',
+                'ape_mat',
                 'employee_id',
                 'area',
                 'grado',

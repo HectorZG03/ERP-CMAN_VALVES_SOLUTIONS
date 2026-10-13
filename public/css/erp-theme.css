@@ -1,0 +1,257 @@
+:root {
+    --erp-navy: #14263d;
+    --erp-navy-light: #203b5a;
+    --erp-yellow: #e5ae24;
+    --erp-yellow-hover: #f0c34b;
+    --erp-yellow-soft: #fff2c6;
+    --erp-gray-50: #f9fafb;
+    --erp-gray-100: #f3f4f6;
+    --erp-gray-200: #e5e7eb;
+    --erp-gray-300: #d1d5db;
+    --erp-black: #111827;
+    --erp-white: #ffffff;
+}
+
+/* Fondo general */
+body.bg-gray-100 {
+    background-color: var(--erp-gray-100);
+    color: var(--erp-black);
+}
+
+html.dark body.bg-gray-100 {
+    background-color: #0b1626;
+    color: var(--erp-white);
+}
+
+/* Sidebar: tema oscuro */
+#app-sidebar {
+    background-color: var(--erp-navy);
+    border-color: var(--erp-navy-light);
+    color: var(--erp-white);
+}
+
+#app-sidebar > div:first-child {
+    border-color: var(--erp-navy-light);
+}
+
+#app-sidebar > div:first-child h1,
+#app-sidebar > div:first-child p,
+#app-sidebar > div:last-child p {
+    color: var(--erp-white);
+}
+
+#app-sidebar nav > div > p {
+    color: #cbd5e1;
+}
+
+#app-sidebar nav a {
+    color: var(--erp-white);
+}
+
+#app-sidebar nav a:hover {
+    background-color: var(--erp-navy-light);
+    color: var(--erp-white);
+}
+
+#app-sidebar nav a[class*="bg-yellow-100"] {
+    background-color: var(--erp-yellow);
+    color: var(--erp-black);
+}
+
+#app-sidebar nav a[class*="bg-yellow-100"]:hover {
+    background-color: var(--erp-yellow-hover);
+    color: var(--erp-black);
+}
+
+#app-sidebar > div:last-child {
+    border-color: var(--erp-navy-light);
+}
+
+#app-sidebar > div:last-child form button {
+    color: var(--erp-white);
+}
+
+#app-sidebar > div:last-child form button:hover {
+    background-color: var(--erp-navy-light);
+    color: var(--erp-white);
+}
+
+/* Encabezado: tema oscuro */
+#app-content > header {
+    background-color: var(--erp-navy);
+    border-color: var(--erp-navy-light);
+}
+
+#app-content > header p,
+#app-content > header h2 {
+    color: var(--erp-white);
+}
+
+#app-content > header button {
+    color: var(--erp-white);
+}
+
+#app-content > header button:hover {
+    background-color: var(--erp-navy-light);
+    color: var(--erp-white);
+}
+
+#app-content > header > div > div:last-child {
+    border-color: var(--erp-navy-light);
+}
+
+/* Layout claro */
+html:not(.dark) #app-sidebar {
+    background-color: var(--erp-gray-100);
+    border-color: var(--erp-gray-300);
+    color: var(--erp-black);
+}
+
+html:not(.dark) #app-sidebar > div:first-child {
+    border-color: var(--erp-gray-300);
+}
+
+html:not(.dark) #app-sidebar > div:first-child h1,
+html:not(.dark) #app-sidebar > div:first-child p,
+html:not(.dark) #app-sidebar > div:last-child p,
+html:not(.dark) #app-sidebar nav > div > p {
+    color: var(--erp-black);
+}
+
+html:not(.dark) #app-sidebar nav a {
+    color: var(--erp-black);
+}
+
+html:not(.dark) #app-sidebar nav a:hover {
+    background-color: var(--erp-yellow-soft);
+    color: var(--erp-black);
+}
+
+html:not(.dark) #app-sidebar nav a[class*="bg-yellow-100"] {
+    background-color: var(--erp-yellow);
+    color: var(--erp-black);
+}
+
+html:not(.dark) #app-sidebar > div:last-child {
+    border-color: var(--erp-gray-300);
+}
+
+html:not(.dark) #app-sidebar > div:last-child form button {
+    color: var(--erp-black);
+}
+
+html:not(.dark) #app-sidebar > div:last-child form button:hover {
+    background-color: var(--erp-yellow-soft);
+    color: var(--erp-black);
+}
+
+/* Encabezado claro */
+html:not(.dark) #app-content > header {
+    background-color: var(--erp-white);
+    border-color: var(--erp-gray-300);
+}
+
+html:not(.dark) #app-content > header p,
+html:not(.dark) #app-content > header h2,
+html:not(.dark) #app-content > header button {
+    color: var(--erp-black);
+}
+
+html:not(.dark) #app-content > header button:hover {
+    background-color: var(--erp-yellow-soft);
+    color: var(--erp-black);
+}
+
+html:not(.dark) #app-content > header > div > div:last-child {
+    border-color: var(--erp-gray-300);
+}
+
+/* Texto negro sobre avatares amarillos en tema claro */
+html:not(.dark) #app-sidebar .rounded-full,
+html:not(.dark) #app-content > header .rounded-full {
+    color: var(--erp-black);
+}
+
+/*
+ * Clases reutilizables para migrar gradualmente
+ * tarjetas, tablas, campos y botones de las vistas.
+ */
+.erp-card {
+    background-color: var(--erp-white);
+    border: 1px solid var(--erp-gray-200);
+    border-radius: 0.75rem;
+    color: var(--erp-black);
+    box-shadow: 0 1px 3px rgb(17 24 39 / 8%);
+}
+
+.erp-section-title {
+    color: var(--erp-black);
+}
+
+html.dark .erp-section-title {
+    color: var(--erp-white);
+}
+
+.erp-table-wrapper {
+    overflow-x: auto;
+    background-color: var(--erp-white);
+    border: 1px solid var(--erp-gray-200);
+    border-radius: 0.75rem;
+}
+
+.erp-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--erp-black);
+}
+
+.erp-table thead {
+    background-color: var(--erp-gray-50);
+}
+
+.erp-table th {
+    color: var(--erp-black);
+    font-weight: 600;
+    text-align: left;
+}
+
+.erp-table th,
+.erp-table td {
+    border-bottom: 1px solid var(--erp-gray-200);
+    padding: 0.75rem 1rem;
+}
+
+.erp-table tbody tr:hover {
+    background-color: var(--erp-gray-50);
+}
+
+.erp-field {
+    background-color: var(--erp-white);
+    border: 1px solid var(--erp-gray-300);
+    border-radius: 0.5rem;
+    color: var(--erp-black);
+}
+
+.erp-field:focus {
+    border-color: var(--erp-navy-light);
+    outline: 2px solid var(--erp-navy-light);
+    outline-offset: 1px;
+}
+
+.erp-btn-primary {
+    background-color: var(--erp-navy);
+    color: var(--erp-white);
+}
+
+.erp-btn-primary:hover {
+    background-color: var(--erp-navy-light);
+}
+
+.erp-btn-accent {
+    background-color: var(--erp-yellow);
+    color: var(--erp-black);
+}
+
+.erp-btn-accent:hover {
+    background-color: var(--erp-yellow-hover);
+}

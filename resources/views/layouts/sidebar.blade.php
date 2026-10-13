@@ -1,4 +1,5 @@
 <aside
+    id="app-sidebar"
     class="fixed inset-y-0 left-0 z-40 w-64
            bg-white dark:bg-gray-900
            border-r border-gray-200 dark:border-gray-700
@@ -10,9 +11,9 @@
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
 
             <img
-                src="{{ asset('img/logo/logo.png') }}"
+                src="{{ asset('img/logo/logo_cman.png') }}"
                 alt="Logo"
-                class="h-9 w-auto"
+                class="h-20 w-auto"
             >
 
             <div>

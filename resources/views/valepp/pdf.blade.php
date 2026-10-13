@@ -363,7 +363,7 @@
         <tr>
             <td class="info-label">Trabajador:</td>
             <td class="info-value-left" colspan="3">
-                {{ mb_strtoupper($personal?->nombre_completo ?? 'N/A') }}
+                {{ mb_strtoupper($personal?->nombre_mostrar ?? 'N/A') }}
             </td>
             <td class="info-label">Fecha:</td>
             <td class="info-value">

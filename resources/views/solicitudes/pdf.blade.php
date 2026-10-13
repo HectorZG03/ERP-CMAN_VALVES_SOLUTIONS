@@ -647,7 +647,7 @@
             <div class="header-doc">
                 <div class="doc-type-label">Solicitud {{ $tipoSolicitudTexto }}</div>
                 <div class="doc-folio">#{{ str_pad($solicitud->id, 4, '0', STR_PAD_LEFT) }}</div>
-                <div class="doc-date-small">Generado: {{ now()->format('d/m/Y H:i') }} hrs</div>
+                {{-- Se quitó la fecha de generación para evitar duplicar la fecha de creación. --}}
             </div>
         </div>
 
@@ -690,10 +690,6 @@
                         <span class="field-value">{{ $solicitud->created_at->format('d/m/Y') }}</span>
                     </div>
                     <div class="field-row">
-                        <span class="field-label">Hora</span>
-                        <span class="field-value">{{ $solicitud->created_at->format('H:i') }} hrs</span>
-                    </div>
-                    <div class="field-row">
                         <span class="field-label">Destino</span>
                         <span class="field-value">{{ $solicitud->destino ?? 'No especificado' }}</span>
                     </div>
@@ -704,7 +700,7 @@
                     @if($solicitud->estatus !== 'pendiente')
                     <div class="field-row">
                         <span class="field-label">Fecha resolución</span>
-                        <span class="field-value">{{ $solicitud->updated_at->format('d/m/Y H:i') }}</span>
+                        <span class="field-value">{{ $solicitud->updated_at->format('d/m/Y') }}</span>
                     </div>
                     @endif
                 </div>
@@ -869,7 +865,6 @@
         <div class="doc-footer">
             <span>#{{ str_pad($solicitud->id, 4, '0', STR_PAD_LEFT) }} &nbsp;/&nbsp; {{ $solicitud->created_at->format('d.m.Y') }}</span>
             <span class="fc">CMAN GLOBAL CONSTRUCTION &nbsp;&middot;&nbsp; SOLICITUD {{ $tipoSolicitudTexto }}</span>
-            <span>{{ now()->format('d/m/Y H:i') }}</span>
         </div>
 
     </div>

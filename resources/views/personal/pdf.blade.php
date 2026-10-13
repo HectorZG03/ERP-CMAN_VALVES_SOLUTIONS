@@ -68,7 +68,7 @@
         @foreach($personal as $p)
         <tr>
             <td>{{ $p->employee_id }}</td>
-            <td>{{ $p->nombre_completo }}</td>
+            <td>{{ $p->nombre_mostrar }}</td>
             <td>{{ $p->division }}</td>
             <td>{{ $p->area }}</td>
             <td>{{ $p->departamento }}</td>

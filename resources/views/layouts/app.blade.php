@@ -34,6 +34,10 @@
     </script>
 
 
+    {{-- Estilos globales del ERP --}}
+    <link rel="stylesheet" href="{{ asset('css/erp-theme.css') }}">
+
+
     {{-- Evita parpadeo al cargar el tema --}}
     <script>
         (() => {
@@ -55,6 +59,77 @@
         })();
     </script>
 
+
+    {{-- Restaura el estado del sidebar antes de mostrar la página --}}
+    <script>
+        try {
+            if (localStorage.getItem('erp-sidebar-collapsed') === 'true') {
+                document.documentElement.classList.add('sidebar-collapsed');
+            }
+        } catch (error) {
+            // El sidebar funcionará aunque el navegador bloquee localStorage.
+        }
+    </script>
+
+
+    {{-- Estilos del sidebar contraído --}}
+    <style>
+        #app-sidebar,
+        #app-content {
+            transition: width 200ms ease, margin-left 200ms ease;
+        }
+
+        html.sidebar-collapsed #app-sidebar {
+            width: 5rem;
+        }
+
+        html.sidebar-collapsed #app-content {
+            margin-left: 5rem;
+        }
+
+        html.sidebar-collapsed #app-sidebar > div:first-child {
+            justify-content: center;
+            padding-left: 0.75rem;
+            padding-right: 0.75rem;
+        }
+
+        html.sidebar-collapsed #app-sidebar > div:first-child a > div,
+        html.sidebar-collapsed #app-sidebar nav p,
+        html.sidebar-collapsed #app-sidebar nav a span,
+        html.sidebar-collapsed #app-sidebar > div:last-child p,
+        html.sidebar-collapsed #app-sidebar > div:last-child form button span {
+            display: none;
+        }
+
+        html.sidebar-collapsed #app-sidebar nav {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+
+        html.sidebar-collapsed #app-sidebar nav a {
+            justify-content: center;
+            gap: 0;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        html.sidebar-collapsed #app-sidebar > div:last-child {
+            padding: 0.75rem;
+        }
+
+        html.sidebar-collapsed #app-sidebar > div:last-child > div:first-child {
+            justify-content: center;
+        }
+
+        html.sidebar-collapsed #app-sidebar > div:last-child > div:first-child > div:last-child {
+            display: none;
+        }
+
+        html.sidebar-collapsed #app-sidebar > div:last-child form button {
+            gap: 0;
+        }
+    </style>
+
 </head>
 
 
@@ -69,7 +144,7 @@
 
 
         {{-- Contenido principal --}}
-        <div class="ml-64 min-h-screen">
+        <div id="app-content" class="ml-64 min-h-screen">
 
 
             {{-- Header --}}
@@ -199,6 +274,9 @@
 
     {{-- JavaScript global --}}
     <script src="{{ asset('js/app.js') }}"></script>
+
+    {{-- JavaScript del sidebar --}}
+    <script src="{{ asset('js/sidebar.js') }}"></script>
 
 
     {{-- JavaScript específico de cada vista --}}
