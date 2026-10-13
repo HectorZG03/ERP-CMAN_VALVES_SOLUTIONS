@@ -189,8 +189,8 @@
                             </td>
 
                             <td class="px-5 py-4">
-                                <p class="max-w-[260px] truncate font-semibold text-gray-900 dark:text-white" title="{{ $vale->personal?->nombre_completo }}">
-                                    {{ $vale->personal?->nombre_completo ?? 'No disponible' }}
+                                <p class="max-w-[260px] truncate font-semibold text-gray-900 dark:text-white" title="{{ $vale->personal?->nombre_mostrar }}">
+                                    {{ $vale->personal?->nombre_mostrar ?? 'No disponible' }}
                                 </p>
                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                                     {{ $vale->personal?->employee_id ?? 'Sin número' }} · {{ $vale->personal?->area ?? 'Sin área' }}

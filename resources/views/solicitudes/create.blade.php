@@ -405,7 +405,7 @@
 
                                     @foreach($personal as $persona)
                                         @php
-                                            $etiquetaPersona = $persona->nombre_completo;
+                                            $etiquetaPersona = $persona->nombre_mostrar;
 
                                             if ($persona->employee_id && $persona->employee_id !== 'N/A') {
                                                 $etiquetaPersona .= " ({$persona->employee_id})";

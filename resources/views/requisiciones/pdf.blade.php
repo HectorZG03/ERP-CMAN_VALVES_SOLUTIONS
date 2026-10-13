@@ -70,7 +70,6 @@
         .header-doc { padding: 18px 24px; text-align: right; display: flex; flex-direction: column; justify-content: center; min-width: 200px; }
         .doc-type-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--gold); margin-bottom: 4px; }
         .doc-folio { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 700; color: #fff; letter-spacing: 2px; line-height: 1; }
-        .doc-date-small { font-size: 9px; color: #5a7aaa; margin-top: 5px; }
 
         /* STATUS BAR */
         .status-bar {
@@ -227,34 +226,29 @@
             <div class="header-doc">
                 <div class="doc-type-label">No. de Requisición</div>
                 <div class="doc-folio">{{ $requisicion->folio ?? str_pad($requisicion->id, 4, '0', STR_PAD_LEFT) }}</div>
-                <div class="doc-date-small">Generado: {{ now()->format('d/m/Y H:i') }} hrs</div>
             </div>
         </div>
 
-        {{-- CSS DEL FOLIO DEL DOCUMENTO  --}}
-
+        {{-- CSS DEL FOLIO DEL DOCUMENTO --}}
         <style>
             .status-bar {
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
 
-        .status-folio {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: 2px;
-            font-size: 11px;
-            opacity: 0.95;
-        
-        }
-
+            .status-folio {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                font-weight: 700;
+                color: #ffffff;
+                letter-spacing: 2px;
+                font-size: 11px;
+                opacity: 0.95;
+            }
         </style>
-
 
         {{-- STATUS BAR --}}
         <div class="status-bar">
@@ -290,7 +284,7 @@
                         {{ strtoupper($requisicion->estatus) }}
                     </div>
                     @if($requisicion->estatus !== 'pendiente')
-                    <div class="status-cell-by">{{ $requisicion->updated_at->format('d/m/Y H:i') }} hrs</div>
+                    <div class="status-cell-by">{{ $requisicion->updated_at->format('d/m/Y') }}</div>
                     @endif
                 </div>
             </div>
@@ -459,7 +453,6 @@
         <div class="doc-footer">
             <span>{{ $requisicion->folio ?? str_pad($requisicion->id, 4, '0', STR_PAD_LEFT) }} &nbsp;/&nbsp; {{ $requisicion->created_at->format('d.m.Y') }}</span>
             <span class="fc">CMAN GLOBAL CONSTRUCTION &nbsp;&middot;&nbsp; DOCUMENTO OFICIAL</span>
-            <span>{{ now()->format('d/m/Y H:i') }}</span>
         </div>
 
     </div>

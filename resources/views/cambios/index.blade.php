@@ -118,13 +118,13 @@
                                     <div class="flex-shrink-0 h-10 w-10">
                                         <div class="h-10 w-10 rounded-full bg-pink-500 dark:bg-pink-600 flex items-center justify-center">
                                             <span class="text-white font-medium">
-                                                {{ substr($cambio->personal->nombre_completo, 0, 2) }}
+                                                {{ substr($cambio->personal->nombre_mostrar, 0, 2) }}
                                             </span>
                                         </div>
                                     </div>
                                     <div class="ml-4">
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                            {{ $cambio->personal->nombre_completo }}
+                                            {{ $cambio->personal->nombre_mostrar }}
                                         </div>
                                         <div class="text-sm text-gray-500 dark:text-gray-400">
                                             {{ $cambio->personal->area }}

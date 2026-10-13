@@ -14,7 +14,7 @@
     $rolSolicitante = $solicitud->user?->role
         ?? 'N/A';
 
-    $personalAsignado = $solicitud->operadorPersonal?->nombre_completo;
+    $personalAsignado = $solicitud->operadorPersonal?->nombre_mostrar;
 
     if (
         !$personalAsignado

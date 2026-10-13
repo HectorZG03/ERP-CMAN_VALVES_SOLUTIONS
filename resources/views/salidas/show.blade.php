@@ -9,7 +9,7 @@
     $destino = $solicitud?->destino
         ?? $salida->cliente?->area
         ?? 'No disponible';
-    $operador = $solicitud?->operadorPersonal?->nombre_completo
+    $operador = $solicitud?->operadorPersonal?->nombre_mostrar
         ?? $solicitud?->operador
         ?? 'No asignado';
     $folio = $salida->numero_factura

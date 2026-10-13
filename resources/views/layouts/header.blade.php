@@ -21,7 +21,21 @@
 
         {{-- Acciones --}}
         <div class="flex items-center gap-4">
+            <button
+                id="sidebar-toggle"
+                type="button"
+                aria-label="Contraer menú lateral"
+                aria-controls="app-sidebar"
+                aria-expanded="true"
+                title="Contraer menú lateral"
+                class="w-10 h-10 rounded-lg
+                    flex items-center justify-center
+                    text-gray-600 dark:text-gray-300
+                    hover:bg-gray-100 dark:hover:bg-gray-800
+                    transition">
 
+                <i id="sidebar-toggle-icon" class="fas fa-angles-left"></i>
+            </button>
             {{-- Tema --}}
             <button
                 id="theme-toggle"

@@ -337,7 +337,7 @@
     $destino = $solicitud?->destino
         ?? $salida->cliente?->area
         ?? 'N/A';
-    $operadorNombre = $operadorAsignado?->nombre_completo
+    $operadorNombre = $operadorAsignado?->nombre_mostrar
         ?? $solicitud?->operador
         ?? 'NO ASIGNADO';
     $folio = $salida->numero_factura

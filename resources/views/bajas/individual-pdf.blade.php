@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acta de Baja - {{ $baja->personal->nombre_completo }}</title>
+    <title>Acta de Baja - {{ $baja->personal->nombre_mostrar }}</title>
     <style>
         body {
             font-family: 'DejaVu Sans', sans-serif;
@@ -180,7 +180,7 @@
             <div class="employee-info">
                 <div class="info-item">
                     <div class="item-label">Nombre Completo</div>
-                    <div class="item-value">{{ $baja->personal->nombre_completo }}</div>
+                    <div class="item-value">{{ $baja->personal->nombre_mostrar }}</div>
                 </div>
                 <div class="info-item">
                     <div class="item-label">Área / Departamento</div>

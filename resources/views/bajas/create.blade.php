@@ -24,7 +24,7 @@
                     <option value="">Seleccione un colaborador</option>
                     @foreach($personalActivo as $persona)
                         <option value="{{ $persona->id }}" {{ old('personal_id') == $persona->id ? 'selected' : '' }}>
-                            {{ $persona->nombre_completo }} - {{ $persona->area }}
+                            {{ $persona->nombre_mostrar }} - {{ $persona->area }}
                         </option>
                     @endforeach
                 </select>

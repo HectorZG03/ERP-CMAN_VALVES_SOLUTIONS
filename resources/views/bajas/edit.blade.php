@@ -31,7 +31,7 @@
                             <option value="{{ $persona->id }}" 
                                     {{ old('personal_id', $baja->personal_id) == $persona->id ? 'selected' : '' }}
                                     {{ $persona->id == $baja->personal_id ? '' : ($persona->estatus == 'baja' ? 'disabled' : '') }}>
-                                {{ $persona->nombre_completo }} - {{ $persona->area }}
+                                {{ $persona->nombre_mostrar }} - {{ $persona->area }}
                                 @if($persona->estatus == 'baja' && $persona->id != $baja->personal_id)
                                     (Inactivo)
                                 @endif
@@ -76,11 +76,11 @@
                 <div class="flex items-center">
                     <div class="w-12 h-12 bg-red-500 dark:bg-red-600 rounded-full flex items-center justify-center mr-3">
                         <span class="text-white font-medium">
-                            {{ substr($baja->personal->nombre_completo, 0, 2) }}
+                            {{ substr($baja->personal->nombre_mostrar, 0, 2) }}
                         </span>
                     </div>
                     <div>
-                        <p class="font-medium text-gray-900 dark:text-white">{{ $baja->personal->nombre_completo }}</p>
+                        <p class="font-medium text-gray-900 dark:text-white">{{ $baja->personal->nombre_mostrar }}</p>
                         <p class="text-sm text-gray-600 dark:text-gray-400">{{ $baja->personal->area }} - {{ $baja->personal->departamento }}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-500">Ingreso: {{ $baja->personal->fecha_ingreso->format('d/m/Y') }}</p>
                     </div>

@@ -18,7 +18,7 @@ class BajaColaboradorController extends Controller
         
         if ($search) {
             $query->whereHas('personal', function($q) use ($search) {
-                $q->where('nombre_completo', 'like', "%{$search}%")
+                $q->whereRaw("CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?", ["%{$search}%"])
                   ->orWhere('area', 'like', "%{$search}%");
             });
         }
@@ -34,7 +34,9 @@ class BajaColaboradorController extends Controller
     {
         // Solo mostrar personal activo
         $personalActivo = Personal::activo()
-            ->orderBy('nombre_completo')
+            ->orderBy('ape_pat')
+            ->orderBy('ape_mat')
+            ->orderBy('nombre')
             ->get();
         
         return view('bajas.create', compact('personalActivo'));
@@ -75,7 +77,9 @@ class BajaColaboradorController extends Controller
     {
         $personalActivo = Personal::activo()
             ->orWhere('id', $baja->personal_id)
-            ->orderBy('nombre_completo')
+            ->orderBy('ape_pat')
+            ->orderBy('ape_mat')
+            ->orderBy('nombre')
             ->get();
         
         return view('bajas.edit', compact('baja', 'personalActivo'));
@@ -145,7 +149,8 @@ class BajaColaboradorController extends Controller
         $pdf = PDF::loadView('bajas.individual-pdf', $data);
         $pdf->setPaper('A4', 'portrait');
         
-        $nombreArchivo = 'baja_' . str_pad($baja->id, 4, '0', STR_PAD_LEFT) . '_' . str_replace(' ', '_', $baja->personal->nombre_completo) . '.pdf';
+        $nombreCompleto = trim(implode(' ', array_filter([$baja->personal->nombre, $baja->personal->ape_pat, $baja->personal->ape_mat])));
+        $nombreArchivo = 'baja_' . str_pad($baja->id, 4, '0', STR_PAD_LEFT) . '_' . str_replace(' ', '_', $nombreCompleto) . '.pdf';
         
         return $pdf->download($nombreArchivo);
     }

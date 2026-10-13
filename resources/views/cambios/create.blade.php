@@ -27,7 +27,7 @@
                                 data-puesto="{{ $persona->grado ?? 'N/A' }}"
                                 data-sueldo="{{ $persona->sueldo }}"
                                 {{ old('personal_id') == $persona->id ? 'selected' : '' }}>
-                            {{ $persona->nombre_completo }} - {{ $persona->area }}
+                            {{ $persona->nombre_mostrar }} - {{ $persona->area }}
                         </option>
                     @endforeach
                 </select>

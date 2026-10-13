@@ -19,7 +19,7 @@ class CambioPuestoSueldoController extends Controller
         
         if ($search) {
             $query->whereHas('personal', function($q) use ($search) {
-                $q->where('nombre_completo', 'like', "%{$search}%")
+                $q->whereRaw("CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?", ["%{$search}%"])
                   ->orWhere('area', 'like', "%{$search}%");
             });
         }
@@ -35,7 +35,9 @@ class CambioPuestoSueldoController extends Controller
     {
         // Solo mostrar personal activo
         $personalActivo = Personal::activo()
-            ->orderBy('nombre_completo')
+            ->orderBy('ape_pat')
+            ->orderBy('ape_mat')
+            ->orderBy('nombre')
             ->get();
         
         return view('cambios.create', compact('personalActivo'));
@@ -98,7 +100,9 @@ class CambioPuestoSueldoController extends Controller
     {
         $personalActivo = Personal::activo()
             ->orWhere('id', $cambio->personal_id)
-            ->orderBy('nombre_completo')
+            ->orderBy('ape_pat')
+            ->orderBy('ape_mat')
+            ->orderBy('nombre')
             ->get();
         
         return view('cambios.edit', compact('cambio', 'personalActivo'));

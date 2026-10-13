@@ -209,7 +209,7 @@
 
                         <!-- Colaborador -->
                         <td>
-                            <div class="colaborador-info">{{ $cambio->personal->nombre_completo }}</div>
+                            <div class="colaborador-info">{{ $cambio->personal->nombre_mostrar }}</div>
                             <div class="area-info">{{ $cambio->personal->area }}</div>
                         </td>
 
