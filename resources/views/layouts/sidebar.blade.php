@@ -11,9 +11,9 @@
         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
 
             <img
-                src="{{ asset('img/logo/logo.png') }}"
+                src="{{ asset('img/logo/logo_cman.png') }}"
                 alt="Logo"
-                class="h-9 w-auto"
+                class="h-20 w-auto"
             >
 
             <div>

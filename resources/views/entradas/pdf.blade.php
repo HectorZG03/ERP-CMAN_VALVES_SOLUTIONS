@@ -2,365 +2,497 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrada de Material #{{ str_pad($entrada->id, 6, '0', STR_PAD_LEFT) }}</title>
+    <title>Entrada {{ $entrada->numero_factura }}</title>
+
     <style>
+        @page {
+            size: letter portrait;
+            margin: 30px 32px 38px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Arial', sans-serif;
-            font-size: 12px;
-            line-height: 1.4;
-            color: #333;
             margin: 0;
-            padding: 20px;
-            background-color: #fff;
-        }
-        
-        /* Encabezado de empresa */
-        .company-header {
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #059669;
-        }
-        
-        .company-name {
-            font-size: 24px;
-            font-weight: bold;
-            color: #059669;
-            margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .company-tagline {
-            font-size: 14px;
-            color: #666;
-            margin: 5px 0 15px 0;
-        }
-        
-        .company-info {
-            font-size: 11px;
-            color: #555;
-            margin-top: 10px;
-        }
-        
-        /* Información del documento */
-        .document-info {
-            margin-bottom: 25px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-        }
-        
-        .document-title {
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
             color: #1f2937;
-            margin: 0 0 15px 0;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 9px;
         }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .header-table {
+            margin-bottom: 12px;
+        }
+
+        .header-table td {
+            vertical-align: middle;
+        }
+
+        .logo-cell {
+            width: 20%;
+            padding-right: 10px;
+            text-align: left;
+        }
+
+        .company {
+            width: 54%;
+            padding-right: 8px;
+        }
+
+        .folio-cell {
+            width: 26%;
+            text-align: right;
+        }
+
+        .logo {
+            display: block;
+            width: 88px;
+            max-width: 100%;
+            max-height: 68px;
+        }
+
+        .company-name {
+            margin: 0 0 4px;
+            color: #102a43;
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .company-address {
+            margin: 0;
+            color: #4b5563;
+            font-size: 8px;
+        }
+
+        .folio-box {
+            display: inline-block;
+            min-width: 115px;
+            padding: 8px 9px;
+            border: 1px solid #19324d;
+            text-align: center;
+        }
+
+        .folio-label {
+            display: block;
+            margin-bottom: 3px;
+            color: #19324d;
+            font-size: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .folio-value {
+            color: #111827;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .details-table {
             margin-bottom: 10px;
         }
-        
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px dotted #ddd;
+
+        .details-table td {
+            padding: 5px 6px;
+            border: 1px solid #9ca3af;
         }
-        
-        .info-label {
+
+        .label-cell {
+            width: 17%;
+            background: #19324d;
+            color: #fff;
             font-weight: bold;
-            color: #555;
         }
-        
-        .info-value {
-            color: #333;
+
+        .value-cell {
+            background: #fff;
         }
-        
-        /* Tabla de producto */
-        .products-section {
-            margin: 25px 0;
-        }
-        
-        .section-title {
-            background-color: #059669;
-            color: white;
-            padding: 8px 12px;
-            font-size: 14px;
+
+        .form-code {
+            width: 26%;
+            background: #19324d;
+            color: #fff;
+            font-size: 8px;
             font-weight: bold;
-            border-radius: 4px 4px 0 0;
-            margin: 0;
+            text-align: center;
         }
-        
-        .products-table {
-            width: 100%;
-            border-collapse: collapse;
+
+        .section-band {
+            margin-top: 8px;
+            padding: 7px 8px;
+            background: #19324d;
+            color: #fff;
+            font-size: 9px;
+            font-weight: bold;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+
+        .items-table {
             margin-top: 0;
         }
-        
-        .products-table th {
-            background-color: #f3f4f6;
-            border: 1px solid #d1d5db;
-            padding: 8px 10px;
-            text-align: left;
-            font-weight: bold;
-            color: #374151;
-            font-size: 11px;
+
+        .items-table thead {
+            display: table-header-group;
         }
-        
-        .products-table td {
-            border: 1px solid #d1d5db;
-            padding: 8px 10px;
-            font-size: 11px;
+
+        .items-table th {
+            padding: 6px 4px;
+            border: 1px solid #9ca3af;
+            background: #e8edf2;
+            color: #19324d;
+            font-size: 7px;
+            text-align: center;
+            text-transform: uppercase;
         }
-        
-        /* Totales */
-        .totals-section {
-            margin-top: 30px;
-            width: 100%;
+
+        .items-table td {
+            padding: 6px 4px;
+            border: 1px solid #b7c0c9;
+            font-size: 8px;
+            vertical-align: top;
         }
-        
-        .totals-table {
-            width: 50%;
-            margin-left: auto;
-            border-collapse: collapse;
-        }
-        
-        .totals-table td {
-            padding: 8px 10px;
-            border: 1px solid #d1d5db;
-            text-align: right;
-        }
-        
-        .totals-label {
-            font-weight: bold;
-            background-color: #f3f4f6;
-        }
-        
-        .subtotal-row {
-            font-weight: bold;
-        }
-        
-        .iva-row {
-            font-weight: bold;
-        }
-        
-        .total-row {
-            font-weight: bold;
-            background-color: #dcfce7;
-            color: #065f46;
-            font-size: 13px;
-        }
-        
-        /* Firmas */
-        .signatures-section {
-            margin-top: 50px;
-            display: flex;
-            justify-content: space-between;
+
+        .items-table tbody tr {
             page-break-inside: avoid;
         }
-        
-        .signature-box {
-            width: 45%;
+
+        .center {
             text-align: center;
-            padding-top: 40px;
         }
-        
-        .signature-line {
-            border-bottom: 1px solid #333;
-            width: 80%;
-            margin: 0 auto 5px auto;
-            height: 40px;
+
+        .right {
+            text-align: right;
+            white-space: nowrap;
         }
-        
-        .signature-label {
-            font-size: 11px;
-            color: #555;
-            margin-top: 5px;
-        }
-        
-        .signature-name {
+
+        .product-name {
             font-weight: bold;
-            margin-top: 5px;
         }
-        
-        /* Pie de página */
-        .footer {
-            margin-top: 60px;
-            padding-top: 15px;
-            border-top: 1px solid #e5e7eb;
-            text-align: center;
-            font-size: 10px;
+
+        .muted {
             color: #6b7280;
         }
-        
-        @media print {
-            body { 
-                margin: 0; 
-                padding: 15px; 
-                font-size: 11px;
-            }
-            .signatures-section { page-break-inside: avoid; }
-            .totals-section { page-break-inside: avoid; }
+
+        .table-total td {
+            background: #f3f4f6;
+            font-weight: bold;
+            vertical-align: middle;
         }
-        
-        /* Estilo para números */
-        .number {
-            text-align: right;
-            font-family: 'Courier New', monospace;
+
+        .financial-wrapper {
+            margin-top: 14px;
         }
-        
-        .currency {
-            text-align: right;
-            font-family: 'Courier New', monospace;
+
+        .notes-cell {
+            width: 48%;
+            padding-right: 10px;
+            vertical-align: top;
         }
-        
-        /* Impacto en inventario */
-        .inventory-impact {
-            background-color: #dcfce7;
-            padding: 10px 15px;
-            border: 1px solid #059669;
-            border-radius: 4px;
-            margin: 15px 0;
-            font-size: 11px;
+
+        .totals-cell {
+            width: 52%;
+            vertical-align: top;
         }
-        
-        .inventory-impact strong {
-            color: #065f46;
+
+        .notes-box {
+            min-height: 75px;
+            padding: 8px;
+            border: 1px solid #b7c0c9;
+        }
+
+        .notes-title {
+            margin: 0 0 6px;
+            color: #19324d;
+            font-size: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .totals-table td {
+            padding: 6px 7px;
+            border: 1px solid #b7c0c9;
+        }
+
+        .totals-label {
+            background: #f3f4f6;
+            font-weight: bold;
+        }
+
+        .total-final td {
+            background: #19324d;
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .signatures {
+            margin-top: 30px;
+            page-break-inside: avoid;
+        }
+
+        .signature-cell,
+        .seal-cell {
+            width: 50%;
+            padding: 0 12px;
+            text-align: center;
+            vertical-align: bottom;
+        }
+
+        .signature-line {
+            width: 85%;
+            height: 38px;
+            margin: 0 auto;
+            border-bottom: 1px solid #374151;
+            text-align: center;
+        }
+
+        .signature-image {
+            display: inline-block;
+            max-width: 175px;
+            max-height: 36px;
+            vertical-align: bottom;
+        }
+
+        .signature-title {
+            margin-top: 6px;
+            font-size: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .signature-name {
+            margin-top: 3px;
+            font-size: 8px;
+        }
+
+        .seal-box {
+            width: 160px;
+            height: 100px;
+            margin: 0 auto;
+            border: 1px solid #9ca3af;
+            color: #9ca3af;
+            text-align: center;
+            font-size: 8px;
+        }
+
+        .seal-box span {
+            display: block;
+            padding-top: 38px;
+        }
+
+        .footer {
+            position: fixed;
+            right: 0;
+            bottom: -20px;
+            left: 0;
+            padding-top: 5px;
+            border-top: 1px solid #d1d5db;
+            color: #6b7280;
+            font-size: 7px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <!-- Encabezado de la empresa -->
-    <div class="company-header">
-        <h1 class="company-name">CMAN VALVES SOLUTIONS</h1>
-        <p class="company-tagline">Sistema de Control de Inventario</p>
-        <div class="company-info">
-            <p>Documento generado: {{ date('d/m/Y H:i:s') }}</p>
-        </div>
-    </div>
+    @php
+        $subtotal = (float) $entrada->precio_total;
+        $descuento = (float) ($entrada->descuento_global ?? 0);
+        $baseDescuento = (float) $entrada->subtotal_con_descuento;
+        $iva = (float) $entrada->iva;
+        $total = (float) $entrada->total_con_iva;
+        $cantidadTotal = (int) $entrada->detalles->sum('cantidad');
+    @endphp
 
-    <!-- Información del documento -->
-    <div class="document-info">
-        <h2 class="document-title">ENTRADA DE MATERIAL</h2>
-        <div class="info-grid">
-            <div class="info-item">
-                <span class="info-label">Número de Entrada:</span>
-                <span class="info-value">#{{ str_pad($entrada->id, 6, '0', STR_PAD_LEFT) }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Fecha de Entrada:</span>
-                <span class="info-value">
-                    {{ $entrada->created_at ? $entrada->created_at->format('d/m/Y H:i:s') : 'N/A' }}
-                </span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Registrado por:</span>
-                <span class="info-value">{{ $entrada->user->name ?? 'N/A' }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Proveedor:</span>
-                <span class="info-value">{{ $entrada->proveedor->proveedor ?? 'N/A' }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Contacto:</span>
-                <span class="info-value">{{ $entrada->proveedor->contacto ?? 'N/A' }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Teléfono:</span>
-                <span class="info-value">{{ $entrada->proveedor->telefono ?? 'N/A' }}</span>
-            </div>
-        </div>
-    </div>
+    <table class="header-table">
+        <tr>
+            <td class="logo-cell">
+                <img
+                    class="logo"
+                    src="{{ public_path('img/logo/logo_cman.png') }}"
+                    alt="CMAN"
+                >
+            </td>
 
-    <!-- Impacto en inventario -->
-    <div class="inventory-impact">
-        <strong>IMPACTO EN INVENTARIO:</strong> Se agregaron {{ $entrada->cantidad }} 
-        {{ $entrada->inventario->medida ?? 'unidades' }} al inventario de 
-        <strong>{{ $entrada->inventario->nombre_producto ?? 'producto' }}</strong>.
-        @if($entrada->inventario)
-        Existencia actual: <strong>{{ $entrada->inventario->existencia }} {{ $entrada->inventario->medida }}</strong>
-        @endif
-    </div>
+            <td class="company">
+                <p class="company-name">CMAN GLOBAL CONSTRUCTION S.A. DE C.V.</p>
+                <p class="company-address">SISTEMA ERP</p>
+            </td>
 
-    <!-- Tabla de producto -->
-    <div class="products-section">
-        <h3 class="section-title">DETALLE DEL PRODUCTO</h3>
-        <table class="products-table">
-            <thead>
+            <td class="folio-cell">
+                <div class="folio-box">
+                    <span class="folio-label">Entrada</span>
+                    <span class="folio-value">
+                        {{ $entrada->numero_factura ?? 'ENT-' . str_pad($entrada->id, 6, '0', STR_PAD_LEFT) }}
+                    </span>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="details-table">
+        <tr>
+            <td class="label-cell">Proveedor:</td>
+            <td class="value-cell" colspan="2">
+                {{ $entrada->proveedor->proveedor ?? 'Proveedor no disponible' }}
+            </td>
+            <td class="form-code" rowspan="2">FOR-01-PRO-ALM-01</td>
+        </tr>
+
+        <tr>
+            <td class="label-cell">Comentario:</td>
+            <td class="value-cell" colspan="2">
+                {{ $entrada->observaciones ?: 'Sin observaciones' }}
+            </td>
+        </tr>
+
+        <tr>
+            <td class="label-cell">Contacto:</td>
+            <td class="value-cell">
+                {{ $entrada->proveedor->contacto ?? 'N/A' }}
+            </td>
+            <td class="label-cell">Teléfono:</td>
+            <td class="value-cell">
+                {{ $entrada->proveedor->telefono ?? 'N/A' }}
+            </td>
+        </tr>
+
+        <tr>
+            <td class="label-cell">Fecha:</td>
+            <td class="value-cell" colspan="3">
+                {{ $entrada->fecha_entrada ? $entrada->fecha_entrada->format('d/m/Y') : 'N/A' }}
+            </td>
+        </tr>
+    </table>
+
+    <div class="section-band">Recepción de materiales y/o herramientas</div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th style="width: 12%;">Código</th>
+                <th style="width: 18%;">Categoría</th>
+                <th style="width: 32%;">Producto</th>
+                <th style="width: 10%;">Medida</th>
+                <th style="width: 10%;">Cantidad</th>
+                <th style="width: 18%;">Precio unitario</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @forelse($entrada->detalles as $detalle)
                 <tr>
-                    <th width="40%">PRODUCTO</th>
-                    <th width="15%" class="number">CANTIDAD</th>
-                    <th width="15%" class="currency">PRECIO UNIT.</th>
-                    <th width="15%" class="currency">SUBTOTAL</th>
-                    <th width="15%" class="currency">TOTAL</th>
+                    <td class="center">
+                        {{ $detalle->inventario ? 'INV-' . str_pad($detalle->inventario->id, 5, '0', STR_PAD_LEFT) : 'N/A' }}
+                    </td>
+
+                    <td>{{ $detalle->inventario->categoria ?? 'Sin categoría' }}</td>
+
+                    <td class="product-name">
+                        {{ $detalle->inventario->nombre_producto ?? 'Producto no disponible' }}
+                    </td>
+
+                    <td class="center">{{ $detalle->inventario->medida ?? 'N/A' }}</td>
+
+                    <td class="center">{{ number_format($detalle->cantidad) }}</td>
+
+                    <td class="right">
+                        ${{ number_format($detalle->precio_unitario, 2) }}
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
+            @empty
                 <tr>
-                    <td>
-                        <strong>{{ $entrada->inventario->nombre_producto ?? 'Producto' }}</strong><br>
-                        <small>{{ $entrada->inventario->categoria ?? 'Sin categoría' }}</small>
+                    <td colspan="6" class="center muted">
+                        No hay materiales registrados.
                     </td>
-                    <td class="number">
-                        {{ $entrada->cantidad }} 
-                        {{ $entrada->inventario->medida ?? 'unid' }}
-                    </td>
-                    <td class="currency">${{ number_format($entrada->precio_unitario, 2) }}</td>
-                    <td class="currency">${{ number_format($entrada->precio_total, 2) }}</td>
-                    <td class="currency">${{ number_format($entrada->total_con_iva, 2) }}</td>
                 </tr>
-            </tbody>
-        </table>
-    </div>
+            @endforelse
 
-    <!-- Totales -->
-    <div class="totals-section">
-        <table class="totals-table">
-            <tr class="subtotal-row">
-                <td class="totals-label">Subtotal:</td>
-                <td class="currency">${{ number_format($entrada->precio_total, 2) }}</td>
+            <tr class="table-total">
+                <td colspan="4" class="right">Cantidad total recibida:</td>
+                <td class="center">{{ number_format($cantidadTotal) }}</td>
+                <td class="right">Subtotal: ${{ number_format($subtotal, 2) }}</td>
             </tr>
-            <tr class="iva-row">
-                <td class="totals-label">IVA (16%):</td>
-                <td class="currency">${{ number_format($entrada->iva, 2) }}</td>
-            </tr>
-            <tr class="total-row">
-                <td class="totals-label">TOTAL:</td>
-                <td class="currency">${{ number_format($entrada->total_con_iva, 2) }}</td>
-            </tr>
-        </table>
-    </div>
+        </tbody>
+    </table>
 
-    <!-- Firmas -->
-    <div class="signatures-section">
-        <div class="signature-box">
-            <div class="signature-line"></div>
-            <div class="signature-label">ENTREGADO POR</div>
-            <div class="signature-name">{{ $entrada->proveedor->proveedor ?? 'Proveedor' }}</div>
-            <div class="signature-label">Proveedor</div>
-        </div>
-        
-        <div class="signature-box">
-            <div class="signature-line"></div>
-            <div class="signature-label">RECIBIDO POR</div>
-            <div class="signature-name">{{ $entrada->user->name ?? 'N/A' }}</div>
-            <div class="signature-label">CMAN VALVES SOLUTIONS</div>
-        </div>
-    </div>
+    <table class="financial-wrapper">
+        <tr>
+            <td class="notes-cell">
+                <div class="notes-box">
+                    <p class="notes-title">Observaciones</p>
+                    {{ $entrada->observaciones ?: 'Sin observaciones.' }}
+                </div>
+            </td>
 
-    <!-- Pie de página -->
+            <td class="totals-cell">
+                <table class="totals-table">
+                    <tr>
+                        <td class="totals-label">Subtotal de materiales</td>
+                        <td class="right">${{ number_format($subtotal, 2) }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="totals-label">Descuento global</td>
+                        <td class="right">- ${{ number_format($descuento, 2) }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="totals-label">Base con descuento</td>
+                        <td class="right">${{ number_format($baseDescuento, 2) }}</td>
+                    </tr>
+
+                    <tr>
+                        <td class="totals-label">IVA (16%)</td>
+                        <td class="right">${{ number_format($iva, 2) }}</td>
+                    </tr>
+
+                    <tr class="total-final">
+                        <td>Total de entrada</td>
+                        <td class="right">${{ number_format($total, 2) }}</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <table class="signatures">
+        <tr>
+            <td class="signature-cell">
+                <div class="signature-line">
+                    @if(!empty($firmaBase64) && !empty($firmaMime))
+                        <img
+                            class="signature-image"
+                            src="data:{{ $firmaMime }};base64,{{ $firmaBase64 }}"
+                            alt="Firma de {{ $entrada->user->name ?? 'usuario' }}"
+                        >
+                    @endif
+                </div>
+
+                <div class="signature-title">Recibido por</div>
+                <div class="signature-name">
+                    {{ $entrada->user->name ?? 'N/A' }}
+                </div>
+                <div class="signature-name">CMAN VALVES SOLUTIONS</div>
+            </td>
+
+            <td class="seal-cell">
+                <div class="seal-box">
+                    <span>ESPACIO PARA SELLO</span>
+                </div>
+            </td>
+        </tr>
+    </table>
+
     <div class="footer">
-        <p>Documento generado automáticamente por el Sistema de Control de Inventario de CMAN VALVES SOLUTIONS</p>
-        <p>Este documento es válido como comprobante de entrada de materiales</p>
-        <p>Impreso el {{ date('d/m/Y') }} a las {{ date('H:i:s') }}</p>
+        CMAN GLOBAL CONSTRUCTION S.A. DE C.V. - Comprobante de recepción de materiales
     </div>
 </body>
 </html>

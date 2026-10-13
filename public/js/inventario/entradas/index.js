@@ -3,7 +3,7 @@
  * Archivo: public/js/inventario/entradas/index.js
  *
  * Funcionalidades:
- * - Búsqueda automática con debounce.
+ * - Búsqueda asíncrona con debounce, sin recargar la página.
  * - Filtro por periodo.
  * - Botón para limpiar filtros.
  * - Compatible con la paginación de Laravel.
@@ -20,73 +20,119 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputBuscar = form.querySelector('input[name="buscar"]');
     const selectPeriodo = form.querySelector('select[name="periodo"]');
     const botonLimpiar = form.querySelector('[data-entradas-clear]');
+    const resultados = document.querySelector('[data-live-results]');
+
+    if (!resultados) return;
 
     let temporizador = null;
+    let controlador = null;
 
-    /**
-     * Envía el formulario mediante GET.
-     * Laravel recibirá los filtros y actualizará los resultados.
-     */
-    const enviarFormulario = () => {
-        form.requestSubmit();
+    const crearUrl = () => {
+        const url = new URL(form.action, window.location.origin);
+        const datos = new FormData(form);
+
+        url.search = '';
+        for (const [clave, valor] of datos.entries()) {
+            const texto = String(valor).trim();
+            if (texto !== '') url.searchParams.set(clave, texto);
+        }
+
+        return url;
     };
 
-    /**
-     * Reinicia la búsqueda cuando el usuario sigue escribiendo.
-     * Espera 350 ms antes de enviar el formulario.
-     */
+    const actualizarEstadoLimpiar = (url) => {
+        if (!botonLimpiar) return;
+
+        const hayFiltros = Boolean(url.searchParams.get('buscar'))
+            || (url.searchParams.get('periodo') || 'todos') !== 'todos';
+
+        botonLimpiar.classList.toggle('hidden', !hayFiltros);
+    };
+
+    const cargarResultados = async (url, agregarHistorial = false) => {
+        if (controlador) controlador.abort();
+
+        controlador = new AbortController();
+        form.setAttribute('aria-busy', 'true');
+        resultados.setAttribute('aria-busy', 'true');
+
+        try {
+            const respuesta = await fetch(url, {
+                headers: {
+                    Accept: 'text/html',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                signal: controlador.signal,
+            });
+
+            if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+
+            const html = await respuesta.text();
+            const documento = new DOMParser().parseFromString(html, 'text/html');
+            const nuevosResultados = documento.querySelector('[data-live-results]');
+
+            if (!nuevosResultados) throw new Error('No se encontró el bloque de resultados.');
+
+            resultados.innerHTML = nuevosResultados.innerHTML;
+
+            if (agregarHistorial) {
+                window.history.pushState({}, '', url);
+            } else {
+                window.history.replaceState({}, '', url);
+            }
+
+            actualizarEstadoLimpiar(url);
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('No se pudieron actualizar las entradas:', error);
+            }
+        } finally {
+            form.removeAttribute('aria-busy');
+            resultados.removeAttribute('aria-busy');
+        }
+    };
+
+    const buscar = () => cargarResultados(crearUrl());
+
     if (inputBuscar) {
         inputBuscar.addEventListener('input', () => {
             window.clearTimeout(temporizador);
-
-            temporizador = window.setTimeout(() => {
-                enviarFormulario();
-            }, 350);
-        });
-
-        // Permite buscar inmediatamente al presionar Enter.
-        inputBuscar.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                window.clearTimeout(temporizador);
-                enviarFormulario();
-            }
+            temporizador = window.setTimeout(buscar, 350);
         });
     }
 
-    /**
-     * Actualiza automáticamente al cambiar el periodo.
-     */
     if (selectPeriodo) {
-        selectPeriodo.addEventListener('change', () => {
-            window.clearTimeout(temporizador);
-            enviarFormulario();
-        });
+        selectPeriodo.addEventListener('change', buscar);
     }
 
-    /**
-     * Limpia el buscador y restablece todos los periodos.
-     */
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        window.clearTimeout(temporizador);
+        buscar();
+    });
+
     if (botonLimpiar) {
         botonLimpiar.addEventListener('click', () => {
             window.clearTimeout(temporizador);
-
-            if (inputBuscar) {
-                inputBuscar.value = '';
-            }
-
-            if (selectPeriodo) {
-                selectPeriodo.value = 'todos';
-            }
-
-            enviarFormulario();
+            if (inputBuscar) inputBuscar.value = '';
+            if (selectPeriodo) selectPeriodo.value = 'todos';
+            buscar();
         });
     }
 
-    /**
-     * Evita que una búsqueda pendiente interfiera
-     * cuando el usuario envía el formulario manualmente.
-     */
-    form.addEventListener('submit', () => {
-        window.clearTimeout(temporizador);
+    resultados.addEventListener('click', (event) => {
+        const enlace = event.target.closest('[data-live-pagination] a[href]');
+        if (!enlace) return;
+
+        event.preventDefault();
+        cargarResultados(new URL(enlace.href), true);
+    });
+
+    window.addEventListener('popstate', () => {
+        const url = new URL(window.location.href);
+        if (inputBuscar) inputBuscar.value = url.searchParams.get('buscar') || '';
+        if (selectPeriodo) selectPeriodo.value = url.searchParams.get('periodo') || 'todos';
+        actualizarEstadoLimpiar(url);
+        cargarResultados(url);
     });
 });

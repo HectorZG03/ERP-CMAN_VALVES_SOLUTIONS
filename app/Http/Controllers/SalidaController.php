@@ -22,9 +22,11 @@ class SalidaController extends Controller
     /**
      * Mostrar el listado de salidas.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $salidas = Salida::with([
+        $buscar = trim($request->input('buscar', ''));
+
+        $query = Salida::with([
             /*
              * Cliente se conserva para salidas históricas
              * registradas antes de vincularlas con solicitudes.
@@ -33,9 +35,74 @@ class SalidaController extends Controller
             'user',
             'solicitudMaterial.user',
             'detalles.inventario',
-        ])
+        ]);
+
+        if ($buscar !== '') {
+            $fecha = null;
+
+            // Acepta fechas d/m/Y y Y-m-d.
+            try {
+                $fechaCandidata = \Carbon\Carbon::createFromFormat('d/m/Y', $buscar);
+
+                if ($fechaCandidata && $fechaCandidata->format('d/m/Y') === $buscar) {
+                    $fecha = $fechaCandidata->format('Y-m-d');
+                }
+            } catch (\Throwable $e) {
+                // El término no tiene formato d/m/Y.
+            }
+
+            if (!$fecha && preg_match('/^\d{4}-\d{2}-\d{2}$/', $buscar)) {
+                try {
+                    $fechaCandidata = \Carbon\Carbon::createFromFormat('Y-m-d', $buscar);
+
+                    if ($fechaCandidata && $fechaCandidata->format('Y-m-d') === $buscar) {
+                        $fecha = $buscar;
+                    }
+                } catch (\Throwable $e) {
+                    // El término no es una fecha válida.
+                }
+            }
+
+            $query->where(function ($q) use ($buscar, $fecha) {
+                $q->where('numero_factura', 'like', "%{$buscar}%")
+                    ->orWhereHas('cliente', function ($cliente) use ($buscar) {
+                        $cliente->where('nombre', 'like', "%{$buscar}%")
+                            ->orWhere('area', 'like', "%{$buscar}%");
+                    })
+                    ->orWhereHas('user', function ($usuario) use ($buscar) {
+                        $usuario->where('name', 'like', "%{$buscar}%");
+                    })
+                    ->orWhereHas('solicitudMaterial', function ($solicitud) use ($buscar) {
+                        $solicitud->where('destino', 'like', "%{$buscar}%")
+                            ->orWhereHas('user', function ($usuario) use ($buscar) {
+                                $usuario->where('name', 'like', "%{$buscar}%");
+                            })
+                            ->orWhereHas('operadorPersonal', function ($personal) use ($buscar) {
+                                $personal->whereRaw(
+                                    "CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?",
+                                    ["%{$buscar}%"]
+                                )
+                                    ->orWhere('nombre', 'like', "%{$buscar}%")
+                                    ->orWhere('ape_pat', 'like', "%{$buscar}%")
+                                    ->orWhere('ape_mat', 'like', "%{$buscar}%");
+                            });
+                    })
+                    ->orWhereHas('detalles.inventario', function ($inventario) use ($buscar) {
+                        $inventario->where('nombre_producto', 'like', "%{$buscar}%")
+                            ->orWhere('categoria', 'like', "%{$buscar}%");
+                    });
+
+                if ($fecha) {
+                    $q->orWhereDate('fecha_salida', $fecha)
+                        ->orWhereDate('created_at', $fecha);
+                }
+            });
+        }
+
+        $salidas = $query
             ->orderByDesc('created_at')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return view(
             'salidas.index',

@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     'use strict';
 
@@ -17,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const agregarBtn = document.getElementById('agregarMaterialBtn');
     const limpiarBtn = document.getElementById('limpiarFormularioBtn');
     const registrarBtn = document.getElementById('registrarEntradaBtn');
+
+    const descuentoInput = document.getElementById('descuento_global');
+    const descuentoError = document.getElementById('descuento-global-error');
 
     const buscarProveedoresUrl = form.dataset.buscarProveedores;
     const buscarProductosUrl = form.dataset.buscarProductos;
@@ -76,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         calcularTotales();
     }
+
     /**
      * Obtiene las tarjetas actuales.
      */
@@ -236,25 +239,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
 
-            <div class="mt-4 grid grid-cols-1 gap-3 rounded-lg bg-white p-3
-                        text-sm dark:bg-gray-800 sm:grid-cols-3">
+            <div class="mt-4 flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-white px-4 py-3
+                        dark:border-gray-600 dark:bg-gray-800">
                 <div>
-                    <p class="text-gray-500 dark:text-gray-400">Subtotal</p>
-                    <p data-campo="subtotal" class="mt-1 font-semibold
-                       text-gray-900 dark:text-white">$0.00</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Subtotal del producto</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500">Cantidad × precio unitario</p>
                 </div>
-
-                <div>
-                    <p class="text-gray-500 dark:text-gray-400">IVA (16%)</p>
-                    <p data-campo="iva" class="mt-1 font-semibold
-                       text-gray-900 dark:text-white">$0.00</p>
-                </div>
-
-                <div>
-                    <p class="text-gray-500 dark:text-gray-400">Total</p>
-                    <p data-campo="total" class="mt-1 font-semibold
-                       text-green-600 dark:text-green-400">$0.00</p>
-                </div>
+                <p data-campo="subtotal" class="text-lg font-bold text-gray-900 dark:text-white">$0.00</p>
             </div>
         `;
 
@@ -306,9 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * Calcula los importes individuales y generales.
      */
     function calcularTotales() {
-        let subtotalGeneral = 0;
-        let ivaGeneral = 0;
-        let totalGeneral = 0;
+        let subtotalCentavos = 0;
 
         obtenerMateriales().forEach(tarjeta => {
             const cantidadInput = tarjeta.querySelector('[data-campo="cantidad"]');
@@ -317,22 +306,47 @@ document.addEventListener('DOMContentLoaded', () => {
             const cantidad = Math.max(0, Number(cantidadInput.value) || 0);
             const precio = Math.max(0, Number(precioInput.value) || 0);
 
-            const subtotal = cantidad * precio;
-            const iva = subtotal * IVA;
-            const total = subtotal + iva;
+            // Redondea cada línea a centavos, igual que el cálculo del servidor.
+            const subtotalLineaCentavos = Math.round((cantidad * precio + Number.EPSILON) * 100);
 
-            tarjeta.querySelector('[data-campo="subtotal"]').textContent = moneda(subtotal);
-            tarjeta.querySelector('[data-campo="iva"]').textContent = moneda(iva);
-            tarjeta.querySelector('[data-campo="total"]').textContent = moneda(total);
+            tarjeta.querySelector('[data-campo="subtotal"]').textContent =
+                moneda(subtotalLineaCentavos / 100);
 
-            subtotalGeneral += subtotal;
-            ivaGeneral += iva;
-            totalGeneral += total;
+            subtotalCentavos += subtotalLineaCentavos;
         });
 
-        document.getElementById('subtotal-total').textContent = moneda(subtotalGeneral);
-        document.getElementById('iva-total').textContent = moneda(ivaGeneral);
-        document.getElementById('total-general').textContent = moneda(totalGeneral);
+        const descuentoValor = Number(descuentoInput.value) || 0;
+        const descuentoCentavos = Math.max(
+            0,
+            Math.round((descuentoValor + Number.EPSILON) * 100)
+        );
+
+        const descuentoInvalido =
+            descuentoCentavos > 0 && descuentoCentavos >= subtotalCentavos;
+
+        descuentoError.classList.toggle('hidden', !descuentoInvalido);
+        descuentoInput.setAttribute('aria-invalid', descuentoInvalido ? 'true' : 'false');
+
+        const baseCentavos = Math.max(0, subtotalCentavos - descuentoCentavos);
+        const ivaCentavos = Math.round(baseCentavos * IVA);
+        const totalCentavos = baseCentavos + ivaCentavos;
+
+        document.getElementById('subtotal-total').textContent =
+            moneda(subtotalCentavos / 100);
+
+        document.getElementById('descuento-total').textContent =
+            `− ${moneda(descuentoCentavos / 100)}`;
+
+        document.getElementById('subtotal-con-descuento').textContent =
+            moneda(baseCentavos / 100);
+
+        document.getElementById('iva-total').textContent =
+            moneda(ivaCentavos / 100);
+
+        document.getElementById('total-general').textContent =
+            moneda(totalCentavos / 100);
+
+        return { descuentoInvalido };
     }
 
     /**
@@ -607,6 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     agregarBtn.addEventListener('click', agregarMaterial);
     limpiarBtn.addEventListener('click', limpiarFormulario);
+    descuentoInput.addEventListener('input', calcularTotales);
 
     container.addEventListener('input', event => {
         const tarjeta = event.target.closest('.material-item');
@@ -763,6 +778,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        const totales = calcularTotales();
+
+        if (totales.descuentoInvalido) {
+            event.preventDefault();
+            descuentoError.classList.remove('hidden');
+            descuentoInput.focus();
+            return;
+        }
+
         if (!confirm(`¿Confirmas registrar la entrada por ${document.getElementById('total-general').textContent}?`)) {
             event.preventDefault();
             return;
@@ -776,3 +800,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // Inicializar con una tarjeta vacía.
     agregarMaterial();
 });
+
