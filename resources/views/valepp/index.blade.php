@@ -189,26 +189,35 @@
                             </td>
 
                             <td class="px-5 py-4">
-                                <p class="max-w-[260px] truncate font-semibold text-gray-900 dark:text-white" title="{{ $vale->personal?->nombre_mostrar }}">
+                                <p
+                                    class="max-w-[260px] truncate font-semibold text-gray-900 dark:text-white"
+                                    title="{{ $vale->personal?->nombre_mostrar }}"
+                                >
                                     {{ $vale->personal?->nombre_mostrar ?? 'No disponible' }}
                                 </p>
                                 <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                    {{ $vale->personal?->employee_id ?? 'Sin número' }} · {{ $vale->personal?->area ?? 'Sin área' }}
+                                    {{ $vale->personal?->datosLaborales?->employee_id ?? 'Sin número' }}
+                                    ·
+                                    {{ $vale->personal?->datosLaborales?->puesto?->departamento?->area?->nombre ?? 'Sin área' }}
                                 </p>
                             </td>
 
                             <td class="px-5 py-4">
-                                <p class="max-w-[210px] truncate text-sm font-medium text-gray-700 dark:text-gray-300" title="{{ $solicitud?->destino }}">
+                                <p
+                                    class="max-w-[210px] truncate text-sm font-medium text-gray-700 dark:text-gray-300"
+                                    title="{{ $solicitud?->destino }}"
+                                >
                                     {{ $solicitud?->destino ?? 'Sin destino' }}
                                 </p>
                             </td>
 
                             <td class="whitespace-nowrap px-5 py-4 text-center">
                                 <p class="text-lg font-bold text-orange-700 dark:text-orange-300">
-                                   {{ (int) ($vale->unidades_asignadas ?? 0) }}
+                                    {{ (int) ($vale->unidades_asignadas ?? 0) }}
                                 </p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ $vale->detalles_count }} {{ $vale->detalles_count === 1 ? 'renglón' : 'renglones' }}
+                                    {{ $vale->detalles_count }}
+                                    {{ $vale->detalles_count === 1 ? 'renglón' : 'renglones' }}
                                 </p>
                             </td>
 

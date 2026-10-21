@@ -201,7 +201,9 @@
                                             value="{{ $persona->id }}"
                                             @selected((string) old('personal_id') === (string) $persona->id)
                                         >
-                                            {{ $persona->nombre_mostrar }} · {{ $persona->employee_id }} · {{ $persona->area }}
+                                            {{ $persona->nombre_mostrar }}
+                                            · {{ $persona->datosLaborales?->employee_id ?? 'Sin número' }}
+                                            · {{ $persona->datosLaborales?->puesto?->departamento?->area?->nombre ?? 'Sin área' }}
                                         </option>
                                     @endforeach
                                 </select>

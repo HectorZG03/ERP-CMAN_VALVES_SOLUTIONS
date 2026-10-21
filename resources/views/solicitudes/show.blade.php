@@ -31,11 +31,11 @@
 @endphp
 
 <div class="mx-auto w-full max-w-[1700px] space-y-5">
-    <header class="flex items-center justify-between">
+    <header class="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
         <div class="flex items-center gap-4">
             <a
                 href="{{ route('solicitudes.index') }}"
-                class="inline-flex h-10 items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+                class="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
             >
                 <svg
                     class="h-4 w-4"
@@ -50,19 +50,13 @@
                         d="M15 19l-7-7 7-7"
                     />
                 </svg>
-
                 Volver
             </a>
 
-            <div>
-                <div class="flex items-center gap-3">
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-                        Solicitud #{{ str_pad(
-                            $solicitud->id,
-                            4,
-                            '0',
-                            STR_PAD_LEFT
-                        ) }}
+            <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-3">
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+                        Solicitud #{{ str_pad($solicitud->id, 4, '0', STR_PAD_LEFT) }}
                     </h1>
 
                     @if($esEpp)
@@ -78,13 +72,12 @@
 
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     Creada el
-                    {{ $solicitud->created_at?->format('d/m/Y \a \l\a\s H:i')
-                        ?? 'Sin fecha' }}
+                    {{ $solicitud->created_at?->format('d/m/Y \a \l\a\s H:i') ?? 'Sin fecha' }}
                 </p>
             </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
             @if($solicitud->estatus === 'pendiente')
                 <span class="inline-flex h-10 items-center gap-2 rounded-full bg-yellow-100 px-4 text-sm font-bold text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
                     <span class="h-2 w-2 rounded-full bg-yellow-500"></span>
@@ -120,7 +113,6 @@
                         d="M7 3h7l5 5v13H7V3zm7 0v5h5M9 13h6M9 17h6"
                     />
                 </svg>
-
                 Ver PDF
             </a>
         </div>
@@ -133,30 +125,29 @@
     @endif
 
     @if($esEpp)
-        <section class="flex items-center justify-between rounded-lg border border-orange-300 bg-orange-50 px-5 py-4 dark:border-orange-700 dark:bg-orange-950/30">
+        <section class="flex flex-col gap-4 rounded-lg border border-orange-300 bg-orange-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-orange-700 dark:bg-orange-950/30">
             <div>
                 <h2 class="font-bold text-orange-900 dark:text-orange-200">
                     Solicitud general de equipo de protección personal
                 </h2>
 
                 <p class="mt-1 text-sm text-orange-700 dark:text-orange-300">
-                    Los materiales se distribuirán posteriormente entre los
-                    trabajadores mediante vales EPP vinculados a esta solicitud.
+                    Los materiales se distribuirán posteriormente entre los trabajadores mediante vales EPP vinculados a esta solicitud.
                 </p>
             </div>
 
-            <span class="rounded-lg bg-orange-200 px-4 py-2 text-sm font-bold text-orange-800 dark:bg-orange-800 dark:text-orange-100">
+            <span class="self-start rounded-lg bg-orange-200 px-4 py-2 text-sm font-bold text-orange-800 sm:self-center dark:bg-orange-800 dark:text-orange-100">
                 Categoría SEGURIDAD
             </span>
         </section>
     @endif
 
-    <section class="grid grid-cols-4 overflow-hidden rounded-xl border
+    <section class="grid grid-cols-1 overflow-hidden rounded-xl border sm:grid-cols-2 xl:grid-cols-4
         {{ $esEpp
             ? 'border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950/20'
             : 'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/20' }}"
     >
-        <div class="border-r px-5 py-4 text-center
+        <div class="border-b px-5 py-4 text-center sm:border-r xl:border-b-0
             {{ $esEpp
                 ? 'border-orange-200 dark:border-orange-800'
                 : 'border-blue-200 dark:border-blue-800' }}"
@@ -164,13 +155,12 @@
             <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">
                 {{ $solicitud->total_productos }}
             </p>
-
             <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 Productos diferentes
             </p>
         </div>
 
-        <div class="border-r px-5 py-4 text-center
+        <div class="border-b px-5 py-4 text-center xl:border-r xl:border-b-0
             {{ $esEpp
                 ? 'border-orange-200 dark:border-orange-800'
                 : 'border-blue-200 dark:border-blue-800' }}"
@@ -178,13 +168,12 @@
             <p class="text-2xl font-bold text-green-600 dark:text-green-400">
                 {{ $solicitud->total_unidades }}
             </p>
-
             <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 Unidades solicitadas
             </p>
         </div>
 
-        <div class="border-r px-5 py-4 text-center
+        <div class="border-b px-5 py-4 text-center sm:border-r sm:border-b-0 xl:border-r
             {{ $esEpp
                 ? 'border-orange-200 dark:border-orange-800'
                 : 'border-blue-200 dark:border-blue-800' }}"
@@ -192,7 +181,6 @@
             <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">
                 ${{ number_format($solicitud->total, 2) }}
             </p>
-
             <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 Valor estimado
             </p>
@@ -202,177 +190,163 @@
             <p class="text-2xl font-bold text-gray-700 dark:text-gray-200">
                 {{ $solicitud->created_at?->format('d/m/Y') ?? 'N/A' }}
             </p>
-
             <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 Fecha de solicitud
             </p>
         </div>
     </section>
 
-    <div class="grid grid-cols-12 items-start gap-5">
-        <main class="col-span-8 space-y-5">
-            <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
+    <div class="grid grid-cols-1 items-start gap-5 xl:grid-cols-12">
+        <main class="min-w-0 space-y-5 xl:col-span-8">
+            <section class="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex flex-col gap-3 border-b border-gray-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700">
                     <div>
                         <h2 class="text-xl font-bold text-gray-900 dark:text-white">
                             Materiales solicitados
                         </h2>
-
                         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
                             Existencias y precios actuales del inventario.
                         </p>
                     </div>
 
-                    <span class="rounded-full bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                        {{ $solicitud->detalles->count() }}
-                        registros
+                    <span class="self-start whitespace-nowrap rounded-full bg-gray-100 px-3 py-1.5 text-xs font-semibold text-gray-600 sm:self-center dark:bg-gray-700 dark:text-gray-300">
+                        {{ $solicitud->detalles->count() }} registros
                     </span>
                 </div>
 
                 @if($solicitud->detalles->isNotEmpty())
-                    <table class="w-full table-fixed">
-                        <colgroup>
-                            <col class="w-[8%]">
-                            <col class="w-[32%]">
-                            <col class="w-[12%]">
-                            <col class="w-[10%]">
-                            <col class="w-[10%]">
-                            <col class="w-[10%]">
-                            <col class="w-[9%]">
-                            <col class="w-[9%]">
-                        </colgroup>
+                    <div class="max-h-[65vh] max-w-full min-w-0 overflow-auto overscroll-contain">
+                        <table class="w-full min-w-[1000px] table-fixed">
+                            <colgroup>
+                                <col class="w-[8%]">
+                                <col class="w-[32%]">
+                                <col class="w-[12%]">
+                                <col class="w-[10%]">
+                                <col class="w-[10%]">
+                                <col class="w-[10%]">
+                                <col class="w-[9%]">
+                                <col class="w-[9%]">
+                            </colgroup>
 
-                        <thead class="{{ $esEpp
-                            ? 'bg-orange-100 dark:bg-orange-900/30'
-                            : 'bg-gray-50 dark:bg-gray-900/40' }}"
-                        >
-                            <tr>
-                                <th class="px-3 py-3 text-center text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
-                                    #
-                                </th>
-
-                                <th class="px-3 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
-                                    Producto
-                                </th>
-
-                                <th class="px-3 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
-                                    Categoría
-                                </th>
-
-                                <th class="px-3 py-3 text-center text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
-                                    Unidad
-                                </th>
-
-                                <th class="px-3 py-3 text-center text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
-                                    Solicitado
-                                </th>
-
-                                <th class="px-3 py-3 text-center text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
-                                    Existencia
-                                </th>
-
-                                <th class="px-3 py-3 text-right text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
-                                    Precio
-                                </th>
-
-                                <th class="px-3 py-3 text-right text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
-                                    Subtotal
-                                </th>
-                            </tr>
-                        </thead>
-
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @foreach($solicitud->detalles as $indice => $detalle)
-                                @php
-                                    $inventario = $detalle->inventario;
-
-                                    $stockSuficiente = $inventario
-                                        && $inventario->existencia
-                                            >= $detalle->cantidad_solicitada;
-
-                                    $subtotal = $detalle->cantidad_solicitada
-                                        * ($detalle->precio_unitario ?? 0);
-                                @endphp
-
-                                <tr class="transition hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                    <td class="px-3 py-4 text-center align-middle">
-                                        <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg
-                                            {{ $esEpp
-                                                ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
-                                                : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' }}
-                                            text-sm font-bold"
-                                        >
-                                            {{ $indice + 1 }}
-                                        </span>
-                                    </td>
-
-                                    <td class="px-3 py-4 align-middle">
-                                        @if($inventario)
-                                            <p class="line-clamp-2 text-sm font-semibold leading-5 text-gray-900 dark:text-white">
-                                                {{ $inventario->nombre_producto }}
-                                            </p>
-
-                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                                {{ $inventario->economico
-                                                    ?: 'Sin número económico' }}
-                                            </p>
-                                        @else
-                                            <p class="font-semibold text-red-600 dark:text-red-400">
-                                                Producto no disponible
-                                            </p>
-
-                                            <p class="text-xs text-red-500">
-                                                El registro fue eliminado.
-                                            </p>
-                                        @endif
-                                    </td>
-
-                                    <td class="px-3 py-4 align-middle">
-                                        <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">
-                                            {{ $inventario?->categoria ?? 'N/A' }}
-                                        </span>
-                                    </td>
-
-                                    <td class="px-3 py-4 text-center align-middle text-sm text-gray-700 dark:text-gray-200">
-                                        {{ $inventario?->medida ?? 'N/A' }}
-                                    </td>
-
-                                    <td class="px-3 py-4 text-center align-middle">
-                                        <span class="text-lg font-bold text-blue-600 dark:text-blue-400">
-                                            {{ $detalle->cantidad_solicitada }}
-                                        </span>
-                                    </td>
-
-                                    <td class="px-3 py-4 text-center align-middle">
-                                        @if($inventario)
-                                            <span class="inline-flex min-w-12 justify-center rounded-full px-2 py-1 text-xs font-bold
-                                                {{ $stockSuficiente
-                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                                                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' }}"
-                                            >
-                                                {{ $inventario->existencia }}
-                                            </span>
-                                        @else
-                                            <span class="text-xs text-gray-400">
-                                                N/A
-                                            </span>
-                                        @endif
-                                    </td>
-
-                                    <td class="px-3 py-4 text-right align-middle text-sm font-semibold text-gray-700 dark:text-gray-200">
-                                        ${{ number_format(
-                                            $detalle->precio_unitario ?? 0,
-                                            2
-                                        ) }}
-                                    </td>
-
-                                    <td class="px-3 py-4 text-right align-middle text-sm font-bold text-gray-900 dark:text-white">
-                                        ${{ number_format($subtotal, 2) }}
-                                    </td>
+                            <thead class="sticky top-0 z-10 {{ $esEpp
+                                ? 'bg-orange-100 dark:bg-orange-900/30'
+                                : 'bg-gray-50 dark:bg-gray-900/40' }}"
+                            >
+                                <tr>
+                                    <th class="whitespace-nowrap px-3 py-3 text-center text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
+                                        #
+                                    </th>
+                                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
+                                        Producto
+                                    </th>
+                                    <th class="whitespace-nowrap px-3 py-3 text-left text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
+                                        Categoría
+                                    </th>
+                                    <th class="whitespace-nowrap px-3 py-3 text-center text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
+                                        Unidad
+                                    </th>
+                                    <th class="whitespace-nowrap px-3 py-3 text-center text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
+                                        Solicitado
+                                    </th>
+                                    <th class="whitespace-nowrap px-3 py-3 text-center text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
+                                        Existencia
+                                    </th>
+                                    <th class="whitespace-nowrap px-3 py-3 text-right text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
+                                        Precio
+                                    </th>
+                                    <th class="whitespace-nowrap px-3 py-3 text-right text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-300">
+                                        Subtotal
+                                    </th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                @foreach($solicitud->detalles as $indice => $detalle)
+                                    @php
+                                        $inventario = $detalle->inventario;
+
+                                        $stockSuficiente = $inventario
+                                            && $inventario->existencia
+                                                >= $detalle->cantidad_solicitada;
+
+                                        $subtotal = $detalle->cantidad_solicitada
+                                            * ($detalle->precio_unitario ?? 0);
+                                    @endphp
+
+                                    <tr class="transition hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                        <td class="px-3 py-4 text-center align-middle">
+                                            <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg
+                                                {{ $esEpp
+                                                    ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300'
+                                                    : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' }}
+                                                text-sm font-bold"
+                                            >
+                                                {{ $indice + 1 }}
+                                            </span>
+                                        </td>
+
+                                        <td class="px-3 py-4 align-middle">
+                                            @if($inventario)
+                                                <p class="line-clamp-2 text-sm font-semibold leading-5 text-gray-900 dark:text-white">
+                                                    {{ $inventario->nombre_producto }}
+                                                </p>
+                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                    {{ $inventario->economico ?: 'Sin número económico' }}
+                                                </p>
+                                            @else
+                                                <p class="font-semibold text-red-600 dark:text-red-400">
+                                                    Producto no disponible
+                                                </p>
+                                                <p class="text-xs text-red-500">
+                                                    El registro fue eliminado.
+                                                </p>
+                                            @endif
+                                        </td>
+
+                                        <td class="px-3 py-4 align-middle">
+                                            <span class="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                                                {{ $inventario?->categoria ?? 'N/A' }}
+                                            </span>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center align-middle text-sm text-gray-700 dark:text-gray-200">
+                                            {{ $inventario?->medida ?? 'N/A' }}
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center align-middle">
+                                            <span class="text-lg font-bold text-blue-600 dark:text-blue-400">
+                                                {{ $detalle->cantidad_solicitada }}
+                                            </span>
+                                        </td>
+
+                                        <td class="px-3 py-4 text-center align-middle">
+                                            @if($inventario)
+                                                <span class="inline-flex min-w-12 justify-center rounded-full px-2 py-1 text-xs font-bold
+                                                    {{ $stockSuficiente
+                                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                                                        : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' }}"
+                                                >
+                                                    {{ $inventario->existencia }}
+                                                </span>
+                                            @else
+                                                <span class="text-xs text-gray-400">
+                                                    N/A
+                                                </span>
+                                            @endif
+                                        </td>
+
+                                        <td class="whitespace-nowrap px-3 py-4 text-right align-middle text-sm font-semibold text-gray-700 dark:text-gray-200">
+                                            ${{ number_format($detalle->precio_unitario ?? 0, 2) }}
+                                        </td>
+
+                                        <td class="whitespace-nowrap px-3 py-4 text-right align-middle text-sm font-bold text-gray-900 dark:text-white">
+                                            ${{ number_format($subtotal, 2) }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
 
                     <div class="border-t border-gray-200 bg-gray-50 px-5 py-3 text-xs text-gray-500 dark:border-gray-700 dark:bg-gray-900/30 dark:text-gray-400">
                         La existencia mostrada es informativa y puede cambiar.
@@ -396,7 +370,7 @@
             @endif
         </main>
 
-        <aside class="col-span-4 space-y-5">
+        <aside class="min-w-0 space-y-5 xl:col-span-4">
             <section class="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
                     <h2 class="text-lg font-bold text-gray-900 dark:text-white">
@@ -409,33 +383,28 @@
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                             Tipo
                         </dt>
-
-                        <dd class="text-sm font-bold
-                            {{ $esEpp
-                                ? 'text-orange-700 dark:text-orange-300'
-                                : 'text-blue-700 dark:text-blue-300' }}"
+                        <dd class="text-sm font-bold {{ $esEpp
+                            ? 'text-orange-700 dark:text-orange-300'
+                            : 'text-blue-700 dark:text-blue-300' }}"
                         >
-                            {{ $esEpp
-                                ? 'Equipo de protección personal'
-                                : 'Solicitud estándar' }}
+                            {{ $esEpp ? 'Equipo de protección personal' : 'Solicitud estándar' }}
                         </dd>
                     </div>
 
-                        <div class="grid grid-cols-[145px_1fr] gap-4 py-4">
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                Destino
-                            </dt>
+                    <div class="grid grid-cols-[145px_1fr] gap-4 py-4">
+                        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                            Destino
+                        </dt>
+                        <dd class="break-words text-sm font-semibold text-gray-900 dark:text-white">
+                            {{ $solicitud->destino ?: 'No disponible' }}
+                        </dd>
+                    </div>
 
-                            <dd class="text-sm font-semibold text-gray-900 dark:text-white">
-                                {{ $solicitud->destino ?: 'No disponible' }}
-                            </dd>
-                        </div>
-                                            <div class="grid grid-cols-[145px_1fr] gap-4 py-4">
+                    <div class="grid grid-cols-[145px_1fr] gap-4 py-4">
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                             Personal
                         </dt>
-
-                        <dd class="text-sm font-semibold text-gray-900 dark:text-white">
+                        <dd class="break-words text-sm font-semibold text-gray-900 dark:text-white">
                             {{ $personalAsignado }}
                         </dd>
                     </div>
@@ -444,12 +413,9 @@
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                             Creación
                         </dt>
-
                         <dd>
                             <p class="text-sm font-semibold text-gray-900 dark:text-white">
-                                {{ $solicitud->created_at?->format(
-                                    'd/m/Y H:i:s'
-                                ) ?? 'N/A' }}
+                                {{ $solicitud->created_at?->format('d/m/Y H:i:s') ?? 'N/A' }}
                             </p>
 
                             @if($solicitud->created_at)
@@ -464,12 +430,9 @@
                         <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
                             Actualización
                         </dt>
-
                         <dd>
                             <p class="text-sm font-semibold text-gray-900 dark:text-white">
-                                {{ $solicitud->updated_at?->format(
-                                    'd/m/Y H:i:s'
-                                ) ?? 'N/A' }}
+                                {{ $solicitud->updated_at?->format('d/m/Y H:i:s') ?? 'N/A' }}
                             </p>
 
                             @if($solicitud->updated_at)
@@ -488,19 +451,9 @@
                 </h2>
 
                 <div class="flex items-center gap-4">
-                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full
-                        {{ $esEpp
-                            ? 'bg-orange-500'
-                            : 'bg-blue-600' }}"
-                    >
+                    <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full {{ $esEpp ? 'bg-orange-500' : 'bg-blue-600' }}">
                         <span class="text-xl font-bold text-white">
-                            {{ mb_strtoupper(
-                                mb_substr(
-                                    $nombreSolicitante,
-                                    0,
-                                    1
-                                )
-                            ) }}
+                            {{ mb_strtoupper(mb_substr($nombreSolicitante, 0, 1)) }}
                         </span>
                     </div>
 
@@ -508,17 +461,11 @@
                         <p class="truncate font-bold text-gray-900 dark:text-white">
                             {{ $nombreSolicitante }}
                         </p>
-
                         <p class="truncate text-sm text-gray-500 dark:text-gray-400">
                             {{ $correoSolicitante }}
                         </p>
-
                         <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-gray-400">
-                            {{ str_replace(
-                                '_',
-                                ' ',
-                                $rolSolicitante
-                            ) }}
+                            {{ str_replace('_', ' ', $rolSolicitante) }}
                         </p>
                     </div>
                 </div>
@@ -534,17 +481,13 @@
                     </h2>
 
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Aprobar únicamente cambia el estatus. El inventario se
-                        descontará cuando Almacén registre la salida.
+                        Aprobar únicamente cambia el estatus. El inventario se descontará cuando Almacén registre la salida.
                     </p>
 
-                    <div class="mt-5 grid grid-cols-2 gap-3">
+                    <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <form
                             method="POST"
-                            action="{{ route(
-                                'solicitudes.updateEstatus',
-                                $solicitud
-                            ) }}"
+                            action="{{ route('solicitudes.updateEstatus', $solicitud) }}"
                         >
                             @csrf
                             @method('PUT')
@@ -566,10 +509,7 @@
 
                         <form
                             method="POST"
-                            action="{{ route(
-                                'solicitudes.updateEstatus',
-                                $solicitud
-                            ) }}"
+                            action="{{ route('solicitudes.updateEstatus', $solicitud) }}"
                         >
                             @csrf
                             @method('PUT')

@@ -27,10 +27,6 @@
 
         }
 
-        $nombreProducto = trim($inventario->nombre_producto ?? 'Producto');
-
-        $avatar = strtoupper(substr($nombreProducto, 0, 2));
-
     @endphp
 
 
@@ -41,45 +37,23 @@
         {{-- ========================================================
              PRODUCTO
         ========================================================= --}}
-        <td class="px-5 py-4">
-
-            <div class="flex min-w-0 items-center gap-3">
-
-                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-xs font-bold text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-
-                    {{ $avatar }}
-
+        <td class="px-4 py-3">
+            <div class="min-w-0">
+                <a href="{{ route('inventario.show', $inventario) }}"
+                   class="block truncate text-sm font-semibold text-gray-900 transition hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+                   title="{{ $inventario->nombre_producto }}">
+                    {{ $inventario->nombre_producto }}
+                </a>
+                <div class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                    ID #{{ str_pad($inventario->id, 4, '0', STR_PAD_LEFT) }}
                 </div>
-
-
-                <div class="min-w-0">
-
-                    <a href="{{ route('inventario.show', $inventario) }}"
-                       class="block truncate text-sm font-semibold text-gray-900 transition hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
-                       title="{{ $inventario->nombre_producto }}">
-
-                        {{ $inventario->nombre_producto }}
-
-                    </a>
-
-
-                    <div class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
-
-                        ID #{{ str_pad($inventario->id, 4, '0', STR_PAD_LEFT) }}
-
-                    </div>
-
-                </div>
-
             </div>
-
         </td>
-
 
         {{-- ========================================================
              ECONÓMICO
         ========================================================= --}}
-        <td class="px-3 py-4">
+        <td class="px-2 py-3">
 
             <span class="block max-w-full truncate rounded-md bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300"
                   title="{{ $inventario->economico }}">
@@ -94,7 +68,7 @@
         {{-- ========================================================
              CATEGORÍA
         ========================================================= --}}
-        <td class="px-3 py-4">
+        <td class="px-2 py-3">
 
             <span class="block max-w-full truncate rounded-md bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
                   title="{{ $inventario->categoria }}">
@@ -109,7 +83,7 @@
         {{-- ========================================================
              MEDIDA
         ========================================================= --}}
-        <td class="px-3 py-4">
+        <td class="px-2 py-3">
 
             <div class="flex min-w-0 items-center gap-1.5 text-sm text-gray-700 dark:text-gray-300">
 
@@ -137,17 +111,17 @@
         {{-- ========================================================
              EXISTENCIA
         ========================================================= --}}
-        <td class="px-3 py-4">
+        <td class="px-2 py-3">
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
 
                 <span class="h-2 w-2 flex-shrink-0 rounded-full {{ $stockDot }}"></span>
 
-                <span class="font-bold {{ $stockClass }}">
+                <span class="min-w-[1.25rem] font-bold tabular-nums {{ $stockClass }}">
                     {{ $stock }}
                 </span>
 
-                <span class="hidden rounded-md px-2 py-0.5 text-[10px] font-semibold xl:inline-flex {{ $stockBadge }}">
+                <span class="hidden whitespace-nowrap rounded-md px-2 py-0.5 text-[10px] font-semibold xl:inline-flex {{ $stockBadge }}">
                     {{ $stockLabel }}
                 </span>
 
@@ -159,9 +133,10 @@
         {{-- ========================================================
              PRECIO UNITARIO
         ========================================================= --}}
-        <td class="px-3 py-4 text-right whitespace-nowrap">
+        <td class="whitespace-nowrap px-3 py-3 text-right">
 
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <span class="text-xs font-semibold tabular-nums text-gray-700 dark:text-gray-300"
+                  title="Precio promedio unitario">
                 ${{ number_format($inventario->getPrecioPromedio(), 2) }}
             </span>
 
@@ -171,7 +146,7 @@
         {{-- ========================================================
              ACCIONES
         ========================================================= --}}
-        <td class="px-3 py-4">
+        <td class="px-3 py-3">
 
             <div class="flex items-center justify-end gap-1">
 

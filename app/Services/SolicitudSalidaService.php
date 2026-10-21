@@ -46,95 +46,65 @@ class SolicitudSalidaService
             ])
             ->with([
                 'user:id,name,email,num_empleado',
-                'operadorPersonal:id,nombre,ape_pat,ape_mat,employee_id',
+
+                'operadorPersonal:id,nombre,ape_pat,ape_mat',
+                'operadorPersonal.datosLaborales:id,personal_id,puesto_id,employee_id',
+                'operadorPersonal.datosLaborales.puesto:id,nombre,departamento_id',
+                'operadorPersonal.datosLaborales.puesto.departamento:id,nombre,area_id',
+                'operadorPersonal.datosLaborales.puesto.departamento.area:id,nombre',
+
                 'detalles:id,solicitud_material_id,inventario_id,cantidad_solicitada',
                 'salidas:id,solicitud_material_id',
                 'salidas.detalles:id,salida_id,inventario_id,cantidad',
             ])
-            ->whereIn(
-                'estatus',
-                self::ESTATUS_SOLICITUD_PERMITIDOS
-            )
-            ->where(function ($query) use (
-                $termino,
-                $solicitudId,
-                $fechaBusqueda
-            ) {
-                $query->where(
-                    'destino',
-                    'LIKE',
-                    "%{$termino}%"
-                );
+            ->whereIn('estatus', self::ESTATUS_SOLICITUD_PERMITIDOS)
+            ->where(function ($query) use ($termino, $solicitudId, $fechaBusqueda) {
+                $query->where('destino', 'LIKE', "%{$termino}%");
 
                 if ($solicitudId !== null) {
                     $query->orWhere('id', $solicitudId);
                 }
 
                 if ($fechaBusqueda !== null) {
-                    $query->orWhereDate(
-                        'created_at',
-                        $fechaBusqueda
-                    );
+                    $query->orWhereDate('created_at', $fechaBusqueda);
                 }
 
-                $query->orWhereHas(
-                    'user',
-                    function ($userQuery) use ($termino) {
-                        $userQuery
-                            ->where(
-                                'name',
-                                'LIKE',
-                                "%{$termino}%"
-                            )
-                            ->orWhere(
-                                'email',
-                                'LIKE',
-                                "%{$termino}%"
-                            )
-                            ->orWhere(
-                                'num_empleado',
-                                'LIKE',
-                                "%{$termino}%"
-                            );
-                    }
-                );
+                $query->orWhereHas('user', function ($userQuery) use ($termino) {
+                    $userQuery
+                        ->where('name', 'LIKE', "%{$termino}%")
+                        ->orWhere('email', 'LIKE', "%{$termino}%")
+                        ->orWhere('num_empleado', 'LIKE', "%{$termino}%");
+                });
 
-                $query->orWhereHas(
-                    'operadorPersonal',
-                    function ($personalQuery) use ($termino) {
-                        $personalQuery
-                            ->whereRaw(
-                                "CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?",
-                                ["%{$termino}%"]
-                            )
-                            ->orWhere(
+                $query->orWhereHas('operadorPersonal', function ($personalQuery) use ($termino) {
+                    $personalQuery
+                        ->whereRaw(
+                            "CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?",
+                            ["%{$termino}%"]
+                        )
+                        ->orWhereHas('datosLaborales', function ($laboralQuery) use ($termino) {
+                            $laboralQuery->where(
                                 'employee_id',
                                 'LIKE',
                                 "%{$termino}%"
                             );
-                    }
+                        });
+                });
+            })
+            ->when($solicitudId !== null, function ($query) use ($solicitudId) {
+                $query->orderByRaw(
+                    'CASE WHEN solicitud_materiales.id = ? THEN 0 ELSE 1 END',
+                    [$solicitudId]
                 );
             })
-            ->when(
-                $solicitudId !== null,
-                function ($query) use ($solicitudId) {
-                    $query->orderByRaw(
-                        'CASE ' .
-                        'WHEN solicitud_materiales.id = ? ' .
-                        'THEN 0 ELSE 1 END',
-                        [$solicitudId]
-                    );
-                }
-            )
             ->orderByDesc('created_at')
             ->limit(50)
             ->get()
             ->map(function ($solicitud) {
-                $pendientes = $this->calcularCantidadesPendientes(
-                    $solicitud
-                )->filter(function ($cantidad) {
-                    return $cantidad > 0;
-                });
+                $pendientes = $this->calcularCantidadesPendientes($solicitud)
+                    ->filter(function ($cantidad) {
+                        return $cantidad > 0;
+                    });
 
                 if ($pendientes->isEmpty()) {
                     return null;
@@ -167,7 +137,6 @@ class SolicitudSalidaService
                     'hora_solicitud' => $solicitud->created_at
                         ?->format('H:i'),
 
-                    // Es un atributo calculado por el accessor de Personal.
                     'operador' => $solicitud->operadorPersonal?->nombre_mostrar
                         ?? 'Sin operador',
 
@@ -187,29 +156,28 @@ class SolicitudSalidaService
     public function obtenerSolicitud(SolicitudMaterial $solicitud): array
     {
         if (!$this->solicitudPermiteSalida($solicitud)) {
-            abort(
-                404,
-                'La solicitud fue rechazada o no está disponible.'
-            );
+            abort(404, 'La solicitud fue rechazada o no está disponible.');
         }
 
         $solicitud->load([
             'user:id,name,email,num_empleado,role',
-            'operadorPersonal:id,nombre,ape_pat,ape_mat,employee_id,area,grado',
+
+            'operadorPersonal:id,nombre,ape_pat,ape_mat',
+            'operadorPersonal.datosLaborales:id,personal_id,puesto_id,employee_id',
+            'operadorPersonal.datosLaborales.puesto:id,nombre,departamento_id',
+            'operadorPersonal.datosLaborales.puesto.departamento:id,nombre,area_id',
+            'operadorPersonal.datosLaborales.puesto.departamento.area:id,nombre',
+
             'detalles.inventario:id,nombre_producto,economico,categoria,medida,existencia,precio_total',
             'salidas.detalles',
         ]);
 
-        $cantidadesPendientes = $this->calcularCantidadesPendientes(
-            $solicitud
-        );
+        $cantidadesPendientes = $this->calcularCantidadesPendientes($solicitud);
 
         $productos = $solicitud
             ->detalles
             ->groupBy('inventario_id')
-            ->map(function ($detalles, $inventarioId) use (
-                $cantidadesPendientes
-            ) {
+            ->map(function ($detalles, $inventarioId) use ($cantidadesPendientes) {
                 $detalle = $detalles->first();
                 $inventario = $detalle->inventario;
 
@@ -245,12 +213,17 @@ class SolicitudSalidaService
                     'cantidad_solicitada' => $cantidadSolicitada,
                     'cantidad_entregada' => $cantidadEntregada,
                     'cantidad_pendiente' => $cantidadPendiente,
-                    'precio_unitario' => (float) $inventario
-                        ->getPrecioPromedio(),
+                    'precio_unitario' => (float) $inventario->getPrecioPromedio(),
                 ];
             })
             ->filter()
             ->values();
+
+        $personal = $solicitud->operadorPersonal;
+        $datosLaborales = $personal?->datosLaborales;
+        $puesto = $datosLaborales?->puesto;
+        $departamento = $puesto?->departamento;
+        $area = $departamento?->area;
 
         return [
             'id' => $solicitud->id,
@@ -269,13 +242,10 @@ class SolicitudSalidaService
             ],
 
             'operador' => [
-                // Es un atributo calculado por el accessor de Personal.
-                'nombre' => $solicitud->operadorPersonal?->nombre_mostrar
-                    ?? 'N/A',
-                'numero_empleado' => $solicitud->operadorPersonal
-                    ?->employee_id ?? 'N/A',
-                'area' => $solicitud->operadorPersonal?->area ?? 'N/A',
-                'puesto' => $solicitud->operadorPersonal?->grado ?? 'N/A',
+                'nombre' => $personal?->nombre_mostrar ?? 'N/A',
+                'numero_empleado' => $datosLaborales?->employee_id ?? 'N/A',
+                'area' => $area?->nombre ?? 'N/A',
+                'puesto' => $puesto?->nombre ?? 'N/A',
             ],
 
             'productos' => $productos,
@@ -320,14 +290,10 @@ class SolicitudSalidaService
             });
 
         return $cantidadesSolicitadas
-            ->map(function (
-                $cantidadSolicitada,
-                $inventarioId
-            ) use ($cantidadesEntregadas) {
+            ->map(function ($cantidadSolicitada, $inventarioId) use ($cantidadesEntregadas) {
                 return max(
                     0,
-                    $cantidadSolicitada -
-                    $cantidadesEntregadas->get($inventarioId, 0)
+                    $cantidadSolicitada - $cantidadesEntregadas->get($inventarioId, 0)
                 );
             });
     }
