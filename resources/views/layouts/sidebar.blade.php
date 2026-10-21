@@ -301,6 +301,18 @@
 
                     </a>
 
+                    <a
+                        href="{{ route('catalogos-rh.index') }}"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg
+                            text-sm font-medium transition
+                            {{ request()->routeIs('catalogos-rh.*')
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300'
+                                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800' }}"
+                    >
+                        <i class="fas fa-sitemap w-5 text-center"></i>
+                        <span>Catálogos RH</span>
+                    </a>
+
 
                     <a
                         href="{{ route('bajas.index') }}"

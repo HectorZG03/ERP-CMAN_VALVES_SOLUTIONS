@@ -1,14 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-5">
     @if(session('success'))
         <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-800 dark:border-green-800 dark:bg-green-900/30 dark:text-green-200">
             {{ session('success') }}
         </div>
     @endif
 
-    <div class="flex items-center justify-between">
+    <header class="flex items-center justify-between rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-white p-5 shadow-sm dark:border-orange-900/50 dark:from-orange-950/30 dark:to-gray-800">
         <div>
             <p class="text-sm font-semibold uppercase tracking-wider text-orange-600 dark:text-orange-400">
                 Seguridad · Equipo de protección personal
@@ -27,28 +27,28 @@
         >
             Nuevo Vale EPP
         </a>
-    </div>
+    </header>
 
-    <div class="grid grid-cols-4 gap-5">
-        <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div class="grid grid-cols-4 gap-4">
+        <div class="rounded-xl border border-sky-200 bg-sky-50/70 p-4 shadow-sm dark:border-sky-900/50 dark:bg-slate-800">
             <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 Total de vales
             </p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+            <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                 {{ $totalVales }}
             </p>
         </div>
 
-        <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="rounded-xl border border-indigo-200 bg-indigo-50/70 p-4 shadow-sm dark:border-indigo-900/50 dark:bg-slate-800">
             <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 Resultados encontrados
             </p>
-            <p class="mt-2 text-3xl font-bold text-gray-900 dark:text-white">
+            <p class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                 {{ $valepp->total() }}
             </p>
         </div>
 
-        <div class="col-span-2 rounded-xl border border-orange-200 bg-orange-50 p-5 shadow-sm dark:border-orange-800 dark:bg-orange-900/20">
+        <div class="col-span-2 rounded-xl border border-orange-200 bg-orange-50/70 p-4 shadow-sm dark:border-orange-900/50 dark:bg-orange-950/20">
             <p class="text-xs font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-300">
                 Flujo actual
             </p>
@@ -58,9 +58,13 @@
         </div>
     </div>
 
-    <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <section class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-5">
+        <div class="mb-4">
+            <h2 class="font-semibold text-gray-900 dark:text-white">Buscar y filtrar vales</h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Filtra por información del vale o acota los resultados por fecha y cantidad por página.</p>
+        </div>
         <form method="GET" action="{{ route('valepp.index') }}" class="grid grid-cols-12 gap-4">
-            <div class="col-span-7">
+            <div class="col-span-6">
                 <label for="search" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Buscar vale
                 </label>
@@ -71,11 +75,11 @@
                     value="{{ $search }}"
                     maxlength="150"
                     class="w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                    placeholder="Número o ID de vale, solicitud, colaborador, empleado, área o destino"
+                    placeholder="Folio de vale o solicitud, colaborador, código, área o destino"
                 >
             </div>
 
-            <div class="col-span-3">
+            <div class="col-span-2">
                 <label for="fecha" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     Fecha del vale
                 </label>
@@ -88,10 +92,25 @@
                 >
             </div>
 
+            <div class="col-span-2">
+                <label for="per_page" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Filas por página
+                </label>
+                <select
+                    name="per_page"
+                    id="per_page"
+                    class="w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                >
+                    @foreach([10, 15, 25, 50] as $cantidad)
+                        <option value="{{ $cantidad }}" @selected($perPage === $cantidad)>{{ $cantidad }}</option>
+                    @endforeach
+                </select>
+            </div>
+
             <div class="col-span-2 flex items-end gap-2">
                 <button
                     type="submit"
-                    class="flex-1 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700"
+                    class="flex-1 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
                 >
                     Buscar
                 </button>
@@ -109,6 +128,15 @@
     </section>
 
     <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="flex items-center justify-between border-b border-gray-200 px-5 py-4 dark:border-gray-700">
+            <div>
+                <h2 class="font-semibold text-gray-900 dark:text-white">Vales registrados</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Consulta, abre el detalle o descarga el PDF.</p>
+            </div>
+            <span class="inline-flex w-fit items-center rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-800 dark:bg-orange-900/40 dark:text-orange-200">
+                {{ $valepp->total() }} {{ $valepp->total() === 1 ? 'resultado' : 'resultados' }}
+            </span>
+        </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900/40">
@@ -261,11 +289,16 @@
             </table>
         </div>
 
-        @if($valepp->hasPages())
-            <div class="border-t border-gray-200 px-5 py-4 dark:border-gray-700">
-                {{ $valepp->links() }}
-            </div>
-        @endif
+        <div class="flex items-center justify-between border-t border-gray-200 px-5 py-4 dark:border-gray-700">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+                @if($valepp->total() > 0)
+                    Mostrando {{ $valepp->firstItem() }}–{{ $valepp->lastItem() }} de {{ $valepp->total() }} vales.
+                @else
+                    No hay vales para mostrar.
+                @endif
+            </p>
+            {{ $valepp->onEachSide(1)->links() }}
+        </div>
     </section>
 </div>
 @endsection

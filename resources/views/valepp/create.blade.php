@@ -3,18 +3,18 @@
 @section('content')
 <div
     id="valepp-create-app"
-    class="space-y-6"
+    class="space-y-5"
     data-search-url="{{ route('valepp.solicitudes-epp.buscar') }}"
     data-detail-url-template="{{ route('valepp.solicitudes-epp.show', ['solicitud' => '__SOLICITUD__']) }}"
     data-old-solicitud-id="{{ old('solicitud_material_id') }}"
     data-old-detalles='@json(old('detalles', []))'
 >
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <p class="text-sm font-semibold uppercase tracking-wider text-orange-600 dark:text-orange-400">
                 Seguridad · Equipo de protección personal
             </p>
-            <h1 class="mt-1 text-3xl font-bold text-gray-900 dark:text-white">
+            <h1 class="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
                 Nuevo Vale EPP
             </h1>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -45,7 +45,7 @@
         method="POST"
         action="{{ route('valepp.store') }}"
         id="valepp-form"
-        class="space-y-6"
+        class="space-y-5"
     >
         @csrf
 
@@ -56,9 +56,9 @@
             value="{{ old('solicitud_material_id') }}"
         >
 
-        <div class="grid grid-cols-12 gap-6">
-            <section class="col-span-5 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div class="border-b border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+        <div class="grid grid-cols-1 gap-5 xl:grid-cols-12">
+            <section class="overflow-hidden rounded-xl border border-sky-200 bg-sky-50/60 shadow-sm dark:border-sky-900/60 dark:bg-slate-800 xl:col-span-5">
+                <div class="border-b border-sky-200 bg-sky-100/70 px-5 py-4 dark:border-sky-900/60 dark:bg-slate-900/50">
                     <div class="flex items-center justify-between">
                         <div>
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -128,7 +128,7 @@
 
                     <div
                         id="resultados-solicitudes"
-                        class="max-h-[520px] space-y-3 overflow-y-auto pr-1"
+                        class="max-h-[420px] space-y-3 overflow-y-auto pr-1"
                     >
                         <div class="rounded-lg border border-dashed border-gray-300 px-5 py-10 text-center dark:border-gray-600">
                             <p class="font-medium text-gray-700 dark:text-gray-300">
@@ -146,16 +146,16 @@
                 </div>
             </section>
 
-            <section class="col-span-7 space-y-6">
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <div class="border-b border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+            <section class="space-y-5 xl:col-span-7">
+                <div class="overflow-hidden rounded-xl border border-amber-200 bg-amber-50/60 shadow-sm dark:border-amber-900/60 dark:bg-slate-800">
+                    <div class="border-b border-amber-200 bg-amber-100/70 px-5 py-4 dark:border-amber-900/60 dark:bg-slate-900/50">
                         <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
                             2. Datos del vale
                         </h2>
                     </div>
 
-                    <div class="p-5">
-                        <div class="mb-5 grid grid-cols-3 gap-4 rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-800 dark:bg-orange-900/20">
+                    <div class="space-y-4 p-4 sm:p-5">
+                        <div class="grid grid-cols-1 gap-2 rounded-lg border border-amber-200 bg-white/70 p-3 dark:border-gray-700 dark:bg-gray-800 sm:grid-cols-3">
                             <div>
                                 <p class="text-xs font-semibold uppercase tracking-wide text-orange-700 dark:text-orange-300">
                                     Próximo vale
@@ -184,29 +184,123 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-5">
+                        <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
                             <div>
-                                <label for="personal_id" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                @php
+                                    $personalSeleccionado = $personalActivo->firstWhere(
+                                        'id',
+                                        (int) old('personal_id')
+                                    );
+                                    $laboralSeleccionado = $personalSeleccionado?->datosLaborales;
+                                    $puestoSeleccionado = $laboralSeleccionado?->puesto;
+                                    $etiquetaSeleccionada = $personalSeleccionado
+                                        ? implode(' · ', array_filter([
+                                            $personalSeleccionado->nombre_mostrar,
+                                            $laboralSeleccionado?->employee_id,
+                                            $puestoSeleccionado?->nombre,
+                                        ]))
+                                        : '';
+                                @endphp
+
+                                <label for="buscar-personal" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Colaborador que recibe <span class="text-red-500">*</span>
                                 </label>
-                                <select
+
+                                <input
+                                    type="hidden"
                                     name="personal_id"
                                     id="personal_id"
-                                    required
-                                    class="w-full rounded-lg border-gray-300 bg-white text-gray-900 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    value="{{ old('personal_id') }}"
                                 >
-                                    <option value="">Seleccione un colaborador</option>
-                                    @foreach($personalActivo as $persona)
-                                        <option
-                                            value="{{ $persona->id }}"
-                                            @selected((string) old('personal_id') === (string) $persona->id)
+
+                                <div id="personal-combobox" class="relative">
+                                    <input
+                                        type="search"
+                                        id="buscar-personal"
+                                        role="combobox"
+                                        aria-autocomplete="list"
+                                        aria-haspopup="listbox"
+                                        aria-controls="personal-options"
+                                        aria-expanded="false"
+                                        autocomplete="off"
+                                        value="{{ $etiquetaSeleccionada }}"
+                                        placeholder="Escribe nombre, código, puesto o área"
+                                        class="w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 pr-10 text-sm text-gray-900 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    >
+                                    <button
+                                        type="button"
+                                        id="limpiar-personal"
+                                        class="absolute inset-y-0 right-0 hidden items-center px-3 text-gray-400 hover:text-gray-700 dark:hover:text-white"
+                                        aria-label="Limpiar colaborador seleccionado"
+                                    >
+                                        <i class="fas fa-times" aria-hidden="true"></i>
+                                    </button>
+
+                                    <div
+                                        id="personal-options"
+                                        role="listbox"
+                                        aria-label="Colaboradores disponibles"
+                                        class="absolute z-30 mt-1 hidden max-h-64 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-lg dark:border-gray-600 dark:bg-gray-800"
+                                    >
+                                        @foreach($personalActivo as $persona)
+                                            @php
+                                                $laboral = $persona->datosLaborales;
+                                                $puesto = $laboral?->puesto;
+                                                $departamento = $puesto?->departamento;
+                                                $area = $departamento?->area;
+                                                $etiqueta = implode(' · ', array_filter([
+                                                    $persona->nombre_mostrar,
+                                                    $laboral?->employee_id,
+                                                    $puesto?->nombre,
+                                                ]));
+                                                $textoBusqueda = implode(' ', array_filter([
+                                                    $persona->nombre_mostrar,
+                                                    $laboral?->employee_id,
+                                                    $puesto?->nombre,
+                                                    $departamento?->nombre,
+                                                    $area?->nombre,
+                                                ]));
+                                            @endphp
+                                            <button
+                                                type="button"
+                                                role="option"
+                                                aria-selected="{{ (string) old('personal_id') === (string) $persona->id ? 'true' : 'false' }}"
+                                                data-personal-option
+                                                data-personal-id="{{ $persona->id }}"
+                                                data-label="{{ $etiqueta }}"
+                                                data-search="{{ $textoBusqueda }}"
+                                                class="w-full rounded-md px-3 py-2 text-left transition hover:bg-orange-50 focus:bg-orange-50 focus:outline-none dark:hover:bg-gray-700 dark:focus:bg-gray-700"
+                                            >
+                                                <span class="block text-sm font-semibold text-gray-900 dark:text-white">
+                                                    {{ $persona->nombre_mostrar }}
+                                                </span>
+                                                <span class="mt-0.5 block text-xs text-gray-500 dark:text-gray-400">
+                                                    {{ $laboral?->employee_id ?? 'Sin número' }}
+                                                    · {{ $puesto?->nombre ?? 'Sin puesto' }}
+                                                    · {{ $area?->nombre ?? 'Sin área' }}
+                                                </span>
+                                            </button>
+                                        @endforeach
+                                        <p
+                                            id="personal-no-results"
+                                            class="hidden px-3 py-3 text-sm text-gray-500 dark:text-gray-400"
                                         >
-                                            {{ $persona->nombre_mostrar }}
-                                            · {{ $persona->datosLaborales?->employee_id ?? 'Sin número' }}
-                                            · {{ $persona->datosLaborales?->puesto?->departamento?->area?->nombre ?? 'Sin área' }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                            No se encontraron colaboradores con esa búsqueda.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <p
+                                    id="personal-search-status"
+                                    class="mt-1.5 min-h-4 text-xs text-gray-500 dark:text-gray-400"
+                                    aria-live="polite"
+                                ></p>
+
+                                @if($personalActivo->isEmpty())
+                                    <p class="mt-2 rounded-lg border border-orange-200 bg-orange-100/70 px-3 py-2 text-xs text-orange-900 dark:border-orange-900/60 dark:bg-orange-950/30 dark:text-orange-200">
+                                        No se encontraron colaboradores con estado laboral activo.
+                                    </p>
+                                @endif
                                 @error('personal_id')
                                     <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                                 @enderror
@@ -231,7 +325,7 @@
                             </div>
                         </div>
 
-                        <div class="mt-5">
+                        <div>
                             <label for="observaciones" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Observaciones
                             </label>
@@ -250,8 +344,8 @@
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <div class="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+                <div class="overflow-hidden rounded-xl border border-emerald-200 bg-emerald-50/50 shadow-sm dark:border-emerald-900/60 dark:bg-slate-800">
+                    <div class="flex flex-col gap-2 border-b border-emerald-200 bg-emerald-100/60 px-5 py-4 dark:border-emerald-900/60 dark:bg-slate-900/50 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
                                 3. Equipos que recibirá el colaborador
@@ -266,7 +360,7 @@
                         </span>
                     </div>
 
-                    <div id="detalle-solicitud-vacio" class="px-6 py-14 text-center">
+                    <div id="detalle-solicitud-vacio" class="bg-white/50 px-6 py-10 text-center dark:bg-gray-800/40">
                         <p class="font-medium text-gray-700 dark:text-gray-300">
                             Seleccione una solicitud EPP
                         </p>
@@ -321,10 +415,9 @@
             </section>
         </div>
 
-        <div class="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-6 py-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-            <p class="max-w-3xl text-sm text-gray-500 dark:text-gray-400">
-                El vale quedará vinculado a la solicitud EPP y autorizado para efectos del registro histórico.
-                Esta operación no descuenta inventario ni genera una salida de almacén.
+        <div class="flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-100/80 px-4 py-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+            <p class="max-w-3xl text-xs leading-5 text-gray-600 dark:text-gray-300">
+                El vale queda vinculado a la solicitud EPP. No descuenta inventario ni genera una salida de almacén.
             </p>
 
             <div class="flex items-center gap-3">
@@ -349,4 +442,5 @@
 </div>
 
 <script src="{{ asset('js/valepp/create.js') }}" defer></script>
+<script src="{{ asset('js/valepp/personal-search.js') }}" defer></script>
 @endsection

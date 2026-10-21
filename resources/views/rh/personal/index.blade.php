@@ -42,7 +42,6 @@
         </div>
     </header>
 
-    {{-- Resumen --}}
     <section class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
              aria-label="Resumen de personal">
 
@@ -257,6 +256,21 @@
                                             </svg>
                                         </a>
 
+                                        @if ($estadoClave === 'activo')
+                                            <button type="button"
+                                                    class="open-baja-modal inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-700 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-red-900/60 dark:bg-red-900/30 dark:text-red-200 dark:hover:bg-red-900/60"
+                                                    data-personal-id="{{ $persona->id }}"
+                                                    data-personal-name="{{ $persona->nombre_mostrar }}"
+                                                    data-employee-id="{{ $laboral?->employee_id ?: 'Sin código de empleado' }}"
+                                                    aria-label="Registrar baja de {{ $persona->nombre_mostrar }}"
+                                                    title="Registrar baja">
+                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                          d="M18 12H6m12 0l-4-4m4 4l-4 4M4 5v14"/>
+                                                </svg>
+                                            </button>
+                                        @endif
+
                                         <form method="POST"
                                               action="{{ route('personal.destroy', $persona) }}"
                                               onsubmit="return confirm('¿Eliminar este colaborador? Esta acción no se puede deshacer.')">
@@ -300,7 +314,11 @@
             @endif
         </div>
     </section>
+
+    {{-- Se mantiene fuera de la región que reemplaza la búsqueda AJAX. --}}
+    @include('rh.personal.modales.registrar-baja')
 </div>
 
 <script src="{{ asset('js/rh/personal-index.js') }}" defer></script>
+<script src="{{ asset('js/rh/registrar-baja.js') }}" defer></script>
 @endsection

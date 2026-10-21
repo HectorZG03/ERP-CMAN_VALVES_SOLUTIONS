@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CatalogoRhController;
 use App\Http\Controllers\AjusteInventarioController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BajaColaboradorController;
@@ -384,6 +385,40 @@ Route::middleware(['auth', 'rh.access'])->group(function () {
     Route::resource('personal', PersonalController::class);
 
 
+    Route::get('catalogos-rh', [CatalogoRhController::class, 'index'])
+        ->name('catalogos-rh.index');
+
+
+    Route::post('catalogos-rh/areas', [CatalogoRhController::class, 'storeArea'])
+        ->name('catalogos-rh.areas.store');
+
+    Route::put('catalogos-rh/areas/{area}', [CatalogoRhController::class, 'updateArea'])
+        ->name('catalogos-rh.areas.update');
+
+    Route::delete('catalogos-rh/areas/{area}', [CatalogoRhController::class, 'destroyArea'])
+        ->name('catalogos-rh.areas.destroy');
+
+
+    Route::post('catalogos-rh/departamentos', [CatalogoRhController::class, 'storeDepartamento'])
+        ->name('catalogos-rh.departamentos.store');
+
+    Route::put('catalogos-rh/departamentos/{departamento}', [CatalogoRhController::class, 'updateDepartamento'])
+        ->name('catalogos-rh.departamentos.update');
+
+    Route::delete('catalogos-rh/departamentos/{departamento}', [CatalogoRhController::class, 'destroyDepartamento'])
+        ->name('catalogos-rh.departamentos.destroy');
+
+
+    Route::post('catalogos-rh/puestos', [CatalogoRhController::class, 'storePuesto'])
+        ->name('catalogos-rh.puestos.store');
+
+    Route::put('catalogos-rh/puestos/{puesto}', [CatalogoRhController::class, 'updatePuesto'])
+        ->name('catalogos-rh.puestos.update');
+
+    Route::delete('catalogos-rh/puestos/{puesto}', [CatalogoRhController::class, 'destroyPuesto'])
+        ->name('catalogos-rh.puestos.destroy');
+
+
     Route::get(
         'personal/buscar/ajax',
         [PersonalController::class, 'buscar']
@@ -402,20 +437,18 @@ Route::middleware(['auth', 'rh.access'])->group(function () {
     )->name('personal.exportPDF');
 
 
-    Route::resource('bajas', BajaColaboradorController::class);
+    // Bajas: no hay rutas independientes de consulta, edición o eliminación.
 
+    // Bajas de personal
 
-    Route::get(
-        'bajas/export/pdf',
-        [BajaColaboradorController::class, 'exportPDF']
-    )->name('bajas.exportPDF');
+    Route::get('bajas', [BajaColaboradorController::class, 'index'])
+        ->name('bajas.index');
 
+    Route::post('bajas', [BajaColaboradorController::class, 'store'])
+        ->name('bajas.store');
 
-    Route::get(
-        'bajas/{baja}/individual-pdf',
-        [BajaColaboradorController::class, 'exportIndividualPDF']
-    )->name('bajas.individual-pdf');
-
+    Route::patch('bajas/{baja}/reactivar', [BajaColaboradorController::class, 'reactivar'])
+        ->name('bajas.reactivar');
 
     Route::resource('cambios', CambioPuestoSueldoController::class);
 

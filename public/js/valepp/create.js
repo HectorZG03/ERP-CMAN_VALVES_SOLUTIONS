@@ -152,6 +152,9 @@
             requests.forEach(function (request) {
                 const status = normalizeStatus(request.estatus);
                 const isSelected = Number(request.id) === selectedRequestId;
+                const productosPreview = Array.isArray(request.productos_preview)
+                    ? request.productos_preview.filter(Boolean).join(' · ')
+                    : '';
                 const button = document.createElement('button');
 
                 button.type = 'button';
@@ -180,6 +183,15 @@
 
                     <p class="mt-3 truncate text-sm font-medium text-gray-700 dark:text-gray-300">
                         ${escapeHtml(request.destino || 'Sin destino')}
+                    </p>
+
+                    <p class="mt-1 truncate text-xs text-gray-500 dark:text-gray-400">
+                        Personal: ${escapeHtml(request.personal || 'Sin personal asignado')}
+                        ${request.numero_empleado ? `· ${escapeHtml(request.numero_empleado)}` : ''}
+                    </p>
+
+                    <p class="mt-1 line-clamp-2 text-xs text-gray-500 dark:text-gray-400">
+                        EPP: ${escapeHtml(productosPreview || `${Number(request.cantidad_productos || 0)} producto(s) en la solicitud`)}
                     </p>
 
                     <div class="mt-3 grid grid-cols-3 gap-2 text-center">
