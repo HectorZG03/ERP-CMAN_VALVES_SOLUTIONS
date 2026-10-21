@@ -137,7 +137,7 @@ class PersonalController extends Controller
             $q->where('clave', 'activo');
         })->sum('sueldo');
 
-        return view('personal.index', compact(
+        return view('rh.personal.index', compact(
             'personal',
             'totalPersonal',
             'totalActivo',
@@ -155,7 +155,7 @@ class PersonalController extends Controller
     {
         $areas = $this->catalogosArea();
 
-        return view('personal.create', compact('areas'));
+        return view('rh.personal.create', compact('areas'));
     }
 
     public function store(Request $request)
@@ -254,13 +254,17 @@ class PersonalController extends Controller
         $personal->load([
             'datosLaborales.puesto.departamento.area',
             'datosLaborales.estadoLaboral',
+            'bajas' => function ($query) {
+                $query->with(['user', 'usuarioAnulacion'])
+                    ->orderByDesc('fecha_baja')
+                    ->orderByDesc('id');
+            },
         ]);
 
         $areas = $this->catalogosArea();
 
-        return view('personal.perfil_personal', compact('personal', 'areas'));
+        return view('rh.personal.perfil_personal', compact('personal', 'areas'));
     }
-
     public function edit(Personal $personal)
     {
         return redirect()->route('personal.show', $personal);
@@ -268,74 +272,42 @@ class PersonalController extends Controller
 
     public function update(Request $request, Personal $personal)
     {
-        $datosLaboralesActuales = $personal->datosLaborales;
-
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'ape_pat' => 'required|string|max:255',
-            'ape_mat' => 'required|string|max:255',
-
-            'area_id' => ['required', 'integer', Rule::exists('areas', 'id')],
-            'departamento_id' => [
-                'required',
-                'integer',
-                Rule::exists('departamentos', 'id')
-                    ->where(fn ($q) => $q->where('area_id', $request->input('area_id'))),
-            ],
-            'puesto_id' => [
-                'required',
-                'integer',
-                Rule::exists('puestos', 'id')
-                    ->where(fn ($q) => $q->where('departamento_id', $request->input('departamento_id'))),
-            ],
-
-            'employee_id' => [
-                'nullable',
-                'string',
-                'max:50',
-                Rule::unique('datos_laborales', 'employee_id')
-                    ->ignore($datosLaboralesActuales?->id),
-            ],
-            'fecha_ingreso' => 'required|date',
-            'sueldo' => 'nullable|numeric|min:0',
-
-            'sexo' => 'required|in:Masculino,Femenino,Otro',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'edad' => 'nullable|integer|min:18|max:100',
-            'nacionalidad' => 'nullable|string|max:100',
-            'fecha_nacimiento' => 'nullable|date|before:today',
-            'estado_civil' => 'nullable|string|max:50',
-            'grupo_sanguineo' => 'nullable|string|max:10',
-            'curp' => 'nullable|string|max:18',
-            'rfc' => 'nullable|string|max:13',
-            'nss' => 'nullable|string|max:11',
-            'clave_interbancaria' => 'nullable|string|max:18',
-            'direccion' => 'nullable|string|max:500',
-            'correo_electronico' => 'nullable|email|max:255',
-            'numero_telefonico' => 'nullable|string|max:20',
-            'nombre_contacto_emergencia' => 'nullable|string|max:255',
-            'numero_telefonico_emergencia' => 'nullable|string|max:20',
-            'enfermedad_alergia' => 'nullable|string|max:1000',
+        $request->validate([
+            '_section' => ['required', Rule::in(['laboral', 'personal', 'contacto'])],
         ]);
 
-        $fotoAnterior = $personal->foto;
-        $fotoNueva = null;
+        $seccion = $request->input('_section');
 
-        if ($request->hasFile('foto')) {
-            $fotoNueva = $request->file('foto')->store('personal/fotos', 'public');
-        }
+        if ($seccion === 'laboral') {
+            $datosLaboralesActuales = $personal->datosLaborales;
 
-        try {
-            DB::transaction(function () use ($validated, $personal, $fotoNueva) {
-                $datosPersonales = Arr::only($validated, self::CAMPOS_PERSONALES);
+            $validated = $request->validate([
+                'area_id' => ['required', 'integer', Rule::exists('areas', 'id')],
+                'departamento_id' => [
+                    'required',
+                    'integer',
+                    Rule::exists('departamentos', 'id')
+                        ->where(fn ($query) => $query->where('area_id', $request->input('area_id'))),
+                ],
+                'puesto_id' => [
+                    'required',
+                    'integer',
+                    Rule::exists('puestos', 'id')
+                        ->where(fn ($query) => $query->where('departamento_id', $request->input('departamento_id'))),
+                ],
+                'employee_id' => [
+                    'nullable',
+                    'string',
+                    'max:50',
+                    Rule::unique('datos_laborales', 'employee_id')
+                        ->ignore($datosLaboralesActuales?->id),
+                ],
+                'fecha_ingreso' => ['required', 'date'],
+                'sueldo' => ['nullable', 'numeric', 'min:0'],
+            ]);
 
-                if ($fotoNueva) {
-                    $datosPersonales['foto'] = $fotoNueva;
-                }
-
-                $personal->update($datosPersonales);
-
-                $estadoActualId = $personal->datosLaborales?->estado_laboral_id;
+            DB::transaction(function () use ($personal, $validated) {
+                $estadoActualId = $personal->datosLaborales()->value('estado_laboral_id');
 
                 if (!$estadoActualId) {
                     $estadoActualId = EstadoLaboral::where('clave', 'activo')->value('id');
@@ -356,29 +328,98 @@ class PersonalController extends Controller
                     ]
                 );
             });
-        } catch (Throwable $e) {
-            if ($fotoNueva) {
-                Storage::disk('public')->delete($fotoNueva);
+        } elseif ($seccion === 'personal') {
+            $validated = $request->validate([
+                'nombre' => ['required', 'string', 'max:255'],
+                'ape_pat' => ['required', 'string', 'max:255'],
+                'ape_mat' => ['required', 'string', 'max:255'],
+                'sexo' => ['required', 'in:Masculino,Femenino,Otro'],
+                'fecha_nacimiento' => ['nullable', 'date', 'before:today'],
+                'nacionalidad' => ['nullable', 'string', 'max:100'],
+                'estado_civil' => ['nullable', 'string', 'max:50'],
+                'grupo_sanguineo' => ['nullable', 'string', 'max:10'],
+                'enfermedad_alergia' => ['nullable', 'string', 'max:1000'],
+                'foto' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            ]);
+
+            $fotoAnterior = $personal->foto;
+            $fotoNueva = null;
+
+            if ($request->hasFile('foto')) {
+                $fotoNueva = $request->file('foto')->store('personal/fotos', 'public');
             }
 
-            throw $e;
+            try {
+                $datosPersonales = Arr::only($validated, self::CAMPOS_PERSONALES);
+
+                $datosPersonales['edad'] = !empty($validated['fecha_nacimiento'])
+                    ? \Carbon\Carbon::parse($validated['fecha_nacimiento'])->age
+                    : null;
+
+                if ($fotoNueva) {
+                    $datosPersonales['foto'] = $fotoNueva;
+                }
+
+                $personal->update($datosPersonales);
+            } catch (Throwable $e) {
+                if ($fotoNueva) {
+                    Storage::disk('public')->delete($fotoNueva);
+                }
+
+                throw $e;
+            }
+
+            if (
+                $fotoNueva
+                && $fotoAnterior
+                && $fotoAnterior !== 'N/A'
+                && Storage::disk('public')->exists($fotoAnterior)
+            ) {
+                Storage::disk('public')->delete($fotoAnterior);
+            }
+        } else {
+            $validated = $request->validate([
+                'curp' => ['nullable', 'string', 'max:18'],
+                'rfc' => ['nullable', 'string', 'max:13'],
+                'nss' => ['nullable', 'string', 'max:11'],
+                'clave_interbancaria' => ['nullable', 'string', 'max:18'],
+                'direccion' => ['nullable', 'string', 'max:500'],
+                'correo_electronico' => ['nullable', 'email', 'max:255'],
+                'numero_telefonico' => ['nullable', 'string', 'max:20'],
+                'nombre_contacto_emergencia' => ['nullable', 'string', 'max:255'],
+                'numero_telefonico_emergencia' => ['nullable', 'string', 'max:20'],
+            ]);
+
+            $personal->update(Arr::only($validated, [
+                'curp',
+                'rfc',
+                'nss',
+                'clave_interbancaria',
+                'direccion',
+                'correo_electronico',
+                'numero_telefonico',
+                'nombre_contacto_emergencia',
+                'numero_telefonico_emergencia',
+            ]));
         }
 
-        if (
-            $fotoNueva
-            && $fotoAnterior
-            && $fotoAnterior !== 'N/A'
-            && Storage::disk('public')->exists($fotoAnterior)
-        ) {
-            Storage::disk('public')->delete($fotoAnterior);
-        }
-
-        return redirect()->route('personal.show', $personal)
-            ->with('success', 'Colaborador actualizado exitosamente.');
+        return redirect()
+            ->route('personal.show', [
+                'personal' => $personal->id,
+                'tab' => $seccion,
+            ])
+            ->with('success', 'Sección actualizada correctamente.');
     }
 
     public function destroy(Personal $personal)
     {
+        if ($personal->bajas()->exists()) {
+            return redirect()->route('personal.index')
+                ->withErrors([
+                    'error' => 'No se puede eliminar al colaborador porque tiene historial de bajas. El historial debe conservarse.',
+                ]);
+        }
+
         try {
             if (
                 $personal->foto
@@ -492,7 +533,7 @@ class PersonalController extends Controller
             $query->where('clave', 'activo');
         })->sum('sueldo');
 
-        $pdf = Pdf::loadView('personal.pdf', [
+        $pdf = Pdf::loadView('rh.personal.pdf', [
             'personal' => $personal,
             'totalActivo' => $totalActivo,
             'totalBaja' => $totalBaja,

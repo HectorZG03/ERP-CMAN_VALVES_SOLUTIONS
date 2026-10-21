@@ -28,7 +28,7 @@ class CambioPuestoSueldoController extends Controller
         
         $totalCambios = CambioPuestoSueldo::count();
         
-        return view('cambios.index', compact('cambios', 'totalCambios', 'search'));
+        return view('rh.cambios.index', compact('cambios', 'totalCambios', 'search'));
     }
 
     public function create()
@@ -40,7 +40,7 @@ class CambioPuestoSueldoController extends Controller
             ->orderBy('nombre')
             ->get();
         
-        return view('cambios.create', compact('personalActivo'));
+        return view('rh.cambios.create', compact('personalActivo'));
     }
 
     public function store(Request $request)
@@ -93,7 +93,7 @@ class CambioPuestoSueldoController extends Controller
     {
         $cambio->load('personal', 'user');
         
-        return view('cambios.show', compact('cambio'));
+        return view('rh.cambios.show', compact('cambio'));
     }
 
     public function edit(CambioPuestoSueldo $cambio)
@@ -105,7 +105,7 @@ class CambioPuestoSueldoController extends Controller
             ->orderBy('nombre')
             ->get();
         
-        return view('cambios.edit', compact('cambio', 'personalActivo'));
+        return view('rh.cambios.edit', compact('cambio', 'personalActivo'));
     }
 
     public function update(Request $request, CambioPuestoSueldo $cambio)
@@ -168,7 +168,7 @@ class CambioPuestoSueldoController extends Controller
             ->orderBy('fecha_cambio', 'desc')
             ->get();
         
-        return view('cambios.historial', compact('personal', 'cambios'));
+        return view('rh.cambios.historial', compact('personal', 'cambios'));
     }
 
     public function exportPDF()
@@ -183,7 +183,7 @@ class CambioPuestoSueldoController extends Controller
             'fechaGeneracion' => now()
         ];
 
-        $pdf = PDF::loadView('cambios.pdf', $data);
+        $pdf = PDF::loadView('rh.cambios.pdf', $data);
         $pdf->setPaper('A4', 'landscape');
         
         return $pdf->download('cambios_puesto_sueldo_' . date('Y-m-d') . '.pdf');

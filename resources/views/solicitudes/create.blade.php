@@ -403,7 +403,7 @@
                                 <select
                                     name="personal_id"
                                     id="personal_id"
-                                    @error('personal_id') aria-invalid="true" aria-describedby="error-personal" @enderror
+                                        @error('personal_id') aria-invalid="true" aria-describedby="error-personal" @enderror
                                     class="{{ $campoBase }} h-11 px-3 {{ $errors->has('personal_id') ? $campoError : $campoOk }}"
                                 >
                                     <option value="">— N/A —</option>

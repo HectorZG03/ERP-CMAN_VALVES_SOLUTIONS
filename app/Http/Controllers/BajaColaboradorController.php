@@ -2,157 +2,220 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\BajaColaborador;
+use App\Models\DatosLaborales;
+use App\Models\EstadoLaboral;
 use App\Models\Personal;
-use Illuminate\Support\Facades\Auth;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class BajaColaboradorController extends Controller
 {
+    /**
+     * Lista bajas activas y anuladas.
+     */
     public function index(Request $request)
     {
-        $search = $request->get('search', '');
-        
-        $query = BajaColaborador::with('personal', 'user');
-        
-        if ($search) {
-            $query->whereHas('personal', function($q) use ($search) {
-                $q->whereRaw("CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?", ["%{$search}%"])
-                  ->orWhere('area', 'like', "%{$search}%");
+        $search = trim((string) $request->query('search', ''));
+        $estado = $request->query('estado', 'todas');
+
+        if (!in_array($estado, ['todas', 'activa', 'anulada'], true)) {
+            $estado = 'todas';
+        }
+
+        $query = BajaColaborador::query()
+            ->with([
+                'personal.datosLaborales.estadoLaboral',
+                'personal.datosLaborales.puesto.departamento.area',
+                'user',
+                'usuarioAnulacion',
+            ]);
+
+        if ($estado !== 'todas') {
+            $query->where('estado', $estado);
+        }
+
+        if ($search !== '') {
+            $termino = '%' . $search . '%';
+
+            $query->where(function ($bajasQuery) use ($termino) {
+                $bajasQuery
+                    ->where('motivo_baja', 'like', $termino)
+                    ->orWhereHas('personal', function ($personalQuery) use ($termino) {
+                        $personalQuery
+                            ->whereRaw(
+                                "CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?",
+                                [$termino]
+                            )
+                            ->orWhereHas('datosLaborales', function ($laboralQuery) use ($termino) {
+                                $laboralQuery
+                                    ->where('employee_id', 'like', $termino)
+                                    ->orWhereHas('puesto', function ($puestoQuery) use ($termino) {
+                                        $puestoQuery
+                                            ->where('nombre', 'like', $termino)
+                                            ->orWhereHas('departamento', function ($departamentoQuery) use ($termino) {
+                                                $departamentoQuery
+                                                    ->where('nombre', 'like', $termino)
+                                                    ->orWhereHas('area', function ($areaQuery) use ($termino) {
+                                                        $areaQuery->where('nombre', 'like', $termino);
+                                                    });
+                                            });
+                                    });
+                            });
+                    });
             });
         }
-        
-        $bajas = $query->orderBy('fecha_baja', 'desc')->paginate(15);
-        
-        $totalBajas = BajaColaborador::count();
-        
-        return view('bajas.index', compact('bajas', 'totalBajas', 'search'));
+
+        $bajas = $query
+            ->orderByDesc('fecha_baja')
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->withQueryString();
+
+        $totalBajasActivas = BajaColaborador::where('estado', 'activa')->count();
+        $totalBajasAnuladas = BajaColaborador::where('estado', 'anulada')->count();
+
+        return view('rh.bajas.index', compact(
+            'bajas',
+            'search',
+            'estado',
+            'totalBajasActivas',
+            'totalBajasAnuladas'
+        ));
     }
 
-    public function create()
-    {
-        // Solo mostrar personal activo
-        $personalActivo = Personal::activo()
-            ->orderBy('ape_pat')
-            ->orderBy('ape_mat')
-            ->orderBy('nombre')
-            ->get();
-        
-        return view('bajas.create', compact('personalActivo'));
-    }
-
+    /**
+     * Registra una baja desde el modal del listado de personal.
+     */
     public function store(Request $request)
     {
-        $request->validate([
-            'personal_id' => 'required|exists:personal,id',
-            'fecha_baja' => 'required|date',
-            'motivo_baja' => 'required|string',
+        $datos = $request->validate([
+            'personal_id' => ['required', 'integer', 'exists:personal,id'],
+            'fecha_baja' => ['required', 'date'],
+            'motivo_baja' => ['required', 'string', 'max:2000'],
         ]);
 
-        // Crear la baja
-        BajaColaborador::create([
-            'personal_id' => $request->personal_id,
-            'fecha_baja' => $request->fecha_baja,
-            'motivo_baja' => $request->motivo_baja,
-            'user_id' => Auth::id(),
-        ]);
+        DB::transaction(function () use ($datos) {
+            $personal = Personal::query()
+                ->lockForUpdate()
+                ->findOrFail($datos['personal_id']);
 
-        // Actualizar el estatus del personal a 'baja'
-        $personal = Personal::findOrFail($request->personal_id);
-        $personal->update(['estatus' => 'baja']);
+            $datosLaborales = DatosLaborales::query()
+                ->where('personal_id', $personal->id)
+                ->lockForUpdate()
+                ->first();
 
-        return redirect()->route('bajas.index')
-            ->with('success', 'Baja registrada exitosamente');
+            if (!$datosLaborales) {
+                throw ValidationException::withMessages([
+                    'personal_id' => 'El colaborador no tiene datos laborales registrados.',
+                ]);
+            }
+
+            $estadoActual = EstadoLaboral::find($datosLaborales->estado_laboral_id);
+
+            if ($estadoActual?->clave !== 'activo') {
+                throw ValidationException::withMessages([
+                    'personal_id' => 'Solo se puede registrar la baja de un colaborador activo.',
+                ]);
+            }
+
+            $bajaActivaExiste = BajaColaborador::query()
+                ->where('personal_id', $personal->id)
+                ->where('estado', 'activa')
+                ->exists();
+
+            if ($bajaActivaExiste) {
+                throw ValidationException::withMessages([
+                    'personal_id' => 'El colaborador ya tiene una baja activa registrada.',
+                ]);
+            }
+
+            $estadoBaja = EstadoLaboral::query()
+                ->where('clave', 'baja')
+                ->first();
+
+            if (!$estadoBaja) {
+                throw ValidationException::withMessages([
+                    'personal_id' => 'No está configurado el estado laboral "Baja".',
+                ]);
+            }
+
+            BajaColaborador::create([
+                'personal_id' => $personal->id,
+                'fecha_baja' => $datos['fecha_baja'],
+                'motivo_baja' => $datos['motivo_baja'],
+                'estado' => 'activa',
+                'user_id' => auth()->id(),
+            ]);
+
+            $datosLaborales->update([
+                'estado_laboral_id' => $estadoBaja->id,
+            ]);
+        });
+
+        return redirect()
+            ->back()
+            ->with('success', 'La baja del colaborador se registró correctamente.');
     }
 
-    public function show(BajaColaborador $baja)
+    /**
+     * Reactiva al colaborador y marca la baja como anulada.
+     * El registro permanece como historial.
+     */
+    public function reactivar(BajaColaborador $baja)
     {
-        $baja->load('personal', 'user');
-        
-        return view('bajas.show', compact('baja'));
+        DB::transaction(function () use ($baja) {
+            $bajaBloqueada = BajaColaborador::query()
+                ->lockForUpdate()
+                ->findOrFail($baja->id);
+
+            if ($bajaBloqueada->estado !== 'activa') {
+                throw ValidationException::withMessages([
+                    'error' => 'Esta baja ya está anulada.',
+                ]);
+            }
+
+            $datosLaborales = DatosLaborales::query()
+                ->where('personal_id', $bajaBloqueada->personal_id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$datosLaborales) {
+                throw ValidationException::withMessages([
+                    'error' => 'El colaborador no tiene datos laborales registrados.',
+                ]);
+            }
+
+            $estadoActual = EstadoLaboral::find($datosLaborales->estado_laboral_id);
+
+            if ($estadoActual?->clave !== 'baja') {
+                throw ValidationException::withMessages([
+                    'error' => 'El estado laboral del colaborador no es Baja.',
+                ]);
+            }
+
+            $estadoActivo = EstadoLaboral::query()
+                ->where('clave', 'activo')
+                ->first();
+
+            if (!$estadoActivo) {
+                throw ValidationException::withMessages([
+                    'error' => 'No está configurado el estado laboral "Activo".',
+                ]);
+            }
+
+            $bajaBloqueada->estado = 'anulada';
+            $bajaBloqueada->anulada_por = auth()->id();
+            $bajaBloqueada->save();
+
+            $datosLaborales->update([
+                'estado_laboral_id' => $estadoActivo->id,
+            ]);
+        });
+
+        return redirect()
+            ->route('bajas.index')
+            ->with('success', 'El colaborador fue reactivado y la baja quedó anulada en el historial.');
     }
-
-    public function edit(BajaColaborador $baja)
-    {
-        $personalActivo = Personal::activo()
-            ->orWhere('id', $baja->personal_id)
-            ->orderBy('ape_pat')
-            ->orderBy('ape_mat')
-            ->orderBy('nombre')
-            ->get();
-        
-        return view('bajas.edit', compact('baja', 'personalActivo'));
-    }
-
-    public function update(Request $request, BajaColaborador $baja)
-    {
-        $request->validate([
-            'personal_id' => 'required|exists:personal,id',
-            'fecha_baja' => 'required|date',
-            'motivo_baja' => 'required|string',
-        ]);
-
-        $baja->update([
-            'personal_id' => $request->personal_id,
-            'fecha_baja' => $request->fecha_baja,
-            'motivo_baja' => $request->motivo_baja,
-        ]);
-
-        return redirect()->route('bajas.index')
-            ->with('success', 'Baja actualizada exitosamente');
-    }
-
-    public function destroy(BajaColaborador $baja)
-    {
-        try {
-            // Reactivar al personal
-            $personal = $baja->personal;
-            $personal->update(['estatus' => 'activo']);
-            
-            $baja->delete();
-            
-            return redirect()->route('bajas.index')
-                ->with('success', 'Baja eliminada y colaborador reactivado');
-        } catch (\Exception $e) {
-            return redirect()->route('bajas.index')
-                ->withErrors(['error' => 'Error al eliminar: ' . $e->getMessage()]);
-        }
-    }
-
-     public function exportPDF()
-    {
-        $bajas = BajaColaborador::with('personal')->orderBy('fecha_baja', 'desc')->get();
-        
-        $data = [
-            'bajas' => $bajas,
-            'totalBajas' => $bajas->count(),
-            'fechaGeneracion' => now()
-        ];
-
-        $pdf = PDF::loadView('bajas.pdf', $data);
-        $pdf->setPaper('A4', 'landscape');
-        
-        return $pdf->download('reporte_bajas_' . date('Y-m-d') . '.pdf');
-    }
-
-    // PDF individual de una baja específica
-    public function exportIndividualPDF(BajaColaborador $baja)
-    {
-        $baja->load('personal', 'user');
-        
-        $data = [
-            'baja' => $baja,
-            'fechaGeneracion' => now()
-        ];
-
-        $pdf = PDF::loadView('bajas.individual-pdf', $data);
-        $pdf->setPaper('A4', 'portrait');
-        
-        $nombreCompleto = trim(implode(' ', array_filter([$baja->personal->nombre, $baja->personal->ape_pat, $baja->personal->ape_mat])));
-        $nombreArchivo = 'baja_' . str_pad($baja->id, 4, '0', STR_PAD_LEFT) . '_' . str_replace(' ', '_', $nombreCompleto) . '.pdf';
-        
-        return $pdf->download($nombreArchivo);
-    }
-
 }

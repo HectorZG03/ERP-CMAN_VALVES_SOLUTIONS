@@ -26,10 +26,12 @@ class ValeppController extends Controller
         $validated = $request->validate([
             'search' => ['nullable', 'string', 'max:150'],
             'fecha' => ['nullable', 'date'],
+            'per_page' => ['nullable', 'integer', 'in:10,15,25,50'],
         ]);
 
         $search = trim($validated['search'] ?? '');
         $fecha = $validated['fecha'] ?? null;
+        $perPage = (int) ($validated['per_page'] ?? 15);
         $folioBuscado = ltrim($search, '#');
 
         $query = Valepp::query()
@@ -99,7 +101,7 @@ class ValeppController extends Controller
             ->orderByDesc('id');
 
         $valepp = $query
-            ->paginate(15)
+            ->paginate($perPage)
             ->withQueryString();
 
         $totalVales = Valepp::query()->count();
@@ -108,7 +110,8 @@ class ValeppController extends Controller
             'valepp',
             'totalVales',
             'search',
-            'fecha'
+            'fecha',
+            'perPage'
         ));
     }
 
@@ -163,7 +166,12 @@ class ValeppController extends Controller
 
         $search = trim($validated['q'] ?? '');
         $fecha = $validated['fecha'] ?? null;
-        $folioBuscado = ltrim($search, '#');
+        $terminosBusqueda = preg_split(
+            '/\s+/u',
+            str_replace('#', '', $search),
+            -1,
+            PREG_SPLIT_NO_EMPTY
+        ) ?: [];
 
         $solicitudes = SolicitudMaterial::query()
             ->epp()
@@ -173,6 +181,8 @@ class ValeppController extends Controller
             ])
             ->with([
                 'user:id,name,email',
+                'operadorPersonal:id,nombre,ape_pat,ape_mat',
+                'operadorPersonal.datosLaborales:personal_id,employee_id',
                 'detalles' => function ($query) {
                     $query
                         ->with([
@@ -181,21 +191,60 @@ class ValeppController extends Controller
                         ->withSum('asignacionesValeEpp', 'cantidad');
                 },
             ])
-            ->when($search !== '', function ($query) use ($search, $folioBuscado) {
-                $query->where(function ($subquery) use ($search, $folioBuscado) {
-                    $subquery
-                        ->where('destino', 'like', "%{$search}%")
-                        ->orWhere('comentario', 'like', "%{$search}%")
-                        ->orWhereHas('user', function ($userQuery) use ($search) {
-                            $userQuery->where(function ($query) use ($search) {
-                                $query
-                                    ->where('name', 'like', "%{$search}%")
-                                    ->orWhere('email', 'like', "%{$search}%");
-                            });
-                        });
+            // Filtra la disponibilidad en SQL antes del límite para que las
+            // solicitudes ya agotadas no oculten otras que aún tienen saldo.
+            ->whereHas('detalles', function ($detalleQuery) {
+                $detalleQuery->whereRaw(
+                    'solicitud_material_detalles.cantidad_solicitada > (
+                        SELECT COALESCE(SUM(valepp_detalles.cantidad), 0)
+                        FROM valepp_detalles
+                        WHERE valepp_detalles.solicitud_material_detalle_id = solicitud_material_detalles.id
+                    )'
+                );
+            })
+            ->when($terminosBusqueda !== [], function ($query) use ($terminosBusqueda) {
+                $query->where(function ($coincidencias) use ($terminosBusqueda) {
+                    foreach ($terminosBusqueda as $termino) {
+                        $like = "%{$termino}%";
 
-                    if (ctype_digit($folioBuscado)) {
-                        $subquery->orWhere('id', (int) $folioBuscado);
+                        $coincidencias->where(function ($campoQuery) use ($termino, $like) {
+                            $campoQuery
+                                ->where('destino', 'like', $like)
+                                ->orWhere('comentario', 'like', $like)
+                                ->orWhere('operador', 'like', $like)
+                                ->orWhere('categoria', 'like', $like)
+                                ->orWhereHas('user', function ($userQuery) use ($like) {
+                                    $userQuery->where(function ($userFields) use ($like) {
+                                        $userFields
+                                            ->where('name', 'like', $like)
+                                            ->orWhere('email', 'like', $like);
+                                    });
+                                })
+                                ->orWhereHas('operadorPersonal', function ($personalQuery) use ($like) {
+                                    $personalQuery->where(function ($personalFields) use ($like) {
+                                        $personalFields
+                                            ->where('nombre', 'like', $like)
+                                            ->orWhere('ape_pat', 'like', $like)
+                                            ->orWhere('ape_mat', 'like', $like)
+                                            ->orWhereHas('datosLaborales', function ($laboralQuery) use ($like) {
+                                                $laboralQuery->where('employee_id', 'like', $like);
+                                            });
+                                    });
+                                })
+                                ->orWhereHas('detalles.inventario', function ($inventarioQuery) use ($like) {
+                                    $inventarioQuery->where(function ($productoFields) use ($like) {
+                                        $productoFields
+                                            ->where('nombre_producto', 'like', $like)
+                                            ->orWhere('economico', 'like', $like)
+                                            ->orWhere('categoria', 'like', $like)
+                                            ->orWhere('medida', 'like', $like);
+                                    });
+                                });
+
+                            if (ctype_digit($termino)) {
+                                $campoQuery->orWhere('id', (int) $termino);
+                            }
+                        });
                     }
                 });
             })
@@ -226,7 +275,18 @@ class ValeppController extends Controller
                     'destino' => $solicitud->destino,
                     'estatus' => $solicitud->estatus,
                     'solicitante' => $solicitud->user?->name,
-                    'productos' => $solicitud->detalles->count(),
+                    'personal' => $solicitud->operadorPersonal?->nombre_mostrar
+                        ?? $solicitud->operador,
+                    'numero_empleado' => $solicitud->operadorPersonal
+                        ?->datosLaborales
+                        ?->employee_id,
+                    'productos_preview' => $solicitud->detalles
+                        ->map(fn (SolicitudMaterialDetalle $detalle) => $detalle->inventario?->nombre_producto)
+                        ->filter()
+                        ->unique()
+                        ->take(3)
+                        ->values(),
+                    'cantidad_productos' => $solicitud->detalles->count(),
                     'cantidad_solicitada' => $cantidadSolicitada,
                     'cantidad_asignada' => $cantidadAsignada,
                     'cantidad_disponible' => max(
@@ -365,6 +425,20 @@ class ValeppController extends Controller
 
         try {
             $valepp = DB::transaction(function () use ($validated, $request) {
+                $personalElegible = Personal::query()
+                    ->whereKey($validated['personal_id'])
+                    ->whereHas('datosLaborales.estadoLaboral', function ($query) {
+                        $query->where('clave', 'activo');
+                    })
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$personalElegible) {
+                    throw ValidationException::withMessages([
+                        'personal_id' => 'Selecciona un colaborador con estado laboral activo.',
+                    ]);
+                }
+
                 $solicitud = SolicitudMaterial::query()
                     ->whereKey($validated['solicitud_material_id'])
                     ->lockForUpdate()
