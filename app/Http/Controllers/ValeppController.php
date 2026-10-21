@@ -34,53 +34,47 @@ class ValeppController extends Controller
 
         $query = Valepp::query()
             ->with([
-                'personal:id,nombre,ape_pat,ape_mat,employee_id,area,grado',
+                'personal:id,nombre,ape_pat,ape_mat',
+                'personal.datosLaborales:personal_id,employee_id,puesto_id',
+                'personal.datosLaborales.puesto:id,nombre,departamento_id',
+                'personal.datosLaborales.puesto.departamento:id,nombre,area_id',
+                'personal.datosLaborales.puesto.departamento.area:id,nombre',
                 'user:id,name,email',
                 'solicitudMaterial:id,user_id,destino,estatus,tipo_solicitud,created_at',
             ])
             ->withCount('detalles')
-            ->withSum(
-                'detalles as unidades_asignadas',
-                'cantidad'
-            )
-            ->when($search !== '', function ($query) use (
-                $search,
-                $folioBuscado
-            ) {
-                $query->where(function ($subquery) use (
-                    $search,
-                    $folioBuscado
-                ) {
+            ->withSum('detalles as unidades_asignadas', 'cantidad')
+            ->when($search !== '', function ($query) use ($search, $folioBuscado) {
+                $query->where(function ($subquery) use ($search, $folioBuscado) {
                     $subquery
-                        ->where(
-                            'numero_vale',
-                            'like',
-                            "%{$search}%"
-                        )
+                        ->where('numero_vale', 'like', "%{$search}%")
                         ->orWhereHas('personal', function ($personalQuery) use ($search) {
                             $personalQuery->where(function ($query) use ($search) {
                                 $query
-                                    ->whereRaw("CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?", ["%{$search}%"])
-                                    ->orWhere(
-                                        'employee_id',
-                                        'like',
-                                        "%{$search}%"
+                                    ->whereRaw(
+                                        "CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?",
+                                        ["%{$search}%"]
                                     )
-                                    ->orWhere(
-                                        'area',
-                                        'like',
-                                        "%{$search}%"
-                                    );
+                                    ->orWhereHas('datosLaborales', function ($laboralQuery) use ($search) {
+                                        $laboralQuery
+                                            ->where('employee_id', 'like', "%{$search}%")
+                                            ->orWhereHas(
+                                                'puesto.departamento.area',
+                                                function ($areaQuery) use ($search) {
+                                                    $areaQuery->where(
+                                                        'nombre',
+                                                        'like',
+                                                        "%{$search}%"
+                                                    );
+                                                }
+                                            );
+                                    });
                             });
                         })
                         ->orWhereHas('solicitudMaterial', function ($solicitudQuery) use ($search) {
                             $solicitudQuery->where(function ($query) use ($search) {
                                 $query
-                                    ->where(
-                                        'destino',
-                                        'like',
-                                        "%{$search}%"
-                                    )
+                                    ->where('destino', 'like', "%{$search}%")
                                     ->orWhereHas('user', function ($userQuery) use ($search) {
                                         $userQuery->where(
                                             'name',
@@ -94,10 +88,7 @@ class ValeppController extends Controller
                     if (ctype_digit($folioBuscado)) {
                         $subquery
                             ->orWhere('id', (int) $folioBuscado)
-                            ->orWhere(
-                                'solicitud_material_id',
-                                (int) $folioBuscado
-                            );
+                            ->orWhere('solicitud_material_id', (int) $folioBuscado);
                     }
                 });
             })
@@ -131,17 +122,21 @@ class ValeppController extends Controller
             403
         );
 
-        $personalActivo = Personal::activo()
-            ->orderBy('ape_pat')->orderBy('ape_mat')->orderBy('nombre')
-            ->get([
-                'id',
-                'nombre',
-                'ape_pat',
-                'ape_mat',
-                'employee_id',
-                'area',
-                'grado',
-            ]);
+        $personalActivo = Personal::query()
+            ->select(['id', 'nombre', 'ape_pat', 'ape_mat'])
+            ->with([
+                'datosLaborales:personal_id,employee_id,puesto_id',
+                'datosLaborales.puesto:id,nombre,departamento_id',
+                'datosLaborales.puesto.departamento:id,nombre,area_id',
+                'datosLaborales.puesto.departamento.area:id,nombre',
+            ])
+            ->whereHas('datosLaborales.estadoLaboral', function ($query) {
+                $query->where('clave', 'activo');
+            })
+            ->orderBy('ape_pat')
+            ->orderBy('ape_mat')
+            ->orderBy('nombre')
+            ->get();
 
         $numeroVale = Valepp::generarNumeroVale();
 
@@ -183,52 +178,24 @@ class ValeppController extends Controller
                         ->with([
                             'inventario:id,nombre_producto,economico,categoria,medida,existencia',
                         ])
-                        ->withSum(
-                            'asignacionesValeEpp',
-                            'cantidad'
-                        );
+                        ->withSum('asignacionesValeEpp', 'cantidad');
                 },
             ])
-            ->when($search !== '', function ($query) use (
-                $search,
-                $folioBuscado
-            ) {
-                $query->where(function ($subquery) use (
-                    $search,
-                    $folioBuscado
-                ) {
+            ->when($search !== '', function ($query) use ($search, $folioBuscado) {
+                $query->where(function ($subquery) use ($search, $folioBuscado) {
                     $subquery
-                        ->where(
-                            'destino',
-                            'like',
-                            "%{$search}%"
-                        )
-                        ->orWhere(
-                            'comentario',
-                            'like',
-                            "%{$search}%"
-                        )
+                        ->where('destino', 'like', "%{$search}%")
+                        ->orWhere('comentario', 'like', "%{$search}%")
                         ->orWhereHas('user', function ($userQuery) use ($search) {
                             $userQuery->where(function ($query) use ($search) {
                                 $query
-                                    ->where(
-                                        'name',
-                                        'like',
-                                        "%{$search}%"
-                                    )
-                                    ->orWhere(
-                                        'email',
-                                        'like',
-                                        "%{$search}%"
-                                    );
+                                    ->where('name', 'like', "%{$search}%")
+                                    ->orWhere('email', 'like', "%{$search}%");
                             });
                         });
 
                     if (ctype_digit($folioBuscado)) {
-                        $subquery->orWhere(
-                            'id',
-                            (int) $folioBuscado
-                        );
+                        $subquery->orWhere('id', (int) $folioBuscado);
                     }
                 });
             })
@@ -295,10 +262,7 @@ class ValeppController extends Controller
                     ->with([
                         'inventario:id,nombre_producto,economico,categoria,medida,existencia',
                     ])
-                    ->withSum(
-                        'asignacionesValeEpp',
-                        'cantidad'
-                    );
+                    ->withSum('asignacionesValeEpp', 'cantidad');
             },
         ]);
 
@@ -400,10 +364,7 @@ class ValeppController extends Controller
         ]);
 
         try {
-            $valepp = DB::transaction(function () use (
-                $validated,
-                $request
-            ) {
+            $valepp = DB::transaction(function () use ($validated, $request) {
                 $solicitud = SolicitudMaterial::query()
                     ->whereKey($validated['solicitud_material_id'])
                     ->lockForUpdate()
@@ -518,6 +479,7 @@ class ValeppController extends Controller
     {
         $valepp->load([
             'personal',
+            'personal.datosLaborales.puesto.departamento.area',
             'user',
             'solicitudMaterial.user',
             'detalles.inventario',
@@ -534,6 +496,7 @@ class ValeppController extends Controller
     {
         $valepp->load([
             'personal',
+            'personal.datosLaborales.puesto.departamento.area',
             'user',
             'solicitudMaterial.user',
             'detalles.inventario',

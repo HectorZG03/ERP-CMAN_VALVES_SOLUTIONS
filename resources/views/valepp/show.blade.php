@@ -4,6 +4,10 @@
 @php
     $solicitud = $valepp->solicitudMaterial;
     $personal = $valepp->personal;
+    $datosLaborales = $personal?->datosLaborales;
+    $puesto = $datosLaborales?->puesto;
+    $departamento = $puesto?->departamento;
+    $area = $departamento?->area;
     $totalAsignado = (int) $valepp->detalles->sum('cantidad');
 
     $estatusVale = match ($valepp->estatus) {
@@ -243,7 +247,7 @@
                                 {{ $personal?->nombre_mostrar ?? 'No disponible' }}
                             </p>
                             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                                {{ $personal?->employee_id ?? 'Sin número de empleado' }}
+                                {{ $datosLaborales?->employee_id ?? 'Sin número de empleado' }}
                             </p>
                         </div>
                     </div>
@@ -252,19 +256,19 @@
                         <div class="flex justify-between gap-4 py-3">
                             <dt class="text-gray-500 dark:text-gray-400">Área</dt>
                             <dd class="text-right font-semibold text-gray-900 dark:text-white">
-                                {{ $personal?->area ?? 'N/A' }}
-                            </dd>
-                        </div>
-                        <div class="flex justify-between gap-4 py-3">
-                            <dt class="text-gray-500 dark:text-gray-400">Puesto / grado</dt>
-                            <dd class="text-right font-semibold text-gray-900 dark:text-white">
-                                {{ $personal?->grado ?? 'N/A' }}
+                                {{ $area?->nombre ?? 'N/A' }}
                             </dd>
                         </div>
                         <div class="flex justify-between gap-4 py-3">
                             <dt class="text-gray-500 dark:text-gray-400">Departamento</dt>
                             <dd class="text-right font-semibold text-gray-900 dark:text-white">
-                                {{ $personal?->departamento ?? 'N/A' }}
+                                {{ $departamento?->nombre ?? 'N/A' }}
+                            </dd>
+                        </div>
+                        <div class="flex justify-between gap-4 py-3">
+                            <dt class="text-gray-500 dark:text-gray-400">Puesto</dt>
+                            <dd class="text-right font-semibold text-gray-900 dark:text-white">
+                                {{ $puesto?->nombre ?? 'N/A' }}
                             </dd>
                         </div>
                     </dl>

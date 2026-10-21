@@ -278,6 +278,10 @@
 @php
     $solicitud = $valepp->solicitudMaterial;
     $personal = $valepp->personal;
+    $datosLaborales = $personal?->datosLaborales;
+    $puesto = $datosLaborales?->puesto;
+    $departamento = $puesto?->departamento;
+    $area = $departamento?->area;
 
     $logoDataUri = null;
     $logoCandidates = [
@@ -371,13 +375,23 @@
             </td>
         </tr>
         <tr>
-            <td class="info-label">Categoría:</td>
+            <td class="info-label">Puesto:</td>
             <td class="info-value" colspan="2">
-                {{ mb_strtoupper($personal?->grado ?? $personal?->area ?? 'N/A') }}
+                {{ mb_strtoupper($puesto?->nombre ?? 'N/A') }}
             </td>
             <td class="info-label">Embarcación:</td>
             <td class="info-value" colspan="2">
                 {{ mb_strtoupper($solicitud?->destino ?? 'N/A') }}
+            </td>
+        </tr>
+        <tr>
+            <td class="info-label">Área:</td>
+            <td class="info-value" colspan="2">
+                {{ mb_strtoupper($area?->nombre ?? 'N/A') }}
+            </td>
+            <td class="info-label">Departamento:</td>
+            <td class="info-value" colspan="2">
+                {{ mb_strtoupper($departamento?->nombre ?? 'N/A') }}
             </td>
         </tr>
         <tr>

@@ -23,7 +23,6 @@ class DashboardController extends Controller
 
         $rol = $user->role;
 
-
         /*
         |--------------------------------------------------------------------------
         | Estructura base del Dashboard
@@ -39,7 +38,6 @@ class DashboardController extends Controller
             'resumen' => [],
         ];
 
-
         /*
         |--------------------------------------------------------------------------
         | DIRECCIÓN
@@ -52,12 +50,10 @@ class DashboardController extends Controller
         */
 
         if ($user->canApproveRequests()) {
-
             $solicitudesPendientes = SolicitudMaterial::where(
                 'estatus',
                 'pendiente'
             )->count();
-
 
             $requisicionesPendientes = Requisicion::where(
                 'estatus_finanzas',
@@ -66,18 +62,12 @@ class DashboardController extends Controller
                 ->where('estatus', 'pendiente')
                 ->count();
 
-
             $dashboard['resumen'] = [
-
                 'solicitudes' => $solicitudesPendientes,
-
                 'requisiciones' => $requisicionesPendientes,
-
                 'pendientes' => $solicitudesPendientes + $requisicionesPendientes,
-
             ];
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -89,38 +79,28 @@ class DashboardController extends Controller
         */
 
         elseif ($user->canApproveFinanzas()) {
-
             $requisicionesPendientes = Requisicion::where(
                 'estatus_finanzas',
                 'pendiente'
             )->count();
-
 
             $requisicionesAprobadas = Requisicion::where(
                 'estatus_finanzas',
                 'aprobado'
             )->count();
 
-
             $requisicionesDenegadas = Requisicion::where(
                 'estatus_finanzas',
                 'denegado'
             )->count();
 
-
             $dashboard['resumen'] = [
-
                 'requisiciones' => Requisicion::count(),
-
                 'pendientes' => $requisicionesPendientes,
-
                 'aprobadas' => $requisicionesAprobadas,
-
                 'denegadas' => $requisicionesDenegadas,
-
             ];
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -136,41 +116,30 @@ class DashboardController extends Controller
         */
 
         elseif ($user->canManageInventory()) {
-
             $totalInventario = Inventario::sum('existencia');
-
 
             $productosAgotados = Inventario::where(
                 'existencia',
                 0
             )->count();
 
-
             $productosBajoStock = Inventario::whereBetween(
                 'existencia',
                 [1, 5]
             )->count();
-
 
             $solicitudesPendientes = SolicitudMaterial::where(
                 'estatus',
                 'pendiente'
             )->count();
 
-
             $dashboard['resumen'] = [
-
                 'inventario' => $totalInventario,
-
                 'agotados' => $productosAgotados,
-
                 'bajoStock' => $productosBajoStock,
-
                 'solicitudes' => $solicitudesPendientes,
-
             ];
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -182,28 +151,14 @@ class DashboardController extends Controller
         */
 
         elseif ($user->canManagePersonal()) {
-
-            $personalActivo = Personal::where(
-                'estatus',
-                'activo'
-            )->count();
-
-
-            $personalBaja = Personal::where(
-                'estatus',
-                'baja'
-            )->count();
-
+            $personalActivo = Personal::activo()->count();
+            $personalBaja = Personal::baja()->count();
 
             $dashboard['resumen'] = [
-
                 'personalActivo' => $personalActivo,
-
                 'personalBaja' => $personalBaja,
-
             ];
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -215,36 +170,27 @@ class DashboardController extends Controller
         */
 
         elseif ($user->canManageValeEPP()) {
-
             $valesPendientes = Valepp::where(
                 'estatus',
                 'pendiente'
             )->count();
-
 
             $valesAprobados = Valepp::where(
                 'estatus',
                 'aprobado'
             )->count();
 
-
             $valesEntregados = Valepp::where(
                 'estatus',
                 'entregado'
             )->count();
 
-
             $dashboard['resumen'] = [
-
                 'valesPendientes' => $valesPendientes,
-
                 'valesAprobados' => $valesAprobados,
-
                 'valesEntregados' => $valesEntregados,
-
             ];
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -256,33 +202,24 @@ class DashboardController extends Controller
         */
 
         elseif ($user->canManageUsers()) {
-
             $usuarios = User::count();
-
 
             $solicitudesPendientes = SolicitudMaterial::where(
                 'estatus',
                 'pendiente'
             )->count();
 
-
             $requisicionesPendientes = Requisicion::where(
                 'estatus',
                 'pendiente'
             )->count();
 
-
             $dashboard['resumen'] = [
-
                 'usuarios' => $usuarios,
-
                 'solicitudes' => $solicitudesPendientes,
-
                 'requisiciones' => $requisicionesPendientes,
-
             ];
         }
-
 
         /*
         |--------------------------------------------------------------------------
@@ -295,14 +232,12 @@ class DashboardController extends Controller
         */
 
         else {
-
             $misSolicitudesPendientes = SolicitudMaterial::where(
                 'user_id',
                 $user->id
             )
                 ->where('estatus', 'pendiente')
                 ->count();
-
 
             $misSolicitudesAprobadas = SolicitudMaterial::where(
                 'user_id',
@@ -311,14 +246,12 @@ class DashboardController extends Controller
                 ->where('estatus', 'aprobado')
                 ->count();
 
-
             $misRequisicionesPendientes = Requisicion::where(
                 'user_id',
                 $user->id
             )
                 ->where('estatus', 'pendiente')
                 ->count();
-
 
             $misRequisicionesAprobadas = Requisicion::where(
                 'user_id',
@@ -327,20 +260,13 @@ class DashboardController extends Controller
                 ->where('estatus', 'aprobado')
                 ->count();
 
-
             $dashboard['resumen'] = [
-
                 'solicitudesPendientes' => $misSolicitudesPendientes,
-
                 'solicitudesAprobadas' => $misSolicitudesAprobadas,
-
                 'requisicionesPendientes' => $misRequisicionesPendientes,
-
                 'requisicionesAprobadas' => $misRequisicionesAprobadas,
-
             ];
         }
-
 
         /*
         |--------------------------------------------------------------------------

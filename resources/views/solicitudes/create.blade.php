@@ -8,19 +8,17 @@
     );
     $esEpp = $tipoInicial === 'epp';
 
-    // Clases reutilizables (misma paleta que la vista original).
     $etiquetaCampo = 'mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-200';
     $campoBase = 'w-full rounded-lg border bg-white text-sm text-gray-900 shadow-sm transition focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white';
     $campoOk = 'border-gray-300 focus:border-blue-500 dark:border-gray-600';
     $campoError = 'border-red-400 focus:border-red-500 focus:ring-red-500 dark:border-red-500';
     $textoError = 'mt-1 text-sm text-red-600 dark:text-red-400';
-    $thBase = 'py-3 text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300';
+    $thBase = 'whitespace-nowrap py-3 text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300';
 @endphp
 
 <div class="mx-auto w-full max-w-[1700px] space-y-5">
-    {{-- Encabezado --}}
     <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+        <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-3">
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
                     Nueva solicitud de material
@@ -55,7 +53,6 @@
         </a>
     </header>
 
-    {{-- Errores de validación --}}
     @if($errors->any())
         <div
             role="alert"
@@ -101,7 +98,6 @@
         >
             @csrf
 
-            {{-- Paso 1: tipo de solicitud --}}
             @if($puedeCrearEpp ?? false)
                 <fieldset class="mb-5 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/30">
                     <div class="grid grid-cols-1 items-center gap-4 md:grid-cols-[210px_1fr] md:gap-5">
@@ -194,10 +190,9 @@
                 <input type="hidden" name="tipo_solicitud" value="estandar">
             @endif
 
-            <div class="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
-                {{-- Paso 2: materiales --}}
+            <div class="grid grid-cols-1 items-start gap-5 xl:grid-cols-12">
                 <section
-                    class="overflow-visible rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 lg:col-span-8"
+                    class="min-w-0 overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 xl:col-span-8"
                     aria-labelledby="titulo-materiales"
                 >
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 px-5 py-4 dark:border-gray-700">
@@ -220,11 +215,10 @@
                         </span>
                     </div>
 
-                    <div class="p-4 sm:p-5">
-                        {{-- Buscador --}}
+                    <div class="min-w-0 p-4 sm:p-5">
                         <div
                             id="panel-buscador"
-                            class="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4 transition-colors duration-200 dark:border-gray-600 dark:bg-gray-700"
+                            class="relative z-20 mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4 transition-colors duration-200 dark:border-gray-600 dark:bg-gray-700"
                         >
                             <div class="flex flex-col gap-4 sm:flex-row sm:items-end">
                                 <div class="min-w-0 flex-1">
@@ -290,31 +284,46 @@
                             </p>
                         </div>
 
-                        {{-- Tabla de productos (con scroll horizontal en pantallas pequeñas) --}}
-                        <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
-                            <div class="overflow-x-auto">
-                                <table class="w-full min-w-[760px] table-fixed">
-                                    <caption class="sr-only">Materiales agregados a la solicitud</caption>
+                        <div class="min-w-0 max-w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+                            <div class="max-h-[65vh] max-w-full min-w-0 overflow-auto overscroll-contain">
+                                <table class="w-full min-w-[850px] table-fixed">
+                                    <caption class="sr-only">
+                                        Materiales agregados a la solicitud
+                                    </caption>
 
                                     <colgroup>
-                                        <col class="w-[35%]">
+                                        <col class="w-[33%]">
                                         <col class="w-[13%]">
                                         <col class="w-[10%]">
                                         <col class="w-[10%]">
-                                        <col class="w-[12%]">
-                                        <col class="w-[15%]">
-                                        <col class="w-[5%]">
+                                        <col class="w-[11%]">
+                                        <col class="w-[16%]">
+                                        <col class="w-[7%]">
                                     </colgroup>
 
-                                    <thead class="bg-gray-100 dark:bg-gray-900/50">
+                                    <thead class="sticky top-0 z-10 bg-gray-100 dark:bg-gray-900/50">
                                         <tr>
-                                            <th scope="col" class="{{ $thBase }} px-4 text-left">Producto</th>
-                                            <th scope="col" class="{{ $thBase }} px-3 text-left">Categoría</th>
-                                            <th scope="col" class="{{ $thBase }} px-3 text-center">Medida</th>
-                                            <th scope="col" class="{{ $thBase }} px-3 text-center">Existencia</th>
-                                            <th scope="col" class="{{ $thBase }} px-3 text-center">Cantidad</th>
-                                            <th scope="col" class="{{ $thBase }} px-3 text-right">Precio unitario</th>
-                                            <th scope="col" class="{{ $thBase }} px-2 text-center">Acción</th>
+                                            <th scope="col" class="{{ $thBase }} px-4 text-left">
+                                                Producto
+                                            </th>
+                                            <th scope="col" class="{{ $thBase }} px-3 text-left">
+                                                Categoría
+                                            </th>
+                                            <th scope="col" class="{{ $thBase }} px-3 text-center">
+                                                Medida
+                                            </th>
+                                            <th scope="col" class="{{ $thBase }} px-3 text-center">
+                                                Existencia
+                                            </th>
+                                            <th scope="col" class="{{ $thBase }} px-3 text-center">
+                                                Cantidad
+                                            </th>
+                                            <th scope="col" class="{{ $thBase }} px-3 text-right">
+                                                Precio unitario
+                                            </th>
+                                            <th scope="col" class="{{ $thBase }} px-2 text-center">
+                                                Acción
+                                            </th>
                                         </tr>
                                     </thead>
 
@@ -347,9 +356,7 @@
                     </div>
                 </section>
 
-                {{-- Columna lateral (fija en escritorio para no perder el botón de envío) --}}
-                <aside class="space-y-5 lg:sticky lg:top-4 lg:col-span-4">
-                    {{-- Paso 3: datos --}}
+                <aside class="min-w-0 space-y-5 xl:sticky xl:top-4 xl:col-span-4">
                     <section class="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
                         <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
                             <p class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">
@@ -362,7 +369,6 @@
                         </div>
 
                         <div class="space-y-5 p-5">
-                            {{-- Destino --}}
                             <div>
                                 <label for="destino" class="{{ $etiquetaCampo }}">
                                     Ubicación de destino
@@ -388,7 +394,6 @@
                                 @enderror
                             </div>
 
-                            {{-- Personal --}}
                             <div>
                                 <label for="personal_id" class="{{ $etiquetaCampo }}">
                                     Operador / Personal asignado
@@ -403,23 +408,31 @@
                                 >
                                     <option value="">— N/A —</option>
 
-                                    @foreach($personal as $persona)
+                                    @foreach ($personal as $persona)
                                         @php
                                             $etiquetaPersona = $persona->nombre_mostrar;
+                                            $numeroEmpleado = $persona->datosLaborales?->employee_id;
+                                            $areaNombre = $persona->datosLaborales
+                                                ?->puesto
+                                                ?->departamento
+                                                ?->area
+                                                ?->nombre;
 
-                                            if ($persona->employee_id && $persona->employee_id !== 'N/A') {
-                                                $etiquetaPersona .= " ({$persona->employee_id})";
+                                            if ($numeroEmpleado && $numeroEmpleado !== 'N/A') {
+                                                $etiquetaPersona .= " ({$numeroEmpleado})";
                                             }
 
-                                            if ($persona->area) {
-                                                $etiquetaPersona .= " — {$persona->area}";
+                                            if ($areaNombre) {
+                                                $etiquetaPersona .= " — {$areaNombre}";
                                             }
                                         @endphp
 
                                         <option
                                             value="{{ $persona->id }}"
                                             @selected((string) old('personal_id') === (string) $persona->id)
-                                        >{{ $etiquetaPersona }}</option>
+                                        >
+                                            {{ $etiquetaPersona }}
+                                        </option>
                                     @endforeach
                                 </select>
 
@@ -428,7 +441,6 @@
                                 @enderror
                             </div>
 
-                            {{-- Comentario --}}
                             <div>
                                 <label for="comentario" class="{{ $etiquetaCampo }}">
                                     Comentario
@@ -451,13 +463,14 @@
                         </div>
                     </section>
 
-                    {{-- Resumen (lo muestra create.js al agregar productos) --}}
                     <section
                         id="resumen-solicitud"
                         class="hidden rounded-lg border border-gray-200 bg-gray-50 p-5 dark:border-gray-700 dark:bg-gray-700"
                         aria-live="polite"
                     >
-                        <h2 class="mb-4 font-bold text-gray-900 dark:text-white">Resumen</h2>
+                        <h2 class="mb-4 font-bold text-gray-900 dark:text-white">
+                            Resumen
+                        </h2>
 
                         <dl class="grid grid-cols-3 divide-x divide-gray-200 dark:divide-gray-600">
                             <div class="px-2 text-center">
@@ -477,7 +490,6 @@
                         </dl>
                     </section>
 
-                    {{-- Proceso de aprobación --}}
                     <section
                         id="panel-proceso"
                         class="rounded-lg border border-blue-200 bg-blue-50 p-4 transition-colors duration-200 dark:border-blue-800 dark:bg-blue-900/30"
@@ -499,8 +511,7 @@
                         </div>
                     </section>
 
-                    {{-- Acciones --}}
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <button
                             type="button"
                             id="btn-limpiar"
@@ -509,7 +520,6 @@
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-
                             Limpiar
                         </button>
 
@@ -522,7 +532,6 @@
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                             </svg>
-
                             Enviar solicitud
                         </button>
                     </div>
@@ -532,14 +541,11 @@
     </div>
 </div>
 
-{{-- Plantilla de fila de producto (clonada por create.js) --}}
 <template id="template-producto">
     <tr class="producto-item transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50">
         <td class="px-4 py-3 align-middle">
             <p class="producto-nombre line-clamp-2 text-sm font-semibold leading-5 text-gray-900 dark:text-white"></p>
-
             <p class="producto-economico mt-1 truncate text-xs text-gray-500 dark:text-gray-400"></p>
-
             <input type="hidden" class="inventario-id">
         </td>
 

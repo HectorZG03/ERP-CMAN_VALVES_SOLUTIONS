@@ -109,16 +109,22 @@ class SolicitudMaterialController extends Controller
      */
     public function create(Request $request)
     {
-        $personal = Personal::activo()
-            ->orderBy('ape_pat')->orderBy('ape_mat')->orderBy('nombre')
-            ->get([
-                'id',
-                'nombre',
-                'ape_pat',
-                'ape_mat',
-                'employee_id',
-                'area',
-            ]);
+        $personal = Personal::query()
+            ->select(['id', 'nombre', 'ape_pat', 'ape_mat'])
+            ->with([
+                'datosLaborales:personal_id,employee_id,puesto_id',
+                'datosLaborales.estadoLaboral:id,clave,nombre',
+                'datosLaborales.puesto:id,nombre,departamento_id',
+                'datosLaborales.puesto.departamento:id,nombre,area_id',
+                'datosLaborales.puesto.departamento.area:id,nombre',
+            ])
+            ->whereHas('datosLaborales.estadoLaboral', function ($query) {
+                $query->where('clave', 'activo');
+            })
+            ->orderBy('ape_pat')
+            ->orderBy('ape_mat')
+            ->orderBy('nombre')
+            ->get();
 
         $puedeCrearEpp = $request->user()->canManageValeEPP();
 

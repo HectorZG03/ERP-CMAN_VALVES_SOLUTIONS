@@ -14,54 +14,26 @@ class InventarioController extends Controller
 {
     public function index(Request $request)
     {
-        // Estadísticas de TODO el inventario
+        $validated = $request->validate([
+            'filter' => 'nullable|in:all,with-stock,without-stock',
+            'search' => 'nullable|string|max:255',
+            'per_page' => 'nullable|integer|in:15,25,50,100',
+            'page' => 'nullable|integer|min:1',
+        ]);
+
         $totalInventario = Inventario::count();
         $totalEnStock = Inventario::where('existencia', '>', 0)->count();
         $totalSinStock = Inventario::where('existencia', '<=', 0)->count();
         $valorTotal = Inventario::sum('precio_total');
 
-        // Verificar si se está aplicando un filtro
-        $filter = $request->get('filter', 'all');
+        $filter = $validated['filter'] ?? 'all';
+        $search = trim($validated['search'] ?? '');
+        $perPage = (int) ($validated['per_page'] ?? 15);
 
-        // Limpiar espacios innecesarios de la búsqueda
-        $search = trim($request->get('search', ''));
-
-        // Consulta base
-        $query = Inventario::query();
-
-        // Aplicar filtro de stock si se especifica
-        if ($filter === 'with-stock') {
-            $query->where('existencia', '>', 0);
-        } elseif ($filter === 'without-stock') {
-            $query->where('existencia', '<=', 0);
-        }
-
-        // Aplicar búsqueda si se especifica
-        if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('nombre_producto', 'like', "%{$search}%")
-                    ->orWhere('categoria', 'like', "%{$search}%")
-                    ->orWhere('economico', 'like', "%{$search}%")
-                    ->orWhere('medida', 'like', "%{$search}%")
-                    ->orWhere('ubicacion', 'like', "%{$search}%");
-            });
-        }
-
-        // Si hay filtro activo o búsqueda, mostrar todos sin paginación
-        // Si no, mostrar con paginación
-        if ($filter !== 'all' || $search !== '') {
-            $inventarios = $query
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            $showPagination = false;
-        } else {
-            $inventarios = $query
-                ->orderBy('created_at', 'desc')
-                ->paginate(15);
-
-            $showPagination = true;
-        }
+        $inventarios = $this->buildInventoryQuery($search, $filter)
+            ->orderByDesc('created_at')
+            ->paginate($perPage)
+            ->withQueryString();
 
         return view('inventario.index', compact(
             'inventarios',
@@ -71,29 +43,57 @@ class InventarioController extends Controller
             'valorTotal',
             'filter',
             'search',
-            'showPagination'
+            'perPage'
         ));
     }
 
 
-    // Método para búsqueda AJAX
+    /**
+     * Devuelve una página de resultados para la búsqueda dinámica.
+     */
     public function searchAjax(Request $request)
     {
-        // Limpiar espacios innecesarios
-        $search = trim($request->get('search', ''));
+        $validated = $request->validate([
+            'filter' => 'required|in:all,with-stock,without-stock',
+            'search' => 'nullable|string|max:255',
+            'per_page' => 'required|integer|in:15,25,50,100',
+            'page' => 'nullable|integer|min:1',
+        ]);
 
-        $filter = $request->get('filter', 'all');
+        $search = trim($validated['search'] ?? '');
+        $filter = $validated['filter'];
+        $perPage = (int) $validated['per_page'];
+        $page = (int) ($validated['page'] ?? 1);
 
+        $inventarios = $this->buildInventoryQuery($search, $filter)
+            ->orderByDesc('created_at')
+            ->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json([
+            'html' => view('inventario.partials.table-rows', compact('inventarios'))->render(),
+            'total' => $inventarios->total(),
+            'from' => $inventarios->firstItem(),
+            'to' => $inventarios->lastItem(),
+            'current_page' => $inventarios->currentPage(),
+            'last_page' => $inventarios->lastPage(),
+            'per_page' => $inventarios->perPage(),
+        ]);
+    }
+
+
+    /**
+     * Comparte los filtros entre la carga inicial y la búsqueda AJAX.
+     */
+    private function buildInventoryQuery(string $search, string $filter)
+    {
         $query = Inventario::query();
 
-        // Aplicar filtro de stock
         if ($filter === 'with-stock') {
             $query->where('existencia', '>', 0);
         } elseif ($filter === 'without-stock') {
             $query->where('existencia', '<=', 0);
         }
 
-        // Aplicar búsqueda
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('nombre_producto', 'like', "%{$search}%")
@@ -104,20 +104,8 @@ class InventarioController extends Controller
             });
         }
 
-        $inventarios = $query
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return response()->json([
-            'html' => view(
-                'inventario.partials.table-rows',
-                compact('inventarios')
-            )->render(),
-
-            'count' => $inventarios->count()
-        ]);
+        return $query;
     }
-
 
     // Mantener el método para API si lo necesitas
     public function getAll()
