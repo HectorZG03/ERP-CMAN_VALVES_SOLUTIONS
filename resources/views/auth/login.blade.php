@@ -170,15 +170,6 @@
                         </label>
 
                         {{-- Errores generales --}}
-                        @if ($errors->any() && !$errors->has('email') && !$errors->has('password'))
-                            <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                                <p class="font-medium">No fue posible iniciar sesión.</p>
-
-                                @foreach ($errors->all() as $error)
-                                    <p class="mt-1">{{ $error }}</p>
-                                @endforeach
-                            </div>
-                        @endif
 
                         <button
                             type="submit"

@@ -27,11 +27,6 @@
         @endif
     </header>
 
-    @if(session('success'))
-        <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300">
-            {{ session('success') }}
-        </div>
-    @endif
 
     <section class="rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div class="border-b border-gray-200 px-4 py-3 dark:border-gray-700">

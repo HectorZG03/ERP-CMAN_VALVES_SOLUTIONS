@@ -43,11 +43,6 @@
         </a>
     </header>
 
-    @if(session('success'))
-        <div class="rounded-lg border border-green-200 bg-green-50 px-5 py-4 text-green-800 dark:border-green-800 dark:bg-green-900/30 dark:text-green-200">
-            {{ session('success') }}
-        </div>
-    @endif
 
     @if($puedeAdministrar)
         <section class="rounded-lg border border-gray-200 bg-white px-5 py-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">

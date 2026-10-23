@@ -53,36 +53,6 @@
         </a>
     </header>
 
-    @if($errors->any())
-        <div
-            role="alert"
-            class="rounded-lg border border-red-200 bg-red-50 px-5 py-4 dark:border-red-800 dark:bg-red-900/30"
-        >
-            <div class="flex items-start gap-3">
-                <svg
-                    class="mt-0.5 h-5 w-5 shrink-0 text-red-600 dark:text-red-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M5.07 19h13.86a2 2 0 001.74-3L13.74 4a2 2 0 00-3.48 0L3.33 16a2 2 0 001.74 3z" />
-                </svg>
-
-                <div>
-                    <h2 class="font-semibold text-red-800 dark:text-red-200">
-                        No fue posible registrar la solicitud
-                    </h2>
-
-                    <ul class="mt-1 list-inside list-disc text-sm text-red-700 dark:text-red-300">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        </div>
-    @endif
 
     <div
         id="contenedor-formulario"

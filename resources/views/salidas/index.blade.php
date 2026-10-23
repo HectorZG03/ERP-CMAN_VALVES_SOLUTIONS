@@ -2,11 +2,6 @@
 
 @section('content')
 <div class="mx-auto max-w-7xl space-y-5">
-    @if(session('success'))
-        <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-300">
-            {{ session('success') }}
-        </div>
-    @endif
 
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>

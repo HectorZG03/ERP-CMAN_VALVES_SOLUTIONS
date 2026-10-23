@@ -21,16 +21,6 @@
     </div>
 
     {{-- ERRORES --}}
-    @if($errors->any())
-        <div class="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800
-                    text-red-800 dark:text-red-200 px-4 py-3 rounded-md">
-            <ul class="list-disc list-inside space-y-1 text-sm">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     {{-- FORMULARIO --}}
     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">

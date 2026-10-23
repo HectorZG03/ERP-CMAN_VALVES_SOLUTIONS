@@ -114,13 +114,6 @@
     @endif
 
     {{-- Error general --}}
-    @if($errors->has('error'))
-        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
-            <p class="text-sm text-red-700 dark:text-red-300">
-                {{ $errors->first('error') }}
-            </p>
-        </div>
-    @endif
 
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
