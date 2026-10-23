@@ -384,7 +384,7 @@
             @forelse($entrada->detalles as $detalle)
                 <tr>
                     <td class="center">
-                        {{ $detalle->inventario ? 'INV-' . str_pad($detalle->inventario->id, 5, '0', STR_PAD_LEFT) : 'N/A' }}
+                        {{ $detalle->inventario->economico ?? 'N/A' }}
                     </td>
 
                     <td>{{ $detalle->inventario->categoria ?? 'Sin categoría' }}</td>

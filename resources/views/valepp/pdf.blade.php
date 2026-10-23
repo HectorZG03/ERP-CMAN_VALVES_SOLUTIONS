@@ -232,19 +232,17 @@
         }
 
         .signature-space {
-            position: relative;
             height: 63px;
+            line-height: 63px;
+            text-align: center;
         }
 
         .signature-image {
-            position: absolute;
-            right: 0;
-            bottom: 2px;
-            left: 0;
-            display: block;
+            display: inline-block;
             max-width: 150px;
             max-height: 59px;
-            margin: 0 auto;
+            margin: 0;
+            vertical-align: middle;
         }
 
         .signature-line {
