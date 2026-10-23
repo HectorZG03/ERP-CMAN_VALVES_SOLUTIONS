@@ -28,16 +28,6 @@
         </a>
     </header>
 
-    @if ($errors->any())
-        <div role="alert" class="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/60 dark:bg-red-950/30">
-            <p class="font-semibold text-red-800 dark:text-red-300">Revisa la información del formulario:</p>
-            <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-red-700 dark:text-red-300">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <form method="POST"
           action="{{ route('personal.store') }}"

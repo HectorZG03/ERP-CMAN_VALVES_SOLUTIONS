@@ -2,11 +2,6 @@
 
 @section('content')
 <div class="space-y-5">
-    @if(session('success'))
-        <div class="rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-800 dark:border-green-800 dark:bg-green-900/30 dark:text-green-200">
-            {{ session('success') }}
-        </div>
-    @endif
 
     <header class="flex items-center justify-between rounded-xl border border-orange-200 bg-gradient-to-r from-orange-50 to-white p-5 shadow-sm dark:border-orange-900/50 dark:from-orange-950/30 dark:to-gray-800">
         <div>

@@ -118,11 +118,6 @@
         </div>
     </header>
 
-    @if(session('success'))
-        <div class="rounded-lg border border-green-200 bg-green-50 px-5 py-4 text-green-800 dark:border-green-800 dark:bg-green-900/30 dark:text-green-200">
-            {{ session('success') }}
-        </div>
-    @endif
 
     @if($esEpp)
         <section class="flex flex-col gap-4 rounded-lg border border-orange-300 bg-orange-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-orange-700 dark:bg-orange-950/30">

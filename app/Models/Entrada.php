@@ -11,15 +11,14 @@ class Entrada extends Model
 
     protected $fillable = [
         'numero_factura',
+        'numero_factura_proveedor',
         'proveedor_id',
         'fecha_entrada',
         'observaciones',
-        'cantidad_total',
-        'precio_unitario_promedio',
-        'precio_total',
+        'subtotal',
         'descuento_global',
         'iva',
-        'total_con_iva',
+        'total',
         'user_id',
     ];
 

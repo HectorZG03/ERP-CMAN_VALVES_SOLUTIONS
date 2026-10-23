@@ -155,6 +155,7 @@ class EntradaController extends Controller
     {
         $datos = $request->validate([
             'proveedor_id' => 'required|exists:proveedores,id',
+            'numero_factura_proveedor' => 'nullable|string|max:100',
             'fecha_entrada' => 'required|date',
             'observaciones' => 'nullable|string|max:500',
             'descuento_global' => 'nullable|numeric|min:0|decimal:0,2',
@@ -242,6 +243,7 @@ class EntradaController extends Controller
         ) {
             $entrada = Entrada::create([
                 'proveedor_id' => $datos['proveedor_id'],
+                'numero_factura_proveedor' => $datos['numero_factura_proveedor'] ?? null,
                 'fecha_entrada' => $datos['fecha_entrada'],
                 'observaciones' => $datos['observaciones'] ?? null,
                 'descuento_global' => $descuentoGlobal,

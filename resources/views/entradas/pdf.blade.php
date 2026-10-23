@@ -94,37 +94,9 @@
             font-weight: bold;
         }
 
-        .details-table {
-            margin-bottom: 10px;
-        }
-
-        .details-table td {
-            padding: 5px 6px;
-            border: 1px solid #9ca3af;
-        }
-
-        .label-cell {
-            width: 17%;
-            background: #19324d;
-            color: #fff;
-            font-weight: bold;
-        }
-
-        .value-cell {
-            background: #fff;
-        }
-
-        .form-code {
-            width: 26%;
-            background: #19324d;
-            color: #fff;
-            font-size: 8px;
-            font-weight: bold;
-            text-align: center;
-        }
-
         .section-band {
             margin-top: 8px;
+            margin-bottom: 0;
             padding: 7px 8px;
             background: #19324d;
             color: #fff;
@@ -133,6 +105,35 @@
             text-align: center;
             text-transform: uppercase;
             letter-spacing: .3px;
+        }
+
+        .details-table {
+            margin-bottom: 10px;
+            table-layout: fixed;
+        }
+
+        .details-table td {
+            padding: 6px 8px;
+            border: 1px solid #9ca3af;
+            overflow-wrap: break-word;
+        }
+
+        .details-label {
+            background: #19324d;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .details-value {
+            background: #fff;
+        }
+
+        .form-code {
+            background: #19324d;
+            color: #fff;
+            font-size: 8px;
+            font-weight: bold;
+            text-align: center;
         }
 
         .items-table {
@@ -234,7 +235,7 @@
         }
 
         .signatures {
-            margin-top: 30px;
+            margin-top: 350px;
             page-break-inside: avoid;
         }
 
@@ -337,42 +338,35 @@
         </tr>
     </table>
 
+    <div class="section-band">Recepción de materiales y/o herramientas</div>
+
     <table class="details-table">
+        <colgroup>
+            <col style="width: 17%;">
+            <col style="width: 29%;">
+            <col style="width: 17%;">
+            <col style="width: 37%;">
+        </colgroup>
+
         <tr>
-            <td class="label-cell">Proveedor:</td>
-            <td class="value-cell" colspan="2">
+            <td class="details-label">Proveedor:</td>
+            <td class="details-value" colspan="2">
                 {{ $entrada->proveedor->proveedor ?? 'Proveedor no disponible' }}
             </td>
-            <td class="form-code" rowspan="2">FOR-01-PRO-ALM-01</td>
+            <td class="form-code">FOR-01-PRO-ALM-01</td>
         </tr>
 
         <tr>
-            <td class="label-cell">Comentario:</td>
-            <td class="value-cell" colspan="2">
-                {{ $entrada->observaciones ?: 'Sin observaciones' }}
+            <td class="details-label">No. factura:</td>
+            <td class="details-value">
+                {{ $entrada->numero_factura_proveedor ?: 'No proporcionado' }}
             </td>
-        </tr>
-
-        <tr>
-            <td class="label-cell">Contacto:</td>
-            <td class="value-cell">
-                {{ $entrada->proveedor->contacto ?? 'N/A' }}
-            </td>
-            <td class="label-cell">Teléfono:</td>
-            <td class="value-cell">
-                {{ $entrada->proveedor->telefono ?? 'N/A' }}
-            </td>
-        </tr>
-
-        <tr>
-            <td class="label-cell">Fecha:</td>
-            <td class="value-cell" colspan="3">
+            <td class="details-label">Fecha:</td>
+            <td class="details-value">
                 {{ $entrada->fecha_entrada ? $entrada->fecha_entrada->format('d/m/Y') : 'N/A' }}
             </td>
         </tr>
     </table>
-
-    <div class="section-band">Recepción de materiales y/o herramientas</div>
 
     <table class="items-table">
         <thead>

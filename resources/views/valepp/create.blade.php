@@ -30,16 +30,6 @@
         </a>
     </div>
 
-    @if($errors->any())
-        <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-red-800 dark:border-red-800 dark:bg-red-900/30 dark:text-red-200">
-            <p class="font-semibold">No fue posible registrar el Vale EPP:</p>
-            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <form
         method="POST"

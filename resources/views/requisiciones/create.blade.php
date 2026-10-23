@@ -41,19 +41,6 @@
         </a>
     </div>
 
-    @if($errors->any())
-        <div role="alert" class="rounded-lg border border-red-200 bg-red-50 px-5 py-4 dark:border-red-800 dark:bg-red-900/30">
-            <h2 class="font-semibold text-red-800 dark:text-red-200">
-                No fue posible registrar la requisición
-            </h2>
-
-            <ul class="mt-1 list-inside list-disc text-sm text-red-700 dark:text-red-300">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
 
     <div class="rounded-lg bg-white p-4 shadow transition-colors duration-200 dark:bg-gray-800 sm:p-6">
         <form method="POST" action="{{ route('requisiciones.store') }}" id="requisicionForm">

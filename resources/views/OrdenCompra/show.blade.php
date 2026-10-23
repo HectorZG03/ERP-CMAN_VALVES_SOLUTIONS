@@ -56,12 +56,6 @@
     </div>
 
     {{-- ALERTAS --}}
-    @if(session('success'))
-        <div class="bg-green-50 dark:bg-green-900/50 border border-green-200 dark:border-green-800
-                    text-green-800 dark:text-green-200 px-4 py-3 rounded-md">
-            {{ session('success') }}
-        </div>
-    @endif
 
     {{-- RESUMEN SUPERIOR --}}
     <div class="bg-gradient-to-r from-blue-50 to-indigo-50

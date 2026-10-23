@@ -49,27 +49,6 @@
     </div>
 
     <!-- Errores de validación -->
-    @if ($errors->any())
-        <div class="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/60 dark:bg-red-900/20">
-            <div class="flex items-start gap-3">
-                <svg class="mt-0.5 h-5 w-5 shrink-0 text-red-600 dark:text-red-400"
-                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M12 8v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 2.57h16.94A2 2 0 0022.18 18L13.71 3.86a2 2 0 00-3.42 0z"/>
-                </svg>
-                <div>
-                    <p class="text-sm font-semibold text-red-800 dark:text-red-300">
-                        Revisa la información ingresada
-                    </p>
-                    <ul class="mt-1 list-inside list-disc space-y-1 text-sm text-red-700 dark:text-red-400">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            </div>
-        </div>
-    @endif
 
     <!-- Formulario -->
     <form method="POST"
