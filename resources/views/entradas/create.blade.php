@@ -12,7 +12,7 @@
                     </h2>
 
                     <p class="mt-2 text-sm text-green-700 dark:text-green-400">
-                        Factura #{{ session('entrada_reciente.numero_factura') }}
+                        Folio interno: {{ session('entrada_reciente.numero_factura') }}
                         · Proveedor: {{ session('entrada_reciente.proveedor_nombre') }}
                         · {{ session('entrada_reciente.fecha') }}
                     </p>
@@ -94,7 +94,6 @@
         </a>
     </header>
 
-
     <form
         method="POST"
         action="{{ route('entradas.store') }}"
@@ -115,7 +114,7 @@
                             Datos de la entrada
                         </h2>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Selecciona el proveedor y la fecha de recepción.
+                            Selecciona el proveedor y registra los datos de recepción.
                         </p>
                     </div>
                 </div>
@@ -166,6 +165,27 @@
                     >
 
                     @error('fecha_entrada')
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="numero_factura_proveedor" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Número de factura del proveedor
+                        <span class="font-normal text-gray-400">(opcional)</span>
+                    </label>
+
+                    <input
+                        type="text"
+                        name="numero_factura_proveedor"
+                        id="numero_factura_proveedor"
+                        maxlength="100"
+                        value="{{ old('numero_factura_proveedor') }}"
+                        placeholder="Ej. A-12345"
+                        class="block w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                    >
+
+                    @error('numero_factura_proveedor')
                         <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                     @enderror
                 </div>
