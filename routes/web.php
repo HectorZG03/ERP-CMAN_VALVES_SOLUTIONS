@@ -33,6 +33,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
+        Route::view('/vacaciones', 'rh.vacaciones.index')
+        ->name('vacaciones.index');
+
     // Ruta de depuración de roles
     Route::get('/debug-role', function () {
         $user = auth()->user();
