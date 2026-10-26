@@ -61,11 +61,6 @@ class Personal extends Model
         return $this->hasMany(BajaColaborador::class);
     }
 
-    public function cambiosPuestoSueldo()
-    {
-        return $this->hasMany(CambioPuestoSueldo::class);
-    }
-
     public function valepp()
     {
         return $this->hasMany(Valepp::class);
@@ -74,11 +69,6 @@ class Personal extends Model
     public function ultimaBaja()
     {
         return $this->hasOne(BajaColaborador::class)->latestOfMany();
-    }
-
-    public function ultimoCambio()
-    {
-        return $this->hasOne(CambioPuestoSueldo::class)->latestOfMany();
     }
 
     /**

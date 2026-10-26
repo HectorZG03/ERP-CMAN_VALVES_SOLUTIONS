@@ -329,22 +329,6 @@
 
                     </a>
 
-
-                    <a
-                        href="{{ route('cambios.index') }}"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg
-                               text-sm font-medium transition
-                               {{ request()->routeIs('cambios.*')
-                                   ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300'
-                                   : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800' }}"
-                    >
-
-                        <i class="fas fa-user-pen w-5 text-center"></i>
-
-                        <span>Cambios</span>
-
-                    </a>
-
                 </div>
 
             </div>

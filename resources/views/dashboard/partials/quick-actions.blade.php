@@ -126,15 +126,6 @@
                     'text' => 'text-red-600 dark:text-red-400',
                     'hover' => 'hover:border-red-300 dark:hover:border-red-600',
                 ],
-                [
-                    'label' => 'Cambios',
-                    'description' => 'Puesto y sueldo',
-                    'route' => 'cambios.index',
-                    'icon' => 'fas fa-user-edit',
-                    'bg' => 'bg-orange-100 dark:bg-orange-900/30',
-                    'text' => 'text-orange-600 dark:text-orange-400',
-                    'hover' => 'hover:border-orange-300 dark:hover:border-orange-600',
-                ],
             ];
         } elseif ($user->canManageValeEPP()) {
             $actions = [

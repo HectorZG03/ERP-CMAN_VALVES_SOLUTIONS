@@ -48,11 +48,14 @@
                 <p class="text-sm font-medium text-blue-600 dark:text-blue-400">
                     Recursos Humanos
                 </p>
+
                 <h1 class="truncate text-2xl font-bold text-gray-900 dark:text-white">
                     {{ $personal->nombre_mostrar }}
                 </h1>
+
                 <div class="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                     <span>{{ $laboral?->employee_id ?: 'Sin número de empleado' }}</span>
+
                     <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold {{ $estadoClass }}">
                         {{ $estadoNombre }}
                     </span>
@@ -65,8 +68,6 @@
             Volver al personal
         </a>
     </header>
-
-
 
     <input type="hidden" id="active-profile-tab" value="{{ $activeTab }}">
 
@@ -84,6 +85,7 @@
                         aria-controls="tab-panel-laboral"
                         aria-selected="{{ $activeTab === 'laboral' ? 'true' : 'false' }}">
                     Laboral
+
                     @if ($errors->hasAny(['area_id', 'departamento_id', 'puesto_id', 'employee_id', 'fecha_ingreso', 'sueldo']))
                         <span class="h-2 w-2 rounded-full bg-red-500" aria-label="Hay errores"></span>
                     @endif
@@ -97,6 +99,7 @@
                         aria-controls="tab-panel-personal"
                         aria-selected="{{ $activeTab === 'personal' ? 'true' : 'false' }}">
                     Datos personales
+
                     @if ($errors->hasAny(['nombre', 'ape_pat', 'ape_mat', 'sexo', 'edad', 'fecha_nacimiento', 'foto', 'nacionalidad', 'estado_civil', 'grupo_sanguineo', 'enfermedad_alergia']))
                         <span class="h-2 w-2 rounded-full bg-red-500" aria-label="Hay errores"></span>
                     @endif
@@ -110,6 +113,7 @@
                         aria-controls="tab-panel-contacto"
                         aria-selected="{{ $activeTab === 'contacto' ? 'true' : 'false' }}">
                     Contacto y documentos
+
                     @if ($errors->hasAny(['curp', 'rfc', 'nss', 'clave_interbancaria', 'direccion', 'correo_electronico', 'numero_telefonico', 'nombre_contacto_emergencia', 'numero_telefonico_emergencia']))
                         <span class="h-2 w-2 rounded-full bg-red-500" aria-label="Hay errores"></span>
                     @endif
@@ -123,6 +127,7 @@
                         aria-controls="tab-panel-bajas"
                         aria-selected="{{ $activeTab === 'bajas' ? 'true' : 'false' }}">
                     Historial de bajas
+
                     <span class="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700 dark:bg-red-900/40 dark:text-red-200">
                         {{ $personal->bajas->count() }}
                     </span>
@@ -141,6 +146,7 @@
                   class="space-y-6">
                 @csrf
                 @method('PUT')
+
                 <input type="hidden" name="_section" value="laboral">
                 <input type="hidden" name="_active_tab" value="laboral">
 
@@ -167,6 +173,7 @@
                   class="space-y-6">
                 @csrf
                 @method('PUT')
+
                 <input type="hidden" name="_section" value="personal">
                 <input type="hidden" name="_active_tab" value="personal">
 
@@ -192,6 +199,7 @@
                   class="space-y-6">
                 @csrf
                 @method('PUT')
+
                 <input type="hidden" name="_section" value="contacto">
                 <input type="hidden" name="_active_tab" value="contacto">
 
