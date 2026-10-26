@@ -13,7 +13,7 @@
             <div>
 
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-white">
-                    Dashboard
+                    Menú Principal
                 </h1>
 
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">

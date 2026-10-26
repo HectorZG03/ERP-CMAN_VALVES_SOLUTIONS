@@ -35,7 +35,7 @@ class InventarioController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        return view('inventario.index', compact(
+        return view('almacen.inventario.index', compact(
             'inventarios',
             'totalInventario',
             'totalEnStock',
@@ -70,7 +70,7 @@ class InventarioController extends Controller
             ->paginate($perPage, ['*'], 'page', $page);
 
         return response()->json([
-            'html' => view('inventario.partials.table-rows', compact('inventarios'))->render(),
+            'html' => view('almacen.inventario.partials.table-rows', compact('inventarios'))->render(),
             'total' => $inventarios->total(),
             'from' => $inventarios->firstItem(),
             'to' => $inventarios->lastItem(),
@@ -118,7 +118,7 @@ class InventarioController extends Controller
 
     public function create()
     {
-        return view('inventario.create');
+        return view('almacen.inventario.create');
     }
 
 
@@ -219,7 +219,7 @@ class InventarioController extends Controller
             ->take(10);
 
         return view(
-            'inventario.show',
+            'almacen.inventario.show',
             compact(
                 'inventario',
                 'movimientos'
@@ -230,7 +230,7 @@ class InventarioController extends Controller
 
     public function edit(Inventario $inventario)
     {
-        return view('inventario.edit', compact('inventario'));
+        return view('almacen.inventario.edit', compact('inventario'));
     }
 
 
@@ -326,7 +326,7 @@ class InventarioController extends Controller
         ];
 
         $pdf = PDF::loadView(
-            'inventario.pdf',
+            'almacen.inventario.pdf',
             $data
         );
 
@@ -385,7 +385,7 @@ class InventarioController extends Controller
         ];
 
         $pdf = PDF::loadView(
-            'inventario.pdf',
+            'almacen.inventario.pdf',
             $data
         );
 

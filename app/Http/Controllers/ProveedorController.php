@@ -10,12 +10,12 @@ class ProveedorController extends Controller
     public function index()
     {
         $proveedores = Proveedor::paginate(15);
-        return view('proveedores.index', compact('proveedores'));
+        return view('almacen.proveedores.index', compact('proveedores'));
     }
 
     public function create()
     {
-        return view('proveedores.create');
+        return view('almacen.proveedores.create');
     }
 
    
@@ -37,12 +37,12 @@ class ProveedorController extends Controller
 
     public function show(Proveedor $proveedor)
     {
-        return view('proveedores.show', compact('proveedor'));
+        return view('almacen.proveedores.show', compact('proveedor'));
     }
 
     public function edit(Proveedor $proveedor)
     {
-        return view('proveedores.edit', compact('proveedor'));
+        return view('almacen.proveedores.edit', compact('proveedor'));
     }
 
 

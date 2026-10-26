@@ -44,12 +44,12 @@ class PrestamoMaterialController extends Controller
             'pendientes' => PrestamoMaterial::pendientes()->count(),
         ];
         
-        return view('prestamos.index', compact('prestamos', 'estadisticas'));
+        return view('almacen.prestamos.index', compact('prestamos', 'estadisticas'));
     }
 
     public function create()
     {
-        return view('prestamos.create');
+        return view('almacen.prestamos.create');
     }
 
     public function store(Request $request)
@@ -134,7 +134,7 @@ class PrestamoMaterialController extends Controller
         // Cargar relaciones
         $prestamo->load(['detalles.inventario', 'user']);
         
-        return view('prestamos.show', compact('prestamo'));
+        return view('almacen.prestamos.show', compact('prestamo'));
     }
 
     public function updateEstatus(Request $request, PrestamoMaterial $prestamo)
@@ -205,7 +205,7 @@ class PrestamoMaterialController extends Controller
 
         $prestamo->load(['detalles.inventario', 'user']);
         
-        return view('prestamos.devolucion', compact('prestamo'));
+        return view('almacen.prestamos.devolucion', compact('prestamo'));
     }
 
     public function procesarDevolucion(Request $request, PrestamoMaterial $prestamo)
@@ -343,7 +343,7 @@ class PrestamoMaterialController extends Controller
             }),
         ];
 
-        return view('prestamos.dashboard', compact('prestamosVencidos', 'prestamosProximos', 'estadisticas'));
+        return view('almacen.prestamos.dashboard', compact('prestamosVencidos', 'prestamosProximos', 'estadisticas'));
     }
 
 

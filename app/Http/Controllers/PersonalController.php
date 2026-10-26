@@ -263,7 +263,10 @@ class PersonalController extends Controller
 
         $areas = $this->catalogosArea();
 
-        return view('rh.personal.perfil_personal', compact('personal', 'areas'));
+        return view('rh.personal.perfil_personal', compact(
+            'personal',
+            'areas'
+        ));
     }
     public function edit(Personal $personal)
     {

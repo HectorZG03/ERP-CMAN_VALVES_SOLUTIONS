@@ -1,10 +1,9 @@
 <?php
 
-use App\Http\Controllers\CatalogoRhController;
 use App\Http\Controllers\AjusteInventarioController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BajaColaboradorController;
-use App\Http\Controllers\CambioPuestoSueldoController;
+use App\Http\Controllers\CatalogoRhController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntradaController;
@@ -20,33 +19,22 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ValeppController;
 use Illuminate\Support\Facades\Route;
 
-
 Route::get('/', function () {
     return redirect('/dashboard');
 });
 
-
-// Rutas de autenticación
-
+// Autenticación
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-
 Route::post('/login', [AuthController::class, 'login']);
-
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-
-// Rutas protegidas
-
+// Rutas protegidas generales
 Route::middleware(['auth'])->group(function () {
-
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
-
     // Ruta de depuración de roles
-
     Route::get('/debug-role', function () {
-
         $user = auth()->user();
 
         return response()->json([
@@ -63,80 +51,59 @@ Route::middleware(['auth'])->group(function () {
                 ->unique()
                 ->values(),
         ]);
-
     })->name('debug-role');
 
-
-    // Inventario - Almacén, Auxiliar Almacén, Dirección y TI
-
+    // Inventario y almacén
     Route::middleware(['inventory.access'])->group(function () {
-
-        // Las rutas específicas deben declararse antes de inventario/{inventario}
-
         Route::post(
             'inventario/search-ajax',
             [InventarioController::class, 'searchAjax']
         )->name('inventario.search.ajax');
-
 
         Route::get(
             'inventario/export/pdf',
             [InventarioController::class, 'exportPDF']
         )->name('inventario.export.pdf');
 
-
         Route::get(
             'inventario/export/excel',
             [InventarioController::class, 'exportExcel']
         )->name('inventario.export.excel');
-
 
         Route::get(
             'inventario/view/pdf',
             [InventarioController::class, 'viewPDF']
         )->name('inventario.view.pdf');
 
-
         Route::get(
             'inventario/api/all',
             [InventarioController::class, 'getAll']
         )->name('inventario.api.all');
-
 
         Route::get(
             'inventario/ajustes',
             [AjusteInventarioController::class, 'index']
         )->name('inventario.ajustes.index');
 
-
         Route::middleware('can:manage-inventory')->group(function () {
-
             Route::resource('inventario', InventarioController::class)
                 ->only(['create', 'store', 'edit', 'update', 'destroy']);
-
 
             Route::post(
                 'inventario/{inventario}/ajustes',
                 [AjusteInventarioController::class, 'store']
             )->name('inventario.ajustes.store');
-
         });
-
 
         Route::resource('inventario', InventarioController::class)
             ->only(['index', 'show']);
 
-
         Route::resource('proveedores', ProveedorController::class)
             ->parameters(['proveedores' => 'proveedor']);
 
-
         Route::resource('clientes', ClienteController::class);
 
-
         // Entradas
-
-        // Búsquedas AJAX: declarar antes de las rutas del recurso.
         Route::get(
             'entradas/buscar-proveedores',
             [EntradaController::class, 'buscarProveedores']
@@ -147,7 +114,6 @@ Route::middleware(['auth'])->group(function () {
             [EntradaController::class, 'buscarProductos']
         )->name('entradas.buscar-productos');
 
-        // Rutas del recurso de entradas
         Route::resource('entradas', EntradaController::class)
             ->only(['index', 'create', 'store', 'show']);
 
@@ -161,139 +127,106 @@ Route::middleware(['auth'])->group(function () {
             [EntradaController::class, 'viewPDF']
         )->name('entradas.view-pdf');
 
-
-        // Búsqueda AJAX de solicitudes con materiales pendientes
-
+        // Búsqueda y consulta para salidas
         Route::get(
             'salidas/buscar-solicitudes',
             [SalidaController::class, 'buscarSolicitudes']
         )->name('salidas.buscar-solicitudes');
-
-
-        // Obtener los datos y materiales pendientes de una solicitud
 
         Route::get(
             'salidas/solicitudes/{solicitud}',
             [SalidaController::class, 'obtenerSolicitud']
         )->name('salidas.solicitudes.show');
 
-
-        // Salidas de material
-
         Route::resource('salidas', SalidaController::class)
             ->only(['index', 'create', 'store', 'show']);
-
 
         Route::get(
             'salidas/{salida}/pdf',
             [SalidaController::class, 'generatePDF']
         )->name('salidas.pdf');
 
-
         Route::get(
             'salidas/{salida}/view-pdf',
             [SalidaController::class, 'viewPDF']
         )->name('salidas.view-pdf');
-
     });
 
-
     // Solicitudes de material
-
     Route::get(
         '/solicitudes',
         [SolicitudMaterialController::class, 'index']
     )->name('solicitudes.index');
-
 
     Route::get(
         '/solicitudes/create',
         [SolicitudMaterialController::class, 'create']
     )->name('solicitudes.create');
 
-
     Route::post(
         '/solicitudes',
         [SolicitudMaterialController::class, 'store']
     )->name('solicitudes.store');
-
-
-    // Las rutas específicas deben ir antes de solicitudes/{solicitud}
 
     Route::get(
         '/solicitudes/buscar-productos',
         [SolicitudMaterialController::class, 'buscarProductos']
     )->name('solicitudes.buscar-productos');
 
-
     Route::get(
         '/solicitudes/producto/{id}',
         [SolicitudMaterialController::class, 'obtenerProducto']
     )->name('solicitudes.obtener-producto');
-
 
     Route::get(
         '/solicitudes/{solicitud}',
         [SolicitudMaterialController::class, 'show']
     )->name('solicitudes.show');
 
-
     Route::get(
         'solicitudes/{solicitud}/pdf',
         [SolicitudMaterialController::class, 'pdf']
     )->name('solicitudes.pdf');
 
-
     // Requisiciones
-
     Route::get(
         '/requisiciones',
         [RequisicionController::class, 'index']
     )->name('requisiciones.index');
-
 
     Route::get(
         '/requisiciones/create',
         [RequisicionController::class, 'create']
     )->name('requisiciones.create');
 
-
     Route::post(
         '/requisiciones',
         [RequisicionController::class, 'store']
     )->name('requisiciones.store');
-
 
     Route::get(
         '/requisiciones/{requisicion}',
         [RequisicionController::class, 'show']
     )->name('requisiciones.show');
 
-
     Route::get(
         'requisiciones/{requisicion}/pdf',
         [RequisicionController::class, 'pdf']
     )->name('requisiciones.pdf');
 
-
     // Aprobación de solicitudes y requisiciones
-
     Route::put(
         'solicitudes/{solicitud}/estatus',
         [SolicitudMaterialController::class, 'updateEstatus']
     )->name('solicitudes.updateEstatus');
-
 
     Route::put(
         'requisiciones/{requisicion}/estatus',
         [RequisicionController::class, 'updateEstatus']
     )->name('requisiciones.updateEstatus');
 
-
     // Préstamos de materiales
-
     Route::prefix('prestamos')->name('prestamos.')->group(function () {
-
         Route::resource('/', PrestamoMaterialController::class)
             ->only(['index', 'create', 'store', 'show'])
             ->parameters(['' => 'prestamo'])
@@ -304,219 +237,181 @@ Route::middleware(['auth'])->group(function () {
                 'show' => 'show',
             ]);
 
-
         Route::get(
             '/dashboard/overview',
             [PrestamoMaterialController::class, 'dashboard']
         )->name('dashboard');
-
 
         Route::get(
             '/buscar-productos/search',
             [PrestamoMaterialController::class, 'buscarProductos']
         )->name('buscar-productos');
 
-
         Route::get(
             '/producto/{id}',
             [PrestamoMaterialController::class, 'obtenerProducto']
         )->name('obtener-producto');
-
 
         Route::put(
             '/{prestamo}/estatus',
             [PrestamoMaterialController::class, 'updateEstatus']
         )->name('updateEstatus');
 
-
         Route::get(
             '/{prestamo}/devolucion',
             [PrestamoMaterialController::class, 'devolucion']
         )->name('devolucion');
 
-
         Route::post(
             '/{prestamo}/devolucion',
             [PrestamoMaterialController::class, 'procesarDevolucion']
         )->name('procesarDevolucion');
-
     });
 
-
-    // Usuarios - Solo TI y Dirección
-
+    // Usuarios
     Route::middleware(['user.access'])->group(function () {
-
         Route::resource('users', UserController::class);
-
     });
-
 
     // Aprobación de requisiciones por Finanzas
-
     Route::patch(
         '/requisiciones/{requisicion}/estatus-finanzas',
         [RequisicionController::class, 'updateEstatusFinanzas']
-    )
-        ->name('requisiciones.updateEstatusFinanzas')
-        ->middleware('auth');
+    )->name('requisiciones.updateEstatusFinanzas');
 
-
-    // Exportaciones a Excel
-
+    // Exportaciones
     Route::get(
         '/prestamos/{prestamo}/excel',
         [PrestamoMaterialController::class, 'exportExcel']
     )->name('prestamos.exportExcel');
 
-
     Route::get(
         '/requisiciones/{requisicion}/excel',
         [RequisicionController::class, 'exportExcel']
     )->name('requisiciones.exportExcel');
-
 });
 
-
-// Rutas protegidas para RH
-
+// Rutas de Recursos Humanos
 Route::middleware(['auth', 'rh.access'])->group(function () {
-
     Route::resource('personal', PersonalController::class);
 
+    Route::get(
+        'catalogos-rh',
+        [CatalogoRhController::class, 'index']
+    )->name('catalogos-rh.index');
 
-    Route::get('catalogos-rh', [CatalogoRhController::class, 'index'])
-        ->name('catalogos-rh.index');
+    Route::post(
+        'catalogos-rh/areas',
+        [CatalogoRhController::class, 'storeArea']
+    )->name('catalogos-rh.areas.store');
 
+    Route::put(
+        'catalogos-rh/areas/{area}',
+        [CatalogoRhController::class, 'updateArea']
+    )->name('catalogos-rh.areas.update');
 
-    Route::post('catalogos-rh/areas', [CatalogoRhController::class, 'storeArea'])
-        ->name('catalogos-rh.areas.store');
+    Route::delete(
+        'catalogos-rh/areas/{area}',
+        [CatalogoRhController::class, 'destroyArea']
+    )->name('catalogos-rh.areas.destroy');
 
-    Route::put('catalogos-rh/areas/{area}', [CatalogoRhController::class, 'updateArea'])
-        ->name('catalogos-rh.areas.update');
+    Route::post(
+        'catalogos-rh/departamentos',
+        [CatalogoRhController::class, 'storeDepartamento']
+    )->name('catalogos-rh.departamentos.store');
 
-    Route::delete('catalogos-rh/areas/{area}', [CatalogoRhController::class, 'destroyArea'])
-        ->name('catalogos-rh.areas.destroy');
+    Route::put(
+        'catalogos-rh/departamentos/{departamento}',
+        [CatalogoRhController::class, 'updateDepartamento']
+    )->name('catalogos-rh.departamentos.update');
 
+    Route::delete(
+        'catalogos-rh/departamentos/{departamento}',
+        [CatalogoRhController::class, 'destroyDepartamento']
+    )->name('catalogos-rh.departamentos.destroy');
 
-    Route::post('catalogos-rh/departamentos', [CatalogoRhController::class, 'storeDepartamento'])
-        ->name('catalogos-rh.departamentos.store');
+    Route::post(
+        'catalogos-rh/puestos',
+        [CatalogoRhController::class, 'storePuesto']
+    )->name('catalogos-rh.puestos.store');
 
-    Route::put('catalogos-rh/departamentos/{departamento}', [CatalogoRhController::class, 'updateDepartamento'])
-        ->name('catalogos-rh.departamentos.update');
+    Route::put(
+        'catalogos-rh/puestos/{puesto}',
+        [CatalogoRhController::class, 'updatePuesto']
+    )->name('catalogos-rh.puestos.update');
 
-    Route::delete('catalogos-rh/departamentos/{departamento}', [CatalogoRhController::class, 'destroyDepartamento'])
-        ->name('catalogos-rh.departamentos.destroy');
-
-
-    Route::post('catalogos-rh/puestos', [CatalogoRhController::class, 'storePuesto'])
-        ->name('catalogos-rh.puestos.store');
-
-    Route::put('catalogos-rh/puestos/{puesto}', [CatalogoRhController::class, 'updatePuesto'])
-        ->name('catalogos-rh.puestos.update');
-
-    Route::delete('catalogos-rh/puestos/{puesto}', [CatalogoRhController::class, 'destroyPuesto'])
-        ->name('catalogos-rh.puestos.destroy');
-
+    Route::delete(
+        'catalogos-rh/puestos/{puesto}',
+        [CatalogoRhController::class, 'destroyPuesto']
+    )->name('catalogos-rh.puestos.destroy');
 
     Route::get(
         'personal/buscar/ajax',
         [PersonalController::class, 'buscar']
     )->name('personal.buscar');
 
-
     Route::get(
         'personal/datos/{id}',
         [PersonalController::class, 'getDatos']
     )->name('personal.getDatos');
-
 
     Route::get(
         'personal/export/pdf',
         [PersonalController::class, 'exportPDF']
     )->name('personal.exportPDF');
 
-
-    // Bajas: no hay rutas independientes de consulta, edición o eliminación.
-
     // Bajas de personal
-
-    Route::get('bajas', [BajaColaboradorController::class, 'index'])
-        ->name('bajas.index');
-
-    Route::post('bajas', [BajaColaboradorController::class, 'store'])
-        ->name('bajas.store');
-
-    Route::patch('bajas/{baja}/reactivar', [BajaColaboradorController::class, 'reactivar'])
-        ->name('bajas.reactivar');
-
-    Route::resource('cambios', CambioPuestoSueldoController::class);
-
-
     Route::get(
-        'cambios/historial/{personal_id}',
-        [CambioPuestoSueldoController::class, 'historial']
-    )->name('cambios.historial');
+        'bajas',
+        [BajaColaboradorController::class, 'index']
+    )->name('bajas.index');
 
+    Route::post(
+        'bajas',
+        [BajaColaboradorController::class, 'store']
+    )->name('bajas.store');
 
-    Route::get(
-        'cambios/export/pdf',
-        [CambioPuestoSueldoController::class, 'exportPDF']
-    )->name('cambios.exportPDF');
-
+    Route::patch(
+        'bajas/{baja}/reactivar',
+        [BajaColaboradorController::class, 'reactivar']
+    )->name('bajas.reactivar');
 });
 
-
-// Rutas protegidas para HSE
-
+// Rutas de HSE
 Route::middleware(['auth', 'hse.access'])->group(function () {
-
-    // Estas rutas deben declararse antes de valepp/{valepp}.
-
     Route::get(
         'valepp/solicitudes-epp/buscar',
         [ValeppController::class, 'buscarSolicitudesEpp']
     )->name('valepp.solicitudes-epp.buscar');
-
 
     Route::get(
         'valepp/solicitudes-epp/{solicitud}',
         [ValeppController::class, 'obtenerSolicitudEpp']
     )->name('valepp.solicitudes-epp.show');
 
-
     Route::get(
         'valepp/{valepp}/pdf',
         [ValeppController::class, 'exportPDF']
     )->name('valepp.exportPDF');
 
-
     Route::resource('valepp', ValeppController::class)
         ->only(['index', 'create', 'store', 'show']);
-
 });
 
-
-// Órdenes de Compra - Solo Finanzas y Auxiliar Finanzas
-
+// Órdenes de compra
 Route::middleware(['auth', 'finanzas.access'])->group(function () {
-
     Route::get(
         '/orden-compra/buscar-productos',
         [OrdenCompraController::class, 'buscarProductos']
     )->name('OrdenCompra.buscar-productos');
 
-
     Route::resource('orden-compra', OrdenCompraController::class)
         ->parameters([
             'orden-compra' => 'ordenCompra',
         ]);
-
 });
 
-
 // PDF de orden de compra
-
 Route::get(
     'orden-compra/{ordenCompra}/pdf',
     [OrdenCompraController::class, 'pdf']

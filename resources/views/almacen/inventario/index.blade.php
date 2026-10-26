@@ -347,7 +347,7 @@
                 <tbody id="inventory-table"
                        class="divide-y divide-gray-100 bg-white dark:divide-gray-700 dark:bg-gray-800">
 
-                    @include('inventario.partials.table-rows', [
+                    @include('almacen.inventario.partials.table-rows', [
                         'inventarios' => $inventarios
                     ])
 
