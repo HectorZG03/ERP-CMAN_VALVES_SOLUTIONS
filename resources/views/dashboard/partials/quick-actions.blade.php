@@ -12,7 +12,7 @@
     @php
         /*
          * Las acciones se definen como datos para evitar repetir el mismo
-         * HTML en cada rol. Se conserva la misma visibilidad y las mismas rutas.
+         * HTML en cada rol. Se conserva la visibilidad y las rutas actuales.
          */
         $actions = [];
 
@@ -191,26 +191,39 @@
                 ],
             ];
         }
+
+        // Este acceso se muestra a todos los perfiles.
+        $actions[] = [
+            'label' => 'Vacaciones',
+            'description' => 'Módulo en construcción',
+            'route' => 'vacaciones.index',
+            'icon' => 'fas fa-umbrella-beach',
+            'bg' => 'bg-amber-100 dark:bg-amber-900/30',
+            'text' => 'text-amber-600 dark:text-amber-400',
+            'hover' => 'hover:border-amber-300 dark:hover:border-amber-600',
+        ];
     @endphp
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         @foreach($actions as $action)
             @php
                 $actionCardBackground = match (true) {
                     str_contains($action['bg'], 'green') => 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/40',
                     str_contains($action['bg'], 'purple') => 'bg-violet-50 dark:bg-violet-950/20 border-violet-100 dark:border-violet-900/40',
                     str_contains($action['bg'], 'orange') => 'bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-900/40',
-                    str_contains($action['bg'], 'yellow') => 'bg-amber-50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/40',
+                    str_contains($action['bg'], 'amber') || str_contains($action['bg'], 'yellow') => 'bg-amber-50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/40',
+                    str_contains($action['bg'], 'red') => 'bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/40',
                     default => 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/40',
                 };
             @endphp
+
             <a
                 data-dashboard-animate
                 href="{{ route($action['route']) }}"
-                class="group {{ $actionCardBackground }} rounded-xl border p-5 shadow-sm hover:shadow-md {{ $action['hover'] }} transition"
+                class="group {{ $actionCardBackground }} rounded-xl border p-5 shadow-sm transition hover:shadow-md {{ $action['hover'] }}"
             >
                 <div class="flex items-center gap-4">
-                    <div class="w-11 h-11 shrink-0 rounded-xl {{ $action['bg'] }} flex items-center justify-center group-hover:scale-105 transition-transform">
+                    <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl {{ $action['bg'] }} transition-transform group-hover:scale-105">
                         <i class="{{ $action['icon'] }} {{ $action['text'] }}"></i>
                     </div>
 
@@ -219,7 +232,7 @@
                             {{ $action['label'] }}
                         </h3>
 
-                        <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
+                        <p class="truncate text-sm text-gray-500 dark:text-gray-400">
                             {{ $action['description'] }}
                         </p>
                     </div>
