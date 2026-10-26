@@ -90,14 +90,14 @@ class EntradaController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('entradas.index', compact('entradas'));
+        return view('almacen.entradas.index', compact('entradas'));
     }
 
     public function create()
     {
         $entradaReciente = session('entrada_reciente', null);
 
-        return view('entradas.create', compact('entradaReciente'));
+        return view('almacen.entradas.create', compact('entradaReciente'));
     }
 
     /**
@@ -289,7 +289,7 @@ class EntradaController extends Controller
     {
         $entrada->load(['proveedor', 'user', 'detalles.inventario']);
 
-        return view('entradas.show', compact('entrada'));
+        return view('almacen.entradas.show', compact('entrada'));
     }
 
     public function destroy(Entrada $entrada)
@@ -341,7 +341,7 @@ class EntradaController extends Controller
         $datosFirma = $this->obtenerFirma($entrada);
 
         $pdf = Pdf::loadView(
-            'entradas.pdf',
+            'almacen.entradas.pdf',
             array_merge(compact('entrada'), $datosFirma)
         );
 
@@ -363,7 +363,7 @@ class EntradaController extends Controller
         $datosFirma = $this->obtenerFirma($entrada);
 
         $pdf = Pdf::loadView(
-            'entradas.pdf',
+            'almacen.entradas.pdf',
             array_merge(compact('entrada'), $datosFirma)
         );
 

@@ -51,7 +51,7 @@ class AjusteInventarioController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        return view('inventario.ajustes.index', compact(
+        return view('almacen.inventario.ajustes.index', compact(
             'ajustes',
             'usuarios',
             'filters'

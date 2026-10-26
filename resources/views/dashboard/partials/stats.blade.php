@@ -209,9 +209,18 @@
 
     <div class="grid grid-cols-1 {{ $gridColumns }} gap-4">
         @foreach($stats as $stat)
+            @php
+                $cardBackground = match (true) {
+                    str_contains($stat['bg'], 'red') => 'bg-rose-50 dark:bg-rose-950/20 border-rose-100 dark:border-rose-900/40',
+                    str_contains($stat['bg'], 'yellow') => 'bg-amber-50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/40',
+                    str_contains($stat['bg'], 'green') => 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/40',
+                    str_contains($stat['bg'], 'purple') => 'bg-violet-50 dark:bg-violet-950/20 border-violet-100 dark:border-violet-900/40',
+                    default => 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/40',
+                };
+            @endphp
             <div
                 data-dashboard-animate
-                class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5"
+                class="{{ $cardBackground }} rounded-xl border shadow-sm p-5"
             >
                 <div class="flex items-center justify-between">
                     <div>

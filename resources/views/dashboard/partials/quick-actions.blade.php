@@ -204,10 +204,19 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         @foreach($actions as $action)
+            @php
+                $actionCardBackground = match (true) {
+                    str_contains($action['bg'], 'green') => 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/40',
+                    str_contains($action['bg'], 'purple') => 'bg-violet-50 dark:bg-violet-950/20 border-violet-100 dark:border-violet-900/40',
+                    str_contains($action['bg'], 'orange') => 'bg-orange-50 dark:bg-orange-950/20 border-orange-100 dark:border-orange-900/40',
+                    str_contains($action['bg'], 'yellow') => 'bg-amber-50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/40',
+                    default => 'bg-blue-50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/40',
+                };
+            @endphp
             <a
                 data-dashboard-animate
                 href="{{ route($action['route']) }}"
-                class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm hover:shadow-md {{ $action['hover'] }} transition"
+                class="group {{ $actionCardBackground }} rounded-xl border p-5 shadow-sm hover:shadow-md {{ $action['hover'] }} transition"
             >
                 <div class="flex items-center gap-4">
                     <div class="w-11 h-11 shrink-0 rounded-xl {{ $action['bg'] }} flex items-center justify-center group-hover:scale-105 transition-transform">

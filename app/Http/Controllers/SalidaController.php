@@ -105,7 +105,7 @@ class SalidaController extends Controller
             ->withQueryString();
 
         return view(
-            'salidas.index',
+            'almacen.salidas.index',
             compact('salidas')
         );
     }
@@ -115,7 +115,7 @@ class SalidaController extends Controller
      */
     public function create()
     {
-        return view('salidas.create');
+        return view('almacen.salidas.create');
     }
 
     /**
@@ -303,7 +303,7 @@ class SalidaController extends Controller
         ]);
 
         return view(
-            'salidas.show',
+            'almacen.salidas.show',
             compact('salida')
         );
     }

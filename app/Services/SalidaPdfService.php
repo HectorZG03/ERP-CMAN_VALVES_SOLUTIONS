@@ -22,7 +22,7 @@ class SalidaPdfService
         );
 
         $pdf = Pdf::loadView(
-            'salidas.pdf',
+            'almacen.salidas.pdf',
             array_merge(
                 ['salida' => $salida],
                 $datosFirmas
@@ -68,7 +68,7 @@ class SalidaPdfService
         );
 
         $pdf = Pdf::loadView(
-            'salidas.pdf',
+            'almacen.salidas.pdf',
             array_merge(
                 ['salida' => $salida],
                 $datosFirmas
