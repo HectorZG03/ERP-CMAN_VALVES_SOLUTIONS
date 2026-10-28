@@ -256,37 +256,34 @@
                                             </svg>
                                         </a>
 
-                                        @if ($estadoClave === 'activo')
-                                            <button type="button"
-                                                    class="open-baja-modal inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-700 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-red-900/60 dark:bg-red-900/30 dark:text-red-200 dark:hover:bg-red-900/60"
-                                                    data-personal-id="{{ $persona->id }}"
-                                                    data-personal-name="{{ $persona->nombre_mostrar }}"
-                                                    data-employee-id="{{ $laboral?->employee_id ?: 'Sin código de empleado' }}"
-                                                    aria-label="Registrar baja de {{ $persona->nombre_mostrar }}"
-                                                    title="Registrar baja">
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                          d="M18 12H6m12 0l-4-4m4 4l-4 4M4 5v14"/>
-                                                </svg>
-                                            </button>
-                                        @endif
-
-                                        <form method="POST"
-                                              action="{{ route('personal.destroy', $persona) }}"
-                                              onsubmit="return confirm('¿Eliminar este colaborador? Esta acción no se puede deshacer.')">
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <button type="submit"
-                                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-700 transition hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-red-900/60 dark:bg-red-900/30 dark:text-red-200 dark:hover:bg-red-900/60"
-                                                    aria-label="Eliminar {{ $persona->nombre_mostrar }}"
-                                                    title="Eliminar">
-                                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3m-9 0h12"/>
-                                                </svg>
-                                            </button>
-                                        </form>
+                                        <button
+                                            type="button"
+                                            class="open-personal-info-modal inline-flex h-9 w-9 items-center justify-center rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 transition hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-indigo-900/60 dark:bg-indigo-900/30 dark:text-indigo-200 dark:hover:bg-indigo-900/60"
+                                            data-name="{{ $persona->nombre_mostrar }}"
+                                            data-employee-id="{{ $laboral?->employee_id }}"
+                                            data-area="{{ $area?->nombre }}"
+                                            data-department="{{ $departamento?->nombre }}"
+                                            data-position="{{ $puesto?->nombre }}"
+                                            data-hire-date="{{ $laboral?->fecha_ingreso?->format('d/m/Y') }}"
+                                            data-status="{{ $estadoNombre }}"
+                                            data-email="{{ $persona->correo_electronico }}"
+                                            data-phone="{{ $persona->numero_telefonico }}"
+                                            data-curp="{{ $persona->curp }}"
+                                            data-rfc="{{ $persona->rfc }}"
+                                            data-nss="{{ $persona->nss }}"
+                                            data-sex="{{ $persona->sexo }}"
+                                            data-birth-date="{{ $persona->fecha_nacimiento }}"
+                                            data-nationality="{{ $persona->nacionalidad }}"
+                                            data-civil-status="{{ $persona->estado_civil }}"
+                                            data-address="{{ $persona->direccion }}"
+                                            aria-label="Consultar datos de {{ $persona->nombre_mostrar }}"
+                                            title="Consultar datos"
+                                        >
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -315,10 +312,9 @@
         </div>
     </section>
 
-    {{-- Se mantiene fuera de la región que reemplaza la búsqueda AJAX. --}}
-    @include('rh.personal.modales.registrar-baja')
+    @include('rh.personal.modales.informacion')
 </div>
 
 <script src="{{ asset('js/rh/personal-index.js') }}" defer></script>
-<script src="{{ asset('js/rh/registrar-baja.js') }}" defer></script>
+<script src="{{ asset('js/rh/personal-info-modal.js') }}" defer></script>
 @endsection

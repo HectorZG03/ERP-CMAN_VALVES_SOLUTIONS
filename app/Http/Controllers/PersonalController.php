@@ -6,7 +6,6 @@ use App\Models\Area;
 use App\Models\DatosLaborales;
 use App\Models\EstadoLaboral;
 use App\Models\Personal;
-use App\Models\Puesto;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -268,6 +267,7 @@ class PersonalController extends Controller
             'areas'
         ));
     }
+
     public function edit(Personal $personal)
     {
         return redirect()->route('personal.show', $personal);
@@ -412,36 +412,6 @@ class PersonalController extends Controller
                 'tab' => $seccion,
             ])
             ->with('success', 'Sección actualizada correctamente.');
-    }
-
-    public function destroy(Personal $personal)
-    {
-        if ($personal->bajas()->exists()) {
-            return redirect()->route('personal.index')
-                ->withErrors([
-                    'error' => 'No se puede eliminar al colaborador porque tiene historial de bajas. El historial debe conservarse.',
-                ]);
-        }
-
-        try {
-            if (
-                $personal->foto
-                && $personal->foto !== 'N/A'
-                && Storage::disk('public')->exists($personal->foto)
-            ) {
-                Storage::disk('public')->delete($personal->foto);
-            }
-
-            $personal->delete();
-
-            return redirect()->route('personal.index')
-                ->with('success', 'Colaborador eliminado exitosamente.');
-        } catch (\Exception $e) {
-            return redirect()->route('personal.index')
-                ->withErrors([
-                    'error' => 'Error al eliminar: ' . $e->getMessage(),
-                ]);
-        }
     }
 
     public function buscar(Request $request)

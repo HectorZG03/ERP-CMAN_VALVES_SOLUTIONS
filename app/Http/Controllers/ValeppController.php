@@ -301,9 +301,6 @@ class ValeppController extends Controller
         ]);
     }
 
-    /**
-     * Obtener los productos pendientes de una solicitud EPP.
-     */
     public function obtenerSolicitudEpp(
         Request $request,
         SolicitudMaterial $solicitud
@@ -313,26 +310,63 @@ class ValeppController extends Controller
             403
         );
 
+        $validated = $request->validate([
+            'valepp_id' => ['nullable', 'integer', 'exists:valepp,id'],
+        ]);
+
+        $valeppId = isset($validated['valepp_id'])
+            ? (int) $validated['valepp_id']
+            : null;
+
+        if ($valeppId) {
+            $valepp = Valepp::findOrFail($valeppId);
+
+            abort_unless(
+                (int) $valepp->solicitud_material_id === (int) $solicitud->id,
+                404
+            );
+
+            abort_unless(
+                in_array($valepp->estatus, ['pendiente', 'aprobado'], true),
+                403
+            );
+        }
+
         $this->validarSolicitudEpp($solicitud);
 
         $solicitud->load([
             'user:id,name,email',
-            'detalles' => function ($query) {
+            'detalles' => function ($query) use ($valeppId) {
                 $query
                     ->with([
                         'inventario:id,nombre_producto,economico,categoria,medida,existencia',
                     ])
-                    ->withSum('asignacionesValeEpp', 'cantidad');
+                    ->withSum([
+                        'asignacionesValeEpp as cantidad_asignada_para_vale' =>
+                            function ($asignacionesQuery) use ($valeppId) {
+                                if ($valeppId) {
+                                    $asignacionesQuery->where(
+                                        'valepp_id',
+                                        '<>',
+                                        $valeppId
+                                    );
+                                }
+                            },
+                    ], 'cantidad');
             },
         ]);
 
         $detalles = $solicitud->detalles
-            ->filter(
-                fn (SolicitudMaterialDetalle $detalle) =>
-                    $detalle->cantidad_disponible_epp > 0
-            )
-            ->values()
             ->map(function (SolicitudMaterialDetalle $detalle) {
+                $cantidadAsignada = (int) (
+                    $detalle->cantidad_asignada_para_vale ?? 0
+                );
+
+                $cantidadDisponible = max(
+                    0,
+                    (int) $detalle->cantidad_solicitada - $cantidadAsignada
+                );
+
                 return [
                     'id' => $detalle->id,
                     'inventario_id' => $detalle->inventario_id,
@@ -340,11 +374,13 @@ class ValeppController extends Controller
                     'economico' => $detalle->inventario?->economico,
                     'categoria' => $detalle->inventario?->categoria,
                     'medida' => $detalle->inventario?->medida,
-                    'cantidad_solicitada' => $detalle->cantidad_solicitada,
-                    'cantidad_asignada' => $detalle->cantidad_asignada_epp,
-                    'cantidad_disponible' => $detalle->cantidad_disponible_epp,
+                    'cantidad_solicitada' => (int) $detalle->cantidad_solicitada,
+                    'cantidad_asignada' => $cantidadAsignada,
+                    'cantidad_disponible' => $cantidadDisponible,
                 ];
-            });
+            })
+            ->filter(fn (array $detalle) => $detalle['cantidad_disponible'] > 0)
+            ->values();
 
         return response()->json([
             'solicitud' => [
@@ -545,6 +581,277 @@ class ValeppController extends Controller
             ->route('valepp.show', $valepp)
             ->with('success', 'Vale EPP registrado correctamente.');
     }
+    
+    /**
+     * Mostrar el formulario para corregir un vale EPP.
+     */
+    public function edit(Request $request, Valepp $valepp)
+    {
+        abort_unless(
+            $request->user()->canManageValeEPP(),
+            403
+        );
+
+        abort_unless(
+            in_array($valepp->estatus, ['pendiente', 'aprobado'], true),
+            403
+        );
+
+        $valepp->load([
+            'solicitudMaterial.user',
+            'personal.datosLaborales.puesto.departamento.area',
+            'detalles.inventario',
+            'detalles.solicitudMaterialDetalle',
+        ]);
+
+        if (!$valepp->solicitudMaterial) {
+            abort(404);
+        }
+
+        $detalleSinOrigenValido = $valepp->detalles->contains(
+            fn (ValeppDetalle $detalle) =>
+                !$detalle->solicitudMaterialDetalle
+                || (int) $detalle->solicitudMaterialDetalle->solicitud_material_id
+                    !== (int) $valepp->solicitud_material_id
+        );
+
+        if ($detalleSinOrigenValido) {
+            return redirect()
+                ->route('valepp.show', $valepp)
+                ->with(
+                    'error',
+                    'Este vale contiene productos sin vínculo válido con su solicitud y requiere revisión antes de editarse.'
+                );
+        }
+
+        $this->validarSolicitudEpp($valepp->solicitudMaterial, true);
+
+        return view('valepp.edit', compact('valepp'));
+    }
+
+    /**
+     * Actualizar los productos asignados en un vale EPP.
+     */
+    public function update(Request $request, Valepp $valepp)
+    {
+        abort_unless(
+            $request->user()->canManageValeEPP(),
+            403
+        );
+
+        abort_unless(
+            in_array($valepp->estatus, ['pendiente', 'aprobado'], true),
+            403
+        );
+
+        $validated = $request->validate([
+            'personal_id' => [
+                'required',
+                'integer',
+                'exists:personal,id',
+            ],
+
+            'fecha_solicitud' => [
+                'required',
+                'date',
+                'before_or_equal:today',
+            ],
+
+            'observaciones' => [
+                'nullable',
+                'string',
+                'max:2000',
+            ],
+
+            'detalles' => [
+                'required',
+                'array',
+                'min:1',
+            ],
+
+            'detalles.*.solicitud_material_detalle_id' => [
+                'required',
+                'integer',
+                'distinct',
+                'exists:solicitud_material_detalles,id',
+            ],
+
+            'detalles.*.cantidad' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
+        ], [
+            'personal_id.required' => 'Debe seleccionar al trabajador que recibirá el EPP.',
+            'fecha_solicitud.required' => 'La fecha del vale es obligatoria.',
+            'fecha_solicitud.before_or_equal' => 'La fecha del vale no puede ser posterior a hoy.',
+            'detalles.required' => 'El vale debe conservar al menos un producto.',
+            'detalles.min' => 'El vale debe conservar al menos un producto.',
+            'detalles.*.solicitud_material_detalle_id.distinct' => 'No puede repetir el mismo producto en el vale.',
+            'detalles.*.cantidad.min' => 'Las cantidades deben ser mayores a cero.',
+        ]);
+
+        try {
+            DB::transaction(function () use ($validated, $request, $valepp) {
+                // Serializa cambios simultáneos al mismo vale.
+                $valeBloqueado = Valepp::query()
+                    ->whereKey($valepp->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if (!in_array($valeBloqueado->estatus, ['pendiente', 'aprobado'], true)) {
+                    throw ValidationException::withMessages([
+                        'error' => 'Este vale ya no está disponible para edición.',
+                    ]);
+                }
+
+                // El encabezado conserva su solicitud de origen.
+                $solicitud = SolicitudMaterial::query()
+                    ->whereKey($valeBloqueado->solicitud_material_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                $this->validarSolicitudEpp($solicitud, true);
+
+                $detallesActuales = $valeBloqueado->detalles()
+                    ->with('solicitudMaterialDetalle')
+                    ->get();
+
+                $detalleSinOrigenValido = $detallesActuales->contains(
+                    fn (ValeppDetalle $detalle) =>
+                        !$detalle->solicitudMaterialDetalle
+                        || (int) $detalle->solicitudMaterialDetalle->solicitud_material_id
+                            !== (int) $solicitud->id
+                );
+
+                if ($detalleSinOrigenValido) {
+                    throw ValidationException::withMessages([
+                        'detalles' => 'Este vale contiene productos sin vínculo válido con su solicitud y requiere revisión antes de editarse.',
+                    ]);
+                }
+
+                $personalActivo = Personal::query()
+                    ->whereKey($validated['personal_id'])
+                    ->whereHas('datosLaborales.estadoLaboral', function ($query) {
+                        $query->where('clave', 'activo');
+                    })
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$personalActivo) {
+                    throw ValidationException::withMessages([
+                        'personal_id' => 'Selecciona un colaborador con estado laboral activo.',
+                    ]);
+                }
+
+                $detalleIds = collect($validated['detalles'])
+                    ->pluck('solicitud_material_detalle_id')
+                    ->map(fn ($id) => (int) $id)
+                    ->values();
+
+                // Solo acepta renglones pertenecientes a la solicitud enlazada.
+                $detallesSolicitud = SolicitudMaterialDetalle::query()
+                    ->where('solicitud_material_id', $solicitud->id)
+                    ->whereIn('id', $detalleIds)
+                    ->with('inventario')
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
+
+                if ($detallesSolicitud->count() !== $detalleIds->count()) {
+                    throw ValidationException::withMessages([
+                        'detalles' => 'Todos los productos deben pertenecer a la solicitud EPP enlazada al vale.',
+                    ]);
+                }
+
+                // Cuenta las cantidades usadas por otros vales y excluye este vale.
+                $asignadoEnOtrosVales = ValeppDetalle::query()
+                    ->select('solicitud_material_detalle_id')
+                    ->selectRaw('SUM(cantidad) AS total')
+                    ->whereIn('solicitud_material_detalle_id', $detalleIds)
+                    ->where('valepp_id', '<>', $valeBloqueado->id)
+                    ->groupBy('solicitud_material_detalle_id')
+                    ->pluck('total', 'solicitud_material_detalle_id');
+
+                foreach ($validated['detalles'] as $indice => $asignacion) {
+                    $detalleId = (int) $asignacion['solicitud_material_detalle_id'];
+                    $cantidad = (int) $asignacion['cantidad'];
+
+                    $detalleSolicitud = $detallesSolicitud->get($detalleId);
+                    $inventario = $detalleSolicitud->inventario;
+
+                    if (
+                        !$inventario
+                        || strtoupper(trim((string) $inventario->categoria)) !== 'SEGURIDAD'
+                    ) {
+                        throw ValidationException::withMessages([
+                            "detalles.{$indice}.solicitud_material_detalle_id"
+                                => 'Todos los productos del vale deben pertenecer a la categoría SEGURIDAD.',
+                        ]);
+                    }
+
+                    $cantidadAsignadaEnOtrosVales = (int) (
+                        $asignadoEnOtrosVales[$detalleId] ?? 0
+                    );
+
+                    $cantidadDisponibleParaEsteVale = max(
+                        0,
+                        (int) $detalleSolicitud->cantidad_solicitada
+                            - $cantidadAsignadaEnOtrosVales
+                    );
+
+                    if ($cantidad > $cantidadDisponibleParaEsteVale) {
+                        throw ValidationException::withMessages([
+                            "detalles.{$indice}.cantidad"
+                                => "La cantidad de '{$inventario->nombre_producto}' excede las {$cantidadDisponibleParaEsteVale} unidades disponibles para este vale.",
+                        ]);
+                    }
+                }
+
+                $valeBloqueado->update([
+                    'personal_id' => $validated['personal_id'],
+                    'fecha_solicitud' => $validated['fecha_solicitud'],
+                    'observaciones' => $validated['observaciones'] ?? null,
+                ]);
+
+                // Quita renglones eliminados en el formulario y libera su asignación.
+                $valeBloqueado->detalles()
+                    ->whereNotIn('solicitud_material_detalle_id', $detalleIds)
+                    ->delete();
+
+                // Actualiza renglones existentes o agrega productos de la solicitud.
+                foreach ($validated['detalles'] as $asignacion) {
+                    $detalleId = (int) $asignacion['solicitud_material_detalle_id'];
+                    $detalleSolicitud = $detallesSolicitud->get($detalleId);
+
+                    $valeBloqueado->detalles()->updateOrCreate(
+                        [
+                            'solicitud_material_detalle_id' => $detalleId,
+                        ],
+                        [
+                            'inventario_id' => $detalleSolicitud->inventario_id,
+                            'cantidad' => (int) $asignacion['cantidad'],
+                            'fecha_entrega' => $validated['fecha_solicitud'],
+                        ]
+                    );
+                }
+            });
+        } catch (ValidationException $exception) {
+            throw $exception;
+        } catch (Throwable $exception) {
+            report($exception);
+
+            return back()
+                ->withErrors([
+                    'error' => 'No fue posible actualizar el vale EPP. Inténtelo nuevamente.',
+                ])
+                ->withInput();
+        }
+
+        return redirect()
+            ->route('valepp.show', $valepp)
+            ->with('success', 'Vale EPP actualizado correctamente.');
+    }
 
     /**
      * Mostrar un vale EPP.
@@ -592,8 +899,21 @@ class ValeppController extends Controller
             'fechaGeneracion' => now()->format('d/m/Y H:i:s'),
         ])->setPaper('A4', 'portrait');
 
+        $personal = $valepp->personal;
+
+        $nombreOperador = implode(' ', array_filter([
+            $personal?->ape_pat,
+            $personal?->ape_mat,
+            $personal?->nombre,
+        ]));
+
+        $nombreOperadorArchivo = \Illuminate\Support\Str::slug(
+            $nombreOperador ?: 'sin_operador',
+            '_'
+        );
+
         return $pdf->download(
-            "vale_epp_{$valepp->numero_vale}.pdf"
+            "vale_epp_{$valepp->numero_vale}_{$nombreOperadorArchivo}.pdf"
         );
     }
 

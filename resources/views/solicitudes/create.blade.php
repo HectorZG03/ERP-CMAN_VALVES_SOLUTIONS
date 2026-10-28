@@ -14,6 +14,20 @@
     $campoError = 'border-red-400 focus:border-red-500 focus:ring-red-500 dark:border-red-500';
     $textoError = 'mt-1 text-sm text-red-600 dark:text-red-400';
     $thBase = 'whitespace-nowrap py-3 text-xs font-bold uppercase tracking-wide text-gray-600 dark:text-gray-300';
+
+    $laboralSeleccionado = $personalSeleccionado?->datosLaborales;
+    $puestoSeleccionado = $laboralSeleccionado?->puesto;
+    $departamentoSeleccionado = $puestoSeleccionado?->departamento;
+    $areaSeleccionada = $departamentoSeleccionado?->area;
+
+    $etiquetaPersonalSeleccionado = $personalSeleccionado
+        ? implode(' · ', array_filter([
+            $personalSeleccionado->nombre_mostrar,
+            $laboralSeleccionado?->employee_id,
+            $puestoSeleccionado?->nombre,
+            $areaSeleccionada?->nombre,
+        ]))
+        : '';
 @endphp
 
 <div class="mx-auto w-full max-w-[1700px] space-y-5">
@@ -52,7 +66,6 @@
             Volver al listado
         </a>
     </header>
-
 
     <div
         id="contenedor-formulario"
@@ -273,27 +286,13 @@
 
                                     <thead class="sticky top-0 z-10 bg-gray-100 dark:bg-gray-900/50">
                                         <tr>
-                                            <th scope="col" class="{{ $thBase }} px-4 text-left">
-                                                Producto
-                                            </th>
-                                            <th scope="col" class="{{ $thBase }} px-3 text-left">
-                                                Categoría
-                                            </th>
-                                            <th scope="col" class="{{ $thBase }} px-3 text-center">
-                                                Medida
-                                            </th>
-                                            <th scope="col" class="{{ $thBase }} px-3 text-center">
-                                                Existencia
-                                            </th>
-                                            <th scope="col" class="{{ $thBase }} px-3 text-center">
-                                                Cantidad
-                                            </th>
-                                            <th scope="col" class="{{ $thBase }} px-3 text-right">
-                                                Precio unitario
-                                            </th>
-                                            <th scope="col" class="{{ $thBase }} px-2 text-center">
-                                                Acción
-                                            </th>
+                                            <th scope="col" class="{{ $thBase }} px-4 text-left">Producto</th>
+                                            <th scope="col" class="{{ $thBase }} px-3 text-left">Categoría</th>
+                                            <th scope="col" class="{{ $thBase }} px-3 text-center">Medida</th>
+                                            <th scope="col" class="{{ $thBase }} px-3 text-center">Existencia</th>
+                                            <th scope="col" class="{{ $thBase }} px-3 text-center">Cantidad</th>
+                                            <th scope="col" class="{{ $thBase }} px-3 text-right">Precio unitario</th>
+                                            <th scope="col" class="{{ $thBase }} px-2 text-center">Acción</th>
                                         </tr>
                                     </thead>
 
@@ -364,47 +363,85 @@
                                 @enderror
                             </div>
 
-                            <div>
-                                <label for="personal_id" class="{{ $etiquetaCampo }}">
+                            <div id="personal-combobox-solicitud" class="relative">
+                                @php
+                                    $laboralSeleccionado = $personalSeleccionado?->datosLaborales;
+                                    $puestoSeleccionado = $laboralSeleccionado?->puesto;
+                                    $departamentoSeleccionado = $puestoSeleccionado?->departamento;
+                                    $areaSeleccionada = $departamentoSeleccionado?->area;
+
+                                    $etiquetaPersonalSeleccionado = $personalSeleccionado
+                                        ? implode(' · ', array_filter([
+                                            $personalSeleccionado->nombre_mostrar,
+                                            $laboralSeleccionado?->employee_id,
+                                            $puestoSeleccionado?->nombre,
+                                            $areaSeleccionada?->nombre,
+                                        ]))
+                                        : '';
+                                @endphp
+
+                                <label for="buscar-personal-solicitud" class="{{ $etiquetaCampo }}">
                                     Operador / Personal asignado
                                     <span class="text-xs font-normal text-gray-400">(Opcional)</span>
                                 </label>
 
-                                <select
+                                <input
+                                    type="hidden"
                                     name="personal_id"
                                     id="personal_id"
-                                        @error('personal_id') aria-invalid="true" aria-describedby="error-personal" @enderror
-                                    class="{{ $campoBase }} h-11 px-3 {{ $errors->has('personal_id') ? $campoError : $campoOk }}"
+                                    value="{{ $personalSeleccionado?->id ?? '' }}"
                                 >
-                                    <option value="">— N/A —</option>
 
-                                    @foreach ($personal as $persona)
-                                        @php
-                                            $etiquetaPersona = $persona->nombre_mostrar;
-                                            $numeroEmpleado = $persona->datosLaborales?->employee_id;
-                                            $areaNombre = $persona->datosLaborales
-                                                ?->puesto
-                                                ?->departamento
-                                                ?->area
-                                                ?->nombre;
+                                <div class="relative">
+                                    <input
+                                        type="search"
+                                        id="buscar-personal-solicitud"
+                                        data-search-url="{{ route('solicitudes.buscar-personal') }}"
+                                        value="{{ $etiquetaPersonalSeleccionado }}"
+                                        autocomplete="off"
+                                        role="combobox"
+                                        aria-autocomplete="list"
+                                        aria-haspopup="listbox"
+                                        aria-expanded="false"
+                                        aria-controls="resultados-personal-solicitud"
+                                        aria-describedby="ayuda-personal-solicitud estado-personal-solicitud @error('personal_id') error-personal @enderror"
+                                        placeholder="Escribe nombre, código, puesto o área..."
+                                        class="{{ $campoBase }} h-11 px-3 pr-10 {{ $errors->has('personal_id') ? $campoError : $campoOk }}"
+                                    >
 
-                                            if ($numeroEmpleado && $numeroEmpleado !== 'N/A') {
-                                                $etiquetaPersona .= " ({$numeroEmpleado})";
-                                            }
+                                    <button
+                                        type="button"
+                                        id="limpiar-personal-solicitud"
+                                        class="{{ $personalSeleccionado ? 'inline-flex' : 'hidden' }} absolute inset-y-0 right-0 items-center px-3 text-gray-400 transition hover:text-gray-700 dark:hover:text-white"
+                                        aria-label="Limpiar colaborador seleccionado"
+                                        title="Limpiar selección"
+                                    >
+                                        <i class="fas fa-times" aria-hidden="true"></i>
+                                    </button>
 
-                                            if ($areaNombre) {
-                                                $etiquetaPersona .= " — {$areaNombre}";
-                                            }
-                                        @endphp
+                                    <div
+                                        id="resultados-personal-solicitud"
+                                        role="listbox"
+                                        aria-label="Colaboradores disponibles"
+                                        class="absolute z-30 mt-1 hidden max-h-64 w-full overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-xl dark:border-gray-600 dark:bg-gray-800"
+                                    ></div>
+                                </div>
 
-                                        <option
-                                            value="{{ $persona->id }}"
-                                            @selected((string) old('personal_id') === (string) $persona->id)
-                                        >
-                                            {{ $etiquetaPersona }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                                <p id="ayuda-personal-solicitud" class="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+                                    Escribe al menos dos caracteres. No se carga el directorio completo.
+                                </p>
+
+                                <p
+                                    id="estado-personal-solicitud"
+                                    class="mt-1 min-h-4 text-xs text-gray-500 dark:text-gray-400"
+                                    aria-live="polite"
+                                >
+                                    @if ($personalSeleccionado)
+                                        Se conservó el colaborador previamente seleccionado.
+                                    @else
+                                        Escribe para buscar un colaborador activo.
+                                    @endif
+                                </p>
 
                                 @error('personal_id')
                                     <p id="error-personal" class="{{ $textoError }}">{{ $message }}</p>
@@ -556,7 +593,7 @@
                 title="Eliminar producto"
             >
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a1.995 1.995 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
             </button>
         </td>
@@ -568,4 +605,5 @@
 </script>
 
 <script src="{{ asset('js/solicitudes/create.js') }}" defer></script>
+<script src="{{ asset('js/solicitudes/personal-search.js') }}" defer></script>
 @endsection
