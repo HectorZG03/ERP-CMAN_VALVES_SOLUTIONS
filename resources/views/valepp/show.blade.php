@@ -28,43 +28,64 @@
 
 <div class="space-y-6">
 
-    <div class="flex items-center justify-between">
-        <div>
-            <p class="text-sm font-semibold uppercase tracking-wider text-orange-600 dark:text-orange-400">
-                Vale de equipo de protección personal
-            </p>
-            <div class="mt-1 flex items-center gap-3">
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
-                    {{ $valepp->numero_vale }}
-                </h1>
-                <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $estatusVale['clases'] }}">
-                    {{ $estatusVale['texto'] }}
-                </span>
-            </div>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Registro de asignación vinculado a una solicitud de almacén tipo EPP.
-            </p>
+    <header class="flex flex-col gap-5 border-b border-gray-200 pb-5 lg:flex-row lg:items-center lg:justify-between dark:border-gray-700">
+    <div class="min-w-0">
+        <p class="text-sm font-semibold uppercase tracking-wider text-orange-600 dark:text-orange-400">
+            Vales EPP
+        </p>
+
+        <div class="mt-1 flex flex-wrap items-center gap-3">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
+                {{ $valepp->numero_vale }}
+            </h1>
+
+            <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $estatusVale['clases'] }}">
+                {{ $estatusVale['texto'] }}
+            </span>
         </div>
 
-        <div class="flex items-center gap-3">
-            <a
-                href="{{ route('valepp.index') }}"
-                class="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-            >
-                Volver al listado
-            </a>
-
-            <a
-                href="{{ route('valepp.exportPDF', $valepp) }}"
-                class="rounded-lg bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700"
-            >
-                Descargar PDF
-            </a>
-        </div>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            Solicitud
+            @if ($solicitud)
+                #{{ str_pad((string) $solicitud->id, 4, '0', STR_PAD_LEFT) }}
+                · {{ $solicitud->destino ?? 'Sin destino' }}
+            @else
+                no disponible
+            @endif
+            · Recibe: {{ $personal?->nombre_mostrar ?? 'No disponible' }}
+        </p>
     </div>
 
-    <div class="grid grid-cols-12 gap-6">
-        <div class="col-span-8 space-y-6">
+    <nav class="flex flex-wrap gap-2 lg:justify-end" aria-label="Acciones del vale">
+        <a
+            href="{{ route('valepp.index') }}"
+            class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
+        >
+            Volver al listado
+        </a>
+
+        @if (
+            auth()->user()->canManageValeEPP()
+            && in_array($valepp->estatus, ['pendiente', 'aprobado'], true)
+        )
+            <a
+                href="{{ route('valepp.edit', $valepp) }}"
+                class="rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-700"
+            >
+                Editar productos
+            </a>
+        @endif
+
+        <a
+            href="{{ route('valepp.exportPDF', $valepp) }}"
+            class="rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700"
+        >
+            Descargar PDF
+        </a>
+    </nav>
+</header>
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        <div class="space-y-6 xl:col-span-8">
             <section class="overflow-hidden rounded-xl border border-orange-200 bg-white shadow-sm dark:border-orange-800 dark:bg-gray-800">
                 <div class="flex items-center justify-between border-b border-orange-200 bg-orange-50 px-5 py-4 dark:border-orange-800 dark:bg-orange-900/20">
                     <div>
@@ -90,8 +111,8 @@
                     @endif
                 </div>
 
-                <div class="grid grid-cols-4 divide-x divide-gray-200 dark:divide-gray-700">
-                    <div class="px-5 py-4">
+                <div class="grid grid-cols-2 gap-px bg-gray-200 dark:bg-gray-700 sm:grid-cols-4">
+                    <div class="bg-white px-5 py-4 dark:bg-gray-800">
                         <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                             Tipo
                         </p>
@@ -100,7 +121,7 @@
                         </p>
                     </div>
 
-                    <div class="px-5 py-4">
+                    <div class="bg-white px-5 py-4 dark:bg-gray-800">
                         <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                             Estatus de solicitud
                         </p>
@@ -109,7 +130,7 @@
                         </p>
                     </div>
 
-                    <div class="px-5 py-4">
+                    <div class="bg-white px-5 py-4 dark:bg-gray-800">
                         <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                             Destino
                         </p>
@@ -118,7 +139,7 @@
                         </p>
                     </div>
 
-                    <div class="px-5 py-4">
+                    <div class="bg-white px-5 py-4 dark:bg-gray-800">
                         <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
                             Solicitante
                         </p>
@@ -224,7 +245,7 @@
             @endif
         </div>
 
-        <aside class="col-span-4 space-y-6">
+        <aside class="space-y-6 xl:col-span-4">
             <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <div class="border-b border-gray-200 bg-gray-50 px-5 py-4 dark:border-gray-700 dark:bg-gray-900/40">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white">

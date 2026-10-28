@@ -85,6 +85,62 @@ class BajaColaboradorController extends Controller
         ));
     }
 
+    public function buscarPersonal(Request $request)
+    {
+        $termino = trim((string) $request->query('q', ''));
+
+        // Espera al menos dos caracteres antes de buscar.
+        if (mb_strlen($termino) < 2) {
+            return response()->json([]);
+        }
+
+        $coincidencia = '%' . $termino . '%';
+
+        $personal = Personal::query()
+            ->with(['datosLaborales.puesto.departamento.area'])
+            ->whereHas('datosLaborales.estadoLaboral', function ($query) {
+                $query->where('clave', 'activo');
+            })
+            ->whereDoesntHave('bajas', function ($query) {
+                $query->where('estado', 'activa');
+            })
+            ->where(function ($query) use ($coincidencia) {
+                $query->whereRaw(
+                    "CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?",
+                    [$coincidencia]
+                )->orWhereHas('datosLaborales', function ($laboralQuery) use ($coincidencia) {
+                    $laboralQuery->where('employee_id', 'LIKE', $coincidencia);
+                });
+            })
+            ->orderBy('ape_pat')
+            ->orderBy('ape_mat')
+            ->orderBy('nombre')
+            ->limit(10)
+            ->get();
+
+        return response()->json(
+            $personal->map(function ($persona) {
+                $laboral = $persona->datosLaborales;
+                $puesto = $laboral?->puesto;
+                $departamento = $puesto?->departamento;
+                $area = $departamento?->area;
+
+                return [
+                    'id' => $persona->id,
+                    'nombre' => trim(implode(' ', array_filter([
+                        $persona->nombre,
+                        $persona->ape_pat,
+                        $persona->ape_mat,
+                    ]))),
+                    'employee_id' => $laboral?->employee_id,
+                    'puesto' => $puesto?->nombre,
+                    'departamento' => $departamento?->nombre,
+                    'area' => $area?->nombre,
+                ];
+            })
+        );
+    }
+
     /**
      * Registra una baja desde el modal del listado de personal.
      */

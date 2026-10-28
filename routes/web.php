@@ -33,7 +33,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
-        Route::view('/vacaciones', 'rh.vacaciones.index')
+    Route::view('/vacaciones', 'rh.vacaciones.index')
         ->name('vacaciones.index');
 
     // Ruta de depuración de roles
@@ -182,6 +182,11 @@ Route::middleware(['auth'])->group(function () {
     )->name('solicitudes.obtener-producto');
 
     Route::get(
+        '/solicitudes/buscar-personal',
+        [SolicitudMaterialController::class, 'buscarPersonal']
+    )->name('solicitudes.buscar-personal');
+
+    Route::get(
         '/solicitudes/{solicitud}',
         [SolicitudMaterialController::class, 'show']
     )->name('solicitudes.show');
@@ -296,7 +301,8 @@ Route::middleware(['auth'])->group(function () {
 
 // Rutas de Recursos Humanos
 Route::middleware(['auth', 'rh.access'])->group(function () {
-    Route::resource('personal', PersonalController::class);
+    Route::resource('personal', PersonalController::class)
+        ->only(['index', 'create', 'store', 'show', 'edit', 'update']);
 
     Route::get(
         'catalogos-rh',
@@ -378,6 +384,11 @@ Route::middleware(['auth', 'rh.access'])->group(function () {
         'bajas/{baja}/reactivar',
         [BajaColaboradorController::class, 'reactivar']
     )->name('bajas.reactivar');
+
+    Route::get(
+        'bajas/buscar-personal',
+        [BajaColaboradorController::class, 'buscarPersonal']
+    )->name('bajas.buscar-personal');
 });
 
 // Rutas de HSE
@@ -398,7 +409,7 @@ Route::middleware(['auth', 'hse.access'])->group(function () {
     )->name('valepp.exportPDF');
 
     Route::resource('valepp', ValeppController::class)
-        ->only(['index', 'create', 'store', 'show']);
+        ->only(['index', 'create', 'store', 'show', 'edit', 'update']);
 });
 
 // Órdenes de compra

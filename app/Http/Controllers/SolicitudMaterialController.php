@@ -109,11 +109,49 @@ class SolicitudMaterialController extends Controller
      */
     public function create(Request $request)
     {
+        $personalSeleccionado = null;
+        $personalIdAnterior = $request->session()->getOldInput('personal_id');
+
+        if ($personalIdAnterior) {
+            $personalSeleccionado = Personal::query()
+                ->with([
+                    'datosLaborales:personal_id,employee_id,puesto_id',
+                    'datosLaborales.puesto:id,nombre,departamento_id',
+                    'datosLaborales.puesto.departamento:id,nombre,area_id',
+                    'datosLaborales.puesto.departamento.area:id,nombre',
+                ])
+                ->whereKey($personalIdAnterior)
+                ->whereHas('datosLaborales.estadoLaboral', function ($query) {
+                    $query->where('clave', 'activo');
+                })
+                ->first();
+        }
+
+        $puedeCrearEpp = $request->user()->canManageValeEPP();
+
+        return view('solicitudes.create', compact(
+            'personalSeleccionado',
+            'puedeCrearEpp'
+        ));
+    }
+
+    public function buscarPersonal(Request $request)
+    {
+        $validated = $request->validate([
+            'q' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $termino = trim($validated['q'] ?? '');
+
+        if (mb_strlen($termino) < 2) {
+            return response()->json([]);
+        }
+
+        $coincidencia = '%' . $termino . '%';
+
         $personal = Personal::query()
-            ->select(['id', 'nombre', 'ape_pat', 'ape_mat'])
             ->with([
                 'datosLaborales:personal_id,employee_id,puesto_id',
-                'datosLaborales.estadoLaboral:id,clave,nombre',
                 'datosLaborales.puesto:id,nombre,departamento_id',
                 'datosLaborales.puesto.departamento:id,nombre,area_id',
                 'datosLaborales.puesto.departamento.area:id,nombre',
@@ -121,17 +159,46 @@ class SolicitudMaterialController extends Controller
             ->whereHas('datosLaborales.estadoLaboral', function ($query) {
                 $query->where('clave', 'activo');
             })
+            ->where(function ($query) use ($coincidencia) {
+                $query->whereRaw(
+                    "CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?",
+                    [$coincidencia]
+                )
+                ->orWhereHas('datosLaborales', function ($laboral) use ($coincidencia) {
+                    $laboral->where('employee_id', 'like', $coincidencia);
+                })
+                ->orWhereHas('datosLaborales.puesto', function ($puesto) use ($coincidencia) {
+                    $puesto->where('nombre', 'like', $coincidencia)
+                        ->orWhereHas('departamento', function ($departamento) use ($coincidencia) {
+                            $departamento->where('nombre', 'like', $coincidencia)
+                                ->orWhereHas('area', function ($area) use ($coincidencia) {
+                                    $area->where('nombre', 'like', $coincidencia);
+                                });
+                        });
+                });
+            })
             ->orderBy('ape_pat')
             ->orderBy('ape_mat')
             ->orderBy('nombre')
+            ->limit(15)
             ->get();
 
-        $puedeCrearEpp = $request->user()->canManageValeEPP();
+        return response()->json(
+            $personal->map(function ($persona) {
+                $laboral = $persona->datosLaborales;
+                $puesto = $laboral?->puesto;
+                $departamento = $puesto?->departamento;
 
-        return view('solicitudes.create', compact(
-            'personal',
-            'puedeCrearEpp'
-        ));
+                return [
+                    'id' => $persona->id,
+                    'nombre' => $persona->nombre_mostrar,
+                    'employee_id' => $laboral?->employee_id,
+                    'puesto' => $puesto?->nombre,
+                    'departamento' => $departamento?->nombre,
+                    'area' => $departamento?->area?->nombre,
+                ];
+            })
+        );
     }
 
     /**
@@ -211,6 +278,21 @@ class SolicitudMaterialController extends Controller
             'productos.*.cantidad_solicitada.integer' => 'La cantidad debe ser un número entero.',
             'productos.*.cantidad_solicitada.min' => 'La cantidad debe ser mayor a cero.',
         ]);
+
+        if (!empty($validated['personal_id'])) {
+            $personalActivo = Personal::query()
+                ->whereKey($validated['personal_id'])
+                ->whereHas('datosLaborales.estadoLaboral', function ($query) {
+                    $query->where('clave', 'activo');
+                })
+                ->exists();
+
+            if (!$personalActivo) {
+                throw ValidationException::withMessages([
+                    'personal_id' => 'Selecciona un colaborador que se encuentre activo.',
+                ]);
+            }
+        }
 
         $tipoSolicitud = $validated['tipo_solicitud']
             ?? SolicitudMaterial::TIPO_ESTANDAR;
