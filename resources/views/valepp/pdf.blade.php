@@ -5,7 +5,8 @@
     <title>Vale EPP {{ $valepp->numero_vale }}</title>
     <style>
         @page {
-            margin: 18px 22px;
+            size: letter portrait;
+            margin: 42px 22px 24px;
         }
 
         * {
