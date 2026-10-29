@@ -897,7 +897,7 @@ class ValeppController extends Controller
             'firmanteHse' => $firmanteHse,
             'firmaHse' => $firmaHse,
             'fechaGeneracion' => now()->format('d/m/Y H:i:s'),
-        ])->setPaper('A4', 'portrait');
+        ])->setPaper('letter', 'portrait');
 
         $personal = $valepp->personal;
 
@@ -912,9 +912,22 @@ class ValeppController extends Controller
             '_'
         );
 
-        return $pdf->download(
-            "vale_epp_{$valepp->numero_vale}_{$nombreOperadorArchivo}.pdf"
+        $personal = $valepp->personal;
+
+        $nombreOperador = implode(' ', array_filter([
+            $personal?->ape_pat,
+            $personal?->ape_mat,
+            $personal?->nombre,
+        ]));
+
+        $nombreOperadorArchivo = \Illuminate\Support\Str::slug(
+            $nombreOperador ?: 'sin_operador',
+            '_'
         );
+
+        $nombreArchivo = "vale_epp_{$valepp->numero_vale}_{$nombreOperadorArchivo}.pdf";
+
+        return $pdf->download(mb_strtoupper($nombreArchivo, 'UTF-8'));
     }
 
     /**

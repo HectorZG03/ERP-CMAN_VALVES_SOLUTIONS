@@ -205,7 +205,7 @@ class EntradaController extends Controller
 
                 return round($subtotal + $subtotalLinea, 2);
             },
-            0
+
         );
 
         // El campo puede venir vacío; en ese caso no se aplica descuento.
