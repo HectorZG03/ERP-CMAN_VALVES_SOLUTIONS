@@ -250,21 +250,14 @@
                             </td>
 
                             <!-- Acciones -->
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center space-x-2">
+                            <td class="min-w-[280px] px-6 py-4 text-sm font-medium">
+                                <div class="flex flex-wrap items-center justify-start gap-2">
 
                                     <!-- Ver -->
-                                    <a href="{{ route('requisiciones.show', $requisicion) }}" 
-                                       class="inline-flex items-center px-2 py-1 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-900/50 text-purple-800 dark:text-purple-300 text-xs font-medium rounded-md transition-colors duration-200">
-                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                                            <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-                                        </svg>
-                                        Ver
-                                    </a>
+                                    <x-button :href="route('requisiciones.show', $requisicion)" variant="secondary" size="sm" icon="view">Ver</x-button>
 
                                     <!-- PDF -->
-                                    <a href="{{ route('requisiciones.pdf', $requisicion) }}" class="inline-flex items-center rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-700">Descargar PDF</a>
+                                    <x-button :href="route('requisiciones.pdf', $requisicion)" variant="danger" size="sm" icon="download">Ver PDF</x-button>
 
                                     <!-- Botones FINANZAS -->
                                     @if(auth()->user()->canApproveFinanzas() && $requisicion->estatus_finanzas === 'pendiente')
@@ -272,27 +265,13 @@
                                             @csrf
                                             @method('PATCH')
                                             <input type="hidden" name="estatus_finanzas" value="aprobado">
-                                            <button type="submit"
-                                                    class="inline-flex items-center px-2 py-1 bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-800 dark:text-green-300 text-xs font-medium rounded-md transition-colors duration-200"
-                                                    onclick="return confirm('¿Aprobar esta requisición desde finanzas?')">
-                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                                </svg>
-                                                Aprobar
-                                            </button>
+                                            <x-button type="submit" variant="success" size="sm" icon="check" onclick="return confirm('¿Aprobar esta requisición desde finanzas?')">Aprobar</x-button>
                                         </form>
                                         <form method="POST" action="{{ route('requisiciones.updateEstatusFinanzas', $requisicion) }}" class="inline">
                                             @csrf
                                             @method('PATCH')
                                             <input type="hidden" name="estatus_finanzas" value="denegado">
-                                            <button type="submit"
-                                                    class="inline-flex items-center px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 text-xs font-medium rounded-md transition-colors duration-200"
-                                                    onclick="return confirm('¿Denegar esta requisición desde finanzas?')">
-                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                                </svg>
-                                                Denegar
-                                            </button>
+                                            <x-button type="submit" variant="danger" size="sm" icon="close" onclick="return confirm('¿Denegar esta requisición desde finanzas?')">Denegar</x-button>
                                         </form>
                                     @elseif(auth()->user()->canApproveFinanzas() && $requisicion->estatus_finanzas !== 'pendiente')
                                         <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md
@@ -307,27 +286,13 @@
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="estatus" value="aprobado">
-                                            <button type="submit"
-                                                    class="inline-flex items-center px-2 py-1 bg-green-100 hover:bg-green-200 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-800 dark:text-green-300 text-xs font-medium rounded-md transition-colors duration-200"
-                                                    onclick="return confirm('¿Aprobar esta requisición?')">
-                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                                </svg>
-                                                Aprobar
-                                            </button>
+                                            <x-button type="submit" variant="success" size="sm" icon="check" onclick="return confirm('¿Aprobar esta requisición?')">Aprobar</x-button>
                                         </form>
                                         <form method="POST" action="{{ route('requisiciones.updateEstatus', $requisicion) }}" class="inline">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="estatus" value="denegado">
-                                            <button type="submit"
-                                                    class="inline-flex items-center px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 text-xs font-medium rounded-md transition-colors duration-200"
-                                                    onclick="return confirm('¿Denegar esta requisición?')">
-                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                                </svg>
-                                                Denegar
-                                            </button>
+                                            <x-button type="submit" variant="danger" size="sm" icon="close" onclick="return confirm('¿Denegar esta requisición?')">Denegar</x-button>
                                         </form>
                                     @endif
                                 </div>

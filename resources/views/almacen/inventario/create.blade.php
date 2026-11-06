@@ -427,35 +427,9 @@
                         p-6 sm:flex-row sm:items-center sm:justify-end
                         dark:border-gray-700 dark:bg-gray-800/80">
 
-                <a href="{{ route('inventario.index') }}"
-                   class="inline-flex items-center justify-center rounded-lg border border-gray-300
-                          bg-white px-5 py-2.5 text-sm font-medium text-gray-700
-                          shadow-sm transition hover:bg-gray-100
-                          dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200
-                          dark:hover:bg-gray-600">
+                <x-button :href="route('inventario.index')" variant="secondary" icon="back">Cancelar</x-button>
 
-                    Cancelar
-                </a>
-
-                <button type="submit"
-                        class="inline-flex items-center justify-center gap-2 rounded-lg
-                               bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white
-                               shadow-sm transition hover:bg-blue-700
-                               focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                               dark:focus:ring-offset-gray-800">
-
-                    <svg class="h-4 w-4"
-                         fill="none"
-                         stroke="currentColor"
-                         viewBox="0 0 24 24">
-                        <path stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M5 13l4 4L19 7"/>
-                    </svg>
-
-                    Guardar producto
-                </button>
+                <x-button type="submit" icon="save">Guardar producto</x-button>
 
             </div>
 

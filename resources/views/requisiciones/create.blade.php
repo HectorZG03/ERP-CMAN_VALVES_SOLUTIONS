@@ -215,14 +215,7 @@
                     </span>
                 </div>
 
-                <button
-                    type="button"
-                    id="btn-agregar"
-                    class="mb-4 inline-flex items-center gap-2 rounded bg-green-500 px-4 py-2 font-bold text-white transition-colors duration-200 hover:bg-green-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2 dark:bg-green-600 dark:hover:bg-green-700 dark:focus-visible:ring-offset-gray-800"
-                >
-                    <span aria-hidden="true">+</span>
-                    Agregar Material
-                </button>
+                <x-button type="button" id="btn-agregar" variant="success" icon="add" class="mb-4">Agregar material</x-button>
 
                 {{-- Lista desplazable para que los materiales no alarguen la página --}}
                 <div
@@ -320,22 +313,9 @@
             </div>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <button
-                    type="button"
-                    id="btn-limpiar"
-                    class="rounded bg-gray-500 px-4 py-2 font-bold text-white transition-colors duration-200 hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus-visible:ring-offset-gray-800"
-                >
-                    Limpiar Todo
-                </button>
+                <x-button type="button" id="btn-limpiar" variant="secondary" icon="close">Limpiar todo</x-button>
 
-                <button
-                    type="submit"
-                    id="btn-enviar"
-                    class="rounded bg-purple-500 px-4 py-2 font-bold text-white transition-colors duration-200 hover:bg-purple-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus-visible:ring-offset-gray-800"
-                    disabled
-                >
-                    Enviar Requisición
-                </button>
+                <x-button type="submit" id="btn-enviar" icon="save" disabled>Enviar requisición</x-button>
             </div>
         </form>
     </div>
@@ -348,21 +328,7 @@
                 Material #<span class="material-numero"></span>
             </h4>
 
-            <button
-                type="button"
-                class="btn-eliminar rounded text-red-600 transition-colors duration-200 hover:text-red-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:text-red-400 dark:hover:text-red-300"
-                aria-label="Eliminar material"
-                title="Eliminar material"
-            >
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                    />
-                </svg>
-            </button>
+            <x-button type="button" class="btn-eliminar" variant="danger" size="sm" icon="delete" icon-only aria-label="Eliminar material" title="Eliminar material" />
         </div>
 
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-6 lg:grid-cols-12">

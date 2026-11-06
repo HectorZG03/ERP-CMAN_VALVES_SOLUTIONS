@@ -95,7 +95,7 @@
                 </span>
             @endif
 
-            <a href="{{ route('solicitudes.pdf', $solicitud) }}" class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">Descargar PDF</a>
+            <x-button :href="route('solicitudes.pdf', $solicitud)" variant="danger" icon="download">Ver / imprimir PDF</x-button>
         </div>
     </header>
 
@@ -474,13 +474,8 @@
                                 value="aprobado"
                             >
 
-                            <button
-                                type="submit"
-                                class="inline-flex h-11 w-full items-center justify-center rounded-lg bg-green-600 px-4 font-bold text-white transition hover:bg-green-700"
-                                onclick="return confirm('¿Aprobar esta solicitud? La aprobación no descontará inventario.')"
-                            >
-                                Aprobar
-                            </button>
+                            <x-button type="submit" variant="success" icon="check" class="w-full"
+                                onclick="return confirm('¿Aprobar esta solicitud? La aprobación no descontará inventario.')">Aprobar</x-button>
                         </form>
 
                         <form
@@ -496,13 +491,8 @@
                                 value="denegado"
                             >
 
-                            <button
-                                type="submit"
-                                class="inline-flex h-11 w-full items-center justify-center rounded-lg bg-red-600 px-4 font-bold text-white transition hover:bg-red-700"
-                                onclick="return confirm('¿Denegar esta solicitud?')"
-                            >
-                                Denegar
-                            </button>
+                            <x-button type="submit" variant="danger" icon="close" class="w-full"
+                                onclick="return confirm('¿Denegar esta solicitud?')">Denegar</x-button>
                         </form>
                     </div>
                 </section>

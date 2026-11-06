@@ -167,19 +167,9 @@
             {{-- Acciones --}}
             <div class="flex flex-col gap-2 border-t border-gray-100 pt-4 sm:flex-row sm:justify-end dark:border-gray-700">
 
-                <a
-                    href="{{ route('inventario.ajustes.index') }}"
-                    class="inline-flex items-center justify-center rounded-lg bg-gray-100 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                >
-                    Limpiar
-                </a>
+                <x-button :href="route('inventario.ajustes.index')" variant="secondary" icon="close">Limpiar</x-button>
 
-                <button
-                    type="submit"
-                    class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
-                >
-                    Filtrar
-                </button>
+                <x-button type="submit" variant="primary" icon="filter">Filtrar</x-button>
 
             </div>
 

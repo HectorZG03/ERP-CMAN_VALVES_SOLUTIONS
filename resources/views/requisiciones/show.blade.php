@@ -300,13 +300,7 @@
                                 @method('PATCH')
                                 <input type="hidden" name="estatus_finanzas" value="aprobado">
 
-                                <button
-                                    type="submit"
-                                    class="inline-flex w-full items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white transition-colors duration-200 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:bg-green-700 dark:hover:bg-green-800"
-                                    onclick="return confirm('¿Aprobar esta requisición desde finanzas?')"
-                                >
-                                    Aprobar (Finanzas)
-                                </button>
+                                <x-button type="submit" variant="success" icon="check" class="w-full" onclick="return confirm('¿Aprobar esta requisición desde finanzas?')">Aprobar (Finanzas)</x-button>
                             </form>
 
                             <form
@@ -318,13 +312,7 @@
                                 @method('PATCH')
                                 <input type="hidden" name="estatus_finanzas" value="denegado">
 
-                                <button
-                                    type="submit"
-                                    class="inline-flex w-full items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-3 text-base font-medium text-white transition-colors duration-200 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:bg-red-700 dark:hover:bg-red-800"
-                                    onclick="return confirm('¿Denegar esta requisición desde finanzas?')"
-                                >
-                                    Denegar (Finanzas)
-                                </button>
+                                <x-button type="submit" variant="danger" icon="close" class="w-full" onclick="return confirm('¿Denegar esta requisición desde finanzas?')">Denegar (Finanzas)</x-button>
                             </form>
                         </div>
                     </div>
@@ -354,13 +342,7 @@
                                 @method('PUT')
                                 <input type="hidden" name="estatus" value="aprobado">
 
-                                <button
-                                    type="submit"
-                                    class="inline-flex w-full items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white transition-colors duration-200 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:bg-green-700 dark:hover:bg-green-800"
-                                    onclick="return confirm('¿Aprobar esta requisición?')"
-                                >
-                                    Aprobar Requisición
-                                </button>
+                                <x-button type="submit" variant="success" icon="check" class="w-full" onclick="return confirm('¿Aprobar esta requisición?')">Aprobar requisición</x-button>
                             </form>
 
                             <form
@@ -372,13 +354,7 @@
                                 @method('PUT')
                                 <input type="hidden" name="estatus" value="denegado">
 
-                                <button
-                                    type="submit"
-                                    class="inline-flex w-full items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-3 text-base font-medium text-white transition-colors duration-200 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:bg-red-700 dark:hover:bg-red-800"
-                                    onclick="return confirm('¿Denegar esta requisición?')"
-                                >
-                                    Denegar Requisición
-                                </button>
+                                <x-button type="submit" variant="danger" icon="close" class="w-full" onclick="return confirm('¿Denegar esta requisición?')">Denegar requisición</x-button>
                             </form>
                         </div>
                     </div>

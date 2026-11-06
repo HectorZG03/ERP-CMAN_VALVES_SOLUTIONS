@@ -80,16 +80,10 @@
                     </option>
                 </select>
 
-                <button type="submit"
-                        class="inline-flex items-center justify-center rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    Buscar
-                </button>
+                <x-button type="submit" variant="primary" icon="search">Buscar</x-button>
 
-                <button type="button"
-                        data-entradas-clear
-                        class="@if(!request()->filled('buscar') && request('periodo', 'todos') === 'todos') hidden @endif inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
-                    Limpiar
-                </button>
+                <x-button type="button" variant="secondary" icon="close" data-entradas-clear
+                    class="@if(!request()->filled('buscar') && request('periodo', 'todos') === 'todos') hidden @endif">Limpiar</x-button>
             </form>
         </div>
 
@@ -213,7 +207,7 @@
                                         Ver
                                     </a>
 
-                                    <a href="{{ route('entradas.pdf', $entrada) }}" class="inline-flex items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-700">Descargar PDF</a>
+                                    <x-button :href="route('entradas.pdf', $entrada)" variant="danger" size="sm" icon="download">PDF</x-button>
                                 </div>
                             </td>
                         </tr>

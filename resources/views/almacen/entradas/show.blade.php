@@ -30,7 +30,7 @@
                 Nueva entrada
             </a>
 
-            <a href="{{ route('entradas.pdf', $entrada) }}" class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">Descargar PDF</a>
+            <x-button :href="route('entradas.pdf', $entrada)" variant="danger" icon="download">Descargar PDF</x-button>
         </div>
     </header>
 

@@ -24,7 +24,7 @@
         </div>
 
         <div class="flex flex-wrap gap-2">
-            <a href="{{ route('personal.exportPDF') }}" class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">Descargar PDF</a>
+            <x-button :href="route('personal.exportPDF')" variant="danger" icon="download">Descargar PDF</x-button>
 
             <a href="{{ route('personal.create') }}" class="{{ $buttonPrimary }}">
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -96,9 +96,7 @@
                            class="block w-full rounded-lg border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400">
                 </div>
 
-                <button type="submit" class="{{ $buttonSecondary }} shrink-0">
-                    Buscar
-                </button>
+                <x-button type="submit" variant="secondary" icon="search" class="shrink-0">Buscar</x-button>
             </form>
         </div>
 
@@ -240,19 +238,17 @@
 
                                 <td class="whitespace-nowrap px-4 py-3 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <a href="{{ route('personal.show', $persona) }}"
-                                           class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-700 transition hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-blue-900/60 dark:bg-blue-900/30 dark:text-blue-200 dark:hover:bg-blue-900/60"
-                                           aria-label="Abrir perfil de {{ $persona->nombre_mostrar }}"
-                                           title="Ver perfil">
-                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                            </svg>
-                                        </a>
+                                        <x-button :href="route('personal.show', $persona)" variant="secondary" size="sm" icon="view" icon-only aria-label="Abrir perfil de {{ $persona->nombre_mostrar }}" title="Ver perfil" />
 
-                                        <button
+                                        <x-button
                                             type="button"
-                                            class="open-personal-info-modal inline-flex h-9 w-9 items-center justify-center rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 transition hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-indigo-900/60 dark:bg-indigo-900/30 dark:text-indigo-200 dark:hover:bg-indigo-900/60"
+                                            class="open-personal-info-modal"
+                                            variant="secondary"
+                                            size="sm"
+                                            icon="view"
+                                            icon-only
+                                            aria-label="Consultar datos de {{ $persona->nombre_mostrar }}"
+                                            title="Consultar datos de {{ $persona->nombre_mostrar }}"
                                             data-name="{{ $persona->nombre_mostrar }}"
                                             data-employee-id="{{ $laboral?->employee_id }}"
                                             data-area="{{ $area?->nombre }}"
@@ -270,14 +266,7 @@
                                             data-nationality="{{ $persona->nacionalidad }}"
                                             data-civil-status="{{ $persona->estado_civil }}"
                                             data-address="{{ $persona->direccion }}"
-                                            aria-label="Consultar datos de {{ $persona->nombre_mostrar }}"
-                                            title="Consultar datos"
-                                        >
-                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                            </svg>
-                                        </button>
+                                        />
                                     </div>
                                 </td>
                             </tr>

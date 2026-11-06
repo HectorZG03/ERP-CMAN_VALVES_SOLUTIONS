@@ -28,7 +28,7 @@
             </h1>
         </div>
 
-        <a href="{{ route('salidas.pdf', $salida) }}" class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">Descargar PDF</a>
+        <x-button :href="route('salidas.pdf', $salida)" variant="danger" icon="download">Descargar PDF</x-button>
     </div>
 
     <div class="rounded-lg bg-white p-5 shadow dark:bg-gray-800">

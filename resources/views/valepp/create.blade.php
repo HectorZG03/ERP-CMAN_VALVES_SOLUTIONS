@@ -92,22 +92,9 @@
                         </div>
 
                         <div class="col-span-2 flex items-end gap-2">
-                            <button
-                                type="button"
-                                id="buscar-solicitudes-btn"
-                                class="flex-1 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700"
-                            >
-                                Buscar
-                            </button>
+                            <x-button type="button" id="buscar-solicitudes-btn" variant="accent" icon="search" class="flex-1">Buscar</x-button>
 
-                            <button
-                                type="button"
-                                id="limpiar-busqueda-btn"
-                                class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-                                title="Limpiar búsqueda"
-                            >
-                                Limpiar
-                            </button>
+                            <x-button type="button" id="limpiar-busqueda-btn" variant="secondary" size="sm" icon="close" title="Limpiar búsqueda">Limpiar</x-button>
                         </div>
                     </div>
 
@@ -217,14 +204,7 @@
                                         placeholder="Escribe nombre, código, puesto o área"
                                         class="w-full rounded-lg border-gray-300 bg-white px-3 py-2.5 pr-10 text-sm text-gray-900 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     >
-                                    <button
-                                        type="button"
-                                        id="limpiar-personal"
-                                        class="absolute inset-y-0 right-0 hidden items-center px-3 text-gray-400 hover:text-gray-700 dark:hover:text-white"
-                                        aria-label="Limpiar colaborador seleccionado"
-                                    >
-                                        <i class="fas fa-times" aria-hidden="true"></i>
-                                    </button>
+                                    <x-button type="button" id="limpiar-personal" class="absolute inset-y-0 right-0 hidden" variant="ghost" size="sm" icon="close" icon-only aria-label="Limpiar colaborador seleccionado" title="Limpiar colaborador seleccionado" />
 
                                     <div
                                         id="personal-options"
@@ -411,21 +391,8 @@
             </p>
 
             <div class="flex items-center gap-3">
-                <a
-                    href="{{ route('valepp.index') }}"
-                    class="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-                >
-                    Cancelar
-                </a>
-
-                <button
-                    type="submit"
-                    id="guardar-vale-btn"
-                    disabled
-                    class="rounded-lg bg-orange-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                    Registrar Vale EPP
-                </button>
+                <x-button :href="route('valepp.index')" variant="secondary" icon="back">Cancelar</x-button>
+                <x-button type="submit" id="guardar-vale-btn" variant="accent" icon="save" disabled>Registrar vale EPP</x-button>
             </div>
         </div>
     </form>

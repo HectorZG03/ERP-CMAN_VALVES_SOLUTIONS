@@ -224,14 +224,8 @@
 
             <!-- Botones de Acción -->
             <div class="px-6 py-4 bg-gray-50 flex justify-end space-x-3">
-                <a href="{{ route('users.index') }}" 
-                   class="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium rounded-lg transition-colors">
-                    Cancelar
-                </a>
-                <button type="submit" 
-                        class="px-6 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors shadow-lg">
-                    Actualizar Usuario
-                </button>
+                <x-button :href="route('users.index')" variant="secondary" icon="back">Cancelar</x-button>
+                <x-button type="submit" variant="accent" icon="save">Actualizar usuario</x-button>
             </div>
         </form>
     </div>

@@ -76,7 +76,7 @@
             </a>
         @endif
 
-        <a href="{{ route('valepp.exportPDF', $valepp) }}" class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">Descargar PDF</a>
+        <x-button :href="route('valepp.exportPDF', $valepp)" variant="danger" icon="download">Descargar PDF</x-button>
     </nav>
 </header>
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">

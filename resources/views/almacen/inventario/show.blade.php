@@ -82,19 +82,9 @@
 
             <div class="flex items-center gap-2">
 
-                <a href="{{ route('inventario.ajustes.index', ['inventario_id' => $inventario->id]) }}"
-                   class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs
-                          font-medium text-gray-700 hover:bg-gray-50
-                          dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300
-                          dark:hover:bg-gray-700">
-                    Historial
-                </a>
+                <x-button :href="route('inventario.ajustes.index', ['inventario_id' => $inventario->id])" variant="secondary" size="sm" icon="view">Historial</x-button>
 
-                <a href="{{ route('inventario.edit', $inventario) }}"
-                   class="rounded-lg bg-blue-600 px-3.5 py-2 text-xs font-semibold
-                          text-white hover:bg-blue-700">
-                    Editar
-                </a>
+                <x-button :href="route('inventario.edit', $inventario)" variant="accent" size="sm" icon="edit">Editar</x-button>
 
             </div>
 

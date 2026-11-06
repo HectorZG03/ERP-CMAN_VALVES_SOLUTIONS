@@ -104,17 +104,8 @@
 
                 <!-- Botones -->
                 <div class="flex justify-end space-x-3">
-                    <a href="{{ route('proveedores.index') }}" 
-                       class="px-4 py-2 bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-medium rounded-md transition-colors duration-200">
-                        Cancelar
-                    </a>
-                    <button type="submit" 
-                            class="px-4 py-2 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white font-medium rounded-md transition-colors duration-200">
-                        <svg class="w-5 h-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        Actualizar Proveedor
-                    </button>
+                    <x-button :href="route('proveedores.index')" variant="secondary" icon="back">Cancelar</x-button>
+                    <x-button type="submit" variant="success" icon="save">Actualizar proveedor</x-button>
                 </div>
             </form>
         </div>

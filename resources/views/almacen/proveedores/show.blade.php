@@ -5,26 +5,14 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
-            <a href="{{ route('proveedores.index') }}" 
-               class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md transition-colors duration-200">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-                Volver a Proveedores
-            </a>
+            <x-button :href="route('proveedores.index')" variant="secondary" icon="back">Volver a proveedores</x-button>
             
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
                 Proveedor #{{ str_pad($proveedor->id, 4, '0', STR_PAD_LEFT) }} ID: {{ $proveedor->economico }}
             </h1>
         </div>
 
-        <a href="{{ route('proveedores.edit', $proveedor) }}" 
-           class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white text-sm font-medium rounded-md transition-colors duration-200">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-            </svg>
-            Editar Proveedor
-        </a>
+        <x-button :href="route('proveedores.edit', $proveedor)" icon="edit">Editar proveedor</x-button>
     </div>
 
     <!-- Información del Proveedor -->
@@ -198,14 +186,7 @@
                 <form method="POST" action="{{ route('proveedores.destroy', $proveedor) }}" class="inline">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" 
-                            class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 text-white text-sm font-medium rounded-md transition-colors duration-200"
-                            onclick="return confirm('¿Estás seguro de eliminar este proveedor?\n\nEsta acción no se puede deshacer y eliminará toda la información relacionada.')">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                        Eliminar Proveedor
-                    </button>
+                    <x-button type="submit" variant="danger" icon="delete" onclick="return confirm('¿Estás seguro de eliminar este proveedor?\\n\\nEsta acción no se puede deshacer y eliminará toda la información relacionada.')">Eliminar proveedor</x-button>
                 </form>
             </div>
         </div>

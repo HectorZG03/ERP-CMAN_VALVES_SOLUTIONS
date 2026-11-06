@@ -4,13 +4,7 @@
 <div class="space-y-6">
     <!-- Header -->
     <div class="flex items-center space-x-4">
-        <a href="{{ route('prestamos.show', $prestamo) }}" 
-           class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md transition-colors duration-200">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-            </svg>
-            Volver
-        </a>
+        <x-button :href="route('prestamos.show', $prestamo)" variant="secondary" icon="back">Volver</x-button>
         
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
             Devolución de Préstamo #{{ str_pad($prestamo->id, 5, '0', STR_PAD_LEFT) }}
@@ -107,11 +101,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                         </svg>
                                     </button>
-                                    <button type="button" 
-                                            class="px-3 py-1 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white text-sm rounded-md"
-                                            onclick="marcarTodo(this)">
-                                        Todo
-                                    </button>
+                                    <x-button type="button" onclick="marcarTodo(this)" variant="primary" size="sm" icon="check">Todo</x-button>
                                 </div>
                             </div>
 
@@ -195,20 +185,9 @@
 
                 <!-- Botones -->
                 <div class="mt-6 flex justify-end space-x-3">
-                    <a href="{{ route('prestamos.show', $prestamo) }}" 
-                       class="px-4 py-2 bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-medium rounded-md transition-colors duration-200">
-                        Cancelar
-                    </a>
-                    <button type="button" 
-                            onclick="marcarDevolucionCompleta()"
-                            class="px-4 py-2 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white font-medium rounded-md transition-colors duration-200">
-                        Marcar Todo Como Devuelto
-                    </button>
-                    <button type="submit" 
-                            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-200"
-                            onclick="return confirm('¿Confirmar la devolución de estos productos?')">
-                        Procesar Devolución
-                    </button>
+                    <x-button :href="route('prestamos.show', $prestamo)" variant="secondary" icon="back">Cancelar</x-button>
+                    <x-button type="button" onclick="marcarDevolucionCompleta()" variant="success" icon="check">Marcar todo devuelto</x-button>
+                    <x-button type="submit" variant="primary" icon="save" onclick="return confirm('¿Confirmar la devolución de estos productos?')">Procesar devolución</x-button>
                 </div>
             @else
                 <div class="text-center py-8 text-gray-500 dark:text-gray-400">

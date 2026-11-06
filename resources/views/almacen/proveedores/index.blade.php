@@ -228,29 +228,12 @@
                                 <div class="flex items-center justify-center gap-2">
 
                                     <!-- Ver -->
-                                    <a href="{{ route('proveedores.show', $proveedor) }}"
-                                       title="Ver proveedor"
-                                       aria-label="Ver proveedor"
-                                       class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-700 transition hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/60">
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                                  d="M2.25 12s3.5-7 9.75-7 9.75 7 9.75 7-3.5 7-9.75 7-9.75-7-9.75-7z"/>
-                                            <circle cx="12" cy="12" r="3" stroke-width="1.8"/>
-                                        </svg>
-                                    </a>
+                                    <x-button :href="route('proveedores.show', $proveedor)" variant="secondary" size="sm" icon="view">Ver</x-button>
 
                                     @if(auth()->user()->canManageInventory())
 
                                         <!-- Editar -->
-                                        <a href="{{ route('proveedores.edit', $proveedor) }}"
-                                           title="Editar proveedor"
-                                           aria-label="Editar proveedor"
-                                           class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-700 transition hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-300 dark:hover:bg-amber-900/60">
-                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                                      d="M16.862 4.487l2.651 2.651M4 20l4.5-1 11-11a1.875 1.875 0 00-2.65-2.65l-11 11L4 20z"/>
-                                            </svg>
-                                        </a>
+                                        <x-button :href="route('proveedores.edit', $proveedor)" variant="accent" size="sm" icon="edit">Editar</x-button>
 
                                         <!-- Eliminar -->
                                         <form method="POST"
@@ -259,15 +242,7 @@
                                             @csrf
                                             @method('DELETE')
 
-                                            <button type="submit"
-                                                    title="Eliminar proveedor"
-                                                    aria-label="Eliminar proveedor"
-                                                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-700 transition hover:bg-red-100 dark:border-red-800 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/60">
-                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                                          d="M4 7h16m-10 4v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3"/>
-                                                </svg>
-                                            </button>
+                                            <x-button type="submit" variant="danger" size="sm" icon="delete" aria-label="Eliminar proveedor">Eliminar</x-button>
                                         </form>
 
                                     @endif

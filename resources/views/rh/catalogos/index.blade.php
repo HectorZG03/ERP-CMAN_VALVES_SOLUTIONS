@@ -103,12 +103,8 @@
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                    <button type="submit" class="{{ $primaryButtonClass }}" data-submit-label>
-                        <i class="fas fa-plus" aria-hidden="true"></i> Agregar área
-                    </button>
-                    <button type="button" class="{{ $secondaryButtonClass }} hidden" data-cancel-edit>
-                        Cancelar
-                    </button>
+                    <x-button type="submit" data-submit-label icon="add">Agregar área</x-button>
+                    <x-button type="button" variant="secondary" icon="close" class="hidden" data-cancel-edit>Cancelar</x-button>
                 </div>
             </form>
 
@@ -133,23 +129,8 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="flex justify-end gap-2">
-                                            <button type="button"
-                                                    class="rounded-md p-2 text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-900/30"
-                                                    title="Editar área"
-                                                    data-edit="area"
-                                                    data-id="{{ $area->id }}"
-                                                    data-name="{{ $area->nombre }}">
-                                                <i class="fas fa-pen" aria-hidden="true"></i>
-                                            </button>
-                                            <button type="button"
-                                                    class="rounded-md p-2 text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-900/30"
-                                                    title="Eliminar área"
-                                                    data-delete="area"
-                                                    data-id="{{ $area->id }}"
-                                                    data-name="{{ $area->nombre }}"
-                                                    data-delete-url="{{ route('catalogos-rh.areas.destroy', ['area' => $area->id]) }}">
-                                                <i class="fas fa-trash" aria-hidden="true"></i>
-                                            </button>
+                                            <x-button type="button" variant="ghost" size="sm" icon="edit" icon-only title="Editar área" aria-label="Editar área" data-edit="area" data-id="{{ $area->id }}" data-name="{{ $area->nombre }}" />
+                                            <x-button type="button" variant="danger" size="sm" icon="delete" icon-only title="Eliminar área" aria-label="Eliminar área" data-delete="area" data-id="{{ $area->id }}" data-name="{{ $area->nombre }}" :data-delete-url="route('catalogos-rh.areas.destroy', ['area' => $area->id])" />
                                         </div>
                                     </td>
                                 </tr>
@@ -211,12 +192,8 @@
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                    <button type="submit" class="{{ $primaryButtonClass }}" data-submit-label>
-                        <i class="fas fa-plus" aria-hidden="true"></i> Agregar departamento
-                    </button>
-                    <button type="button" class="{{ $secondaryButtonClass }} hidden" data-cancel-edit>
-                        Cancelar
-                    </button>
+                    <x-button type="submit" data-submit-label icon="add">Agregar departamento</x-button>
+                    <x-button type="button" variant="secondary" icon="close" class="hidden" data-cancel-edit>Cancelar</x-button>
                 </div>
             </form>
 
@@ -247,24 +224,8 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="flex justify-end gap-2">
-                                            <button type="button"
-                                                    class="rounded-md p-2 text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-900/30"
-                                                    title="Editar departamento"
-                                                    data-edit="departamento"
-                                                    data-id="{{ $departamento->id }}"
-                                                    data-name="{{ $departamento->nombre }}"
-                                                    data-parent-id="{{ $departamento->area_id }}">
-                                                <i class="fas fa-pen" aria-hidden="true"></i>
-                                            </button>
-                                            <button type="button"
-                                                    class="rounded-md p-2 text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-900/30"
-                                                    title="Eliminar departamento"
-                                                    data-delete="departamento"
-                                                    data-id="{{ $departamento->id }}"
-                                                    data-name="{{ $departamento->nombre }}"
-                                                    data-delete-url="{{ route('catalogos-rh.departamentos.destroy', ['departamento' => $departamento->id]) }}">
-                                                <i class="fas fa-trash" aria-hidden="true"></i>
-                                            </button>
+                                            <x-button type="button" variant="ghost" size="sm" icon="edit" icon-only title="Editar departamento" aria-label="Editar departamento" data-edit="departamento" data-id="{{ $departamento->id }}" data-name="{{ $departamento->nombre }}" data-parent-id="{{ $departamento->area_id }}" />
+                                            <x-button type="button" variant="danger" size="sm" icon="delete" icon-only title="Eliminar departamento" aria-label="Eliminar departamento" data-delete="departamento" data-id="{{ $departamento->id }}" data-name="{{ $departamento->nombre }}" :data-delete-url="route('catalogos-rh.departamentos.destroy', ['departamento' => $departamento->id])" />
                                         </div>
                                     </td>
                                 </tr>
@@ -328,12 +289,8 @@
                 </div>
 
                 <div class="flex flex-wrap gap-2">
-                    <button type="submit" class="{{ $primaryButtonClass }}" data-submit-label>
-                        <i class="fas fa-plus" aria-hidden="true"></i> Agregar puesto
-                    </button>
-                    <button type="button" class="{{ $secondaryButtonClass }} hidden" data-cancel-edit>
-                        Cancelar
-                    </button>
+                    <x-button type="submit" data-submit-label icon="add">Agregar puesto</x-button>
+                    <x-button type="button" variant="secondary" icon="close" class="hidden" data-cancel-edit>Cancelar</x-button>
                 </div>
             </form>
 
@@ -368,24 +325,8 @@
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="flex justify-end gap-2">
-                                            <button type="button"
-                                                    class="rounded-md p-2 text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-900/30"
-                                                    title="Editar puesto"
-                                                    data-edit="puesto"
-                                                    data-id="{{ $puesto->id }}"
-                                                    data-name="{{ $puesto->nombre }}"
-                                                    data-parent-id="{{ $puesto->departamento_id }}">
-                                                <i class="fas fa-pen" aria-hidden="true"></i>
-                                            </button>
-                                            <button type="button"
-                                                    class="rounded-md p-2 text-red-700 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-900/30"
-                                                    title="Eliminar puesto"
-                                                    data-delete="puesto"
-                                                    data-id="{{ $puesto->id }}"
-                                                    data-name="{{ $puesto->nombre }}"
-                                                    data-delete-url="{{ route('catalogos-rh.puestos.destroy', ['puesto' => $puesto->id]) }}">
-                                                <i class="fas fa-trash" aria-hidden="true"></i>
-                                            </button>
+                                            <x-button type="button" variant="ghost" size="sm" icon="edit" icon-only title="Editar puesto" aria-label="Editar puesto" data-edit="puesto" data-id="{{ $puesto->id }}" data-name="{{ $puesto->nombre }}" data-parent-id="{{ $puesto->departamento_id }}" />
+                                            <x-button type="button" variant="danger" size="sm" icon="delete" icon-only title="Eliminar puesto" aria-label="Eliminar puesto" data-delete="puesto" data-id="{{ $puesto->id }}" data-name="{{ $puesto->nombre }}" :data-delete-url="route('catalogos-rh.puestos.destroy', ['puesto' => $puesto->id])" />
                                         </div>
                                     </td>
                                 </tr>

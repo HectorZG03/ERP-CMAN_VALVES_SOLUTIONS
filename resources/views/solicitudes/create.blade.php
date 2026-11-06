@@ -409,15 +409,7 @@
                                         class="{{ $campoBase }} h-11 px-3 pr-10 {{ $errors->has('personal_id') ? $campoError : $campoOk }}"
                                     >
 
-                                    <button
-                                        type="button"
-                                        id="limpiar-personal-solicitud"
-                                        class="{{ $personalSeleccionado ? 'inline-flex' : 'hidden' }} absolute inset-y-0 right-0 items-center px-3 text-gray-400 transition hover:text-gray-700 dark:hover:text-white"
-                                        aria-label="Limpiar colaborador seleccionado"
-                                        title="Limpiar selección"
-                                    >
-                                        <i class="fas fa-times" aria-hidden="true"></i>
-                                    </button>
+                                    <x-button type="button" id="limpiar-personal-solicitud" class="{{ $personalSeleccionado ? 'inline-flex' : 'hidden' }} absolute inset-y-0 right-0" variant="ghost" size="sm" icon="close" icon-only aria-label="Limpiar colaborador seleccionado" title="Limpiar selección" />
 
                                     <div
                                         id="resultados-personal-solicitud"
@@ -519,28 +511,9 @@
                     </section>
 
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <button
-                            type="button"
-                            id="btn-limpiar"
-                            class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 font-semibold text-gray-700 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-                        >
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                            Limpiar
-                        </button>
+                        <x-button type="button" id="btn-limpiar" variant="secondary" icon="close" class="w-full">Limpiar</x-button>
 
-                        <button
-                            type="submit"
-                            id="btn-enviar"
-                            class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 font-bold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:focus-visible:ring-offset-gray-800"
-                            disabled
-                        >
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                            </svg>
-                            Enviar solicitud
-                        </button>
+                        <x-button type="submit" id="btn-enviar" icon="save" class="w-full" disabled>Enviar solicitud</x-button>
                     </div>
                 </aside>
             </div>
@@ -586,16 +559,7 @@
         </td>
 
         <td class="px-2 py-3 text-center align-middle">
-            <button
-                type="button"
-                class="btn-eliminar inline-flex h-8 w-8 items-center justify-center rounded-md text-red-600 transition hover:bg-red-50 hover:text-red-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 dark:text-red-400 dark:hover:bg-red-900/30"
-                aria-label="Eliminar producto"
-                title="Eliminar producto"
-            >
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a1.995 1.995 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-            </button>
+            <x-button type="button" class="btn-eliminar" variant="danger" size="sm" icon="delete" icon-only aria-label="Eliminar producto" title="Eliminar producto" />
         </td>
     </tr>
 </template>

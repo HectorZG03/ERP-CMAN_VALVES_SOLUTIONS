@@ -4,10 +4,7 @@
 <div class="space-y-6">
     <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold text-gray-900">Gestión de Usuarios</h1>
-        <a href="{{ route('users.create') }}" 
-           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Crear Usuario
-        </a>
+        <x-button :href="route('users.create')" icon="add">Crear usuario</x-button>
     </div>
 
     <div class="bg-white shadow overflow-hidden sm:rounded-md">
@@ -57,20 +54,18 @@
                                 {{ $user->created_at->format('d/m/Y') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="{{ route('users.show', $user) }}" 
-                                   class="text-indigo-600 hover:text-indigo-900 mr-3">Ver</a>
-                                <a href="{{ route('users.edit', $user) }}" 
-                                   class="text-yellow-600 hover:text-yellow-900 mr-3">Editar</a>
+                                <div class="flex flex-wrap gap-2">
+                                    <x-button :href="route('users.show', $user)" variant="secondary" size="sm" icon="view">Ver</x-button>
+                                    <x-button :href="route('users.edit', $user)" variant="accent" size="sm" icon="edit">Editar</x-button>
                                 @if($user->id !== auth()->id())
                                 <form method="POST" action="{{ route('users.destroy', $user) }}" 
                                       class="inline" onsubmit="return confirm('¿Estás seguro?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900">
-                                        Eliminar
-                                    </button>
+                                    <x-button type="submit" variant="danger" size="sm" icon="delete">Eliminar</x-button>
                                 </form>
                                 @endif
+                                </div>
                             </td>
                         </tr>
                         @endforeach

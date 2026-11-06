@@ -243,23 +243,8 @@
             </p>
 
             <div class="flex flex-col-reverse gap-3 sm:flex-row">
-                <a href="{{ route('proveedores.index') }}"
-                   class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-100 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:focus:ring-gray-700">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                    Cancelar
-                </a>
-
-                <button type="submit"
-                        class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 active:scale-[0.98] dark:bg-blue-500 dark:hover:bg-blue-600">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M5 13l4 4L19 7"/>
-                    </svg>
-                    Guardar proveedor
-                </button>
+                <x-button :href="route('proveedores.index')" variant="secondary" icon="back">Cancelar</x-button>
+                <x-button type="submit" icon="save">Guardar proveedor</x-button>
             </div>
         </div>
     </form>

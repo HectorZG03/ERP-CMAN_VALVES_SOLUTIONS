@@ -4,13 +4,7 @@
 <div class="space-y-6">
     <!-- Header con navegación -->
     <div class="flex items-center space-x-4">
-        <a href="{{ route('prestamos.index') }}" 
-           class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md transition-colors duration-200">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-            </svg>
-            Volver a Préstamos
-        </a>
+        <x-button :href="route('prestamos.index')" variant="secondary" icon="back">Volver a préstamos</x-button>
         
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">
             Préstamo #{{ str_pad($prestamo->id, 5, '0', STR_PAD_LEFT) }}
@@ -59,13 +53,7 @@
             
             <!-- Botón de devolución si aplica -->
             @if(auth()->user()->canManageInventory() && $prestamo->estatus === 'prestado')
-                <a href="{{ route('prestamos.devolucion', $prestamo) }}" 
-                   class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 dark:bg-purple-700 dark:hover:bg-purple-800 text-white text-sm font-medium rounded-md transition-colors duration-200">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
-                    </svg>
-                    Procesar Devolución
-                </a>
+                <x-button :href="route('prestamos.devolucion', $prestamo)" variant="accent" icon="check">Procesar devolución</x-button>
             @endif
         </div>
 
@@ -78,10 +66,7 @@
 
 
 
-        <a href="{{ route('prestamos.exportExcel', $prestamo) }}"
-            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
-            Exportar con Plantilla Excel
-        </a>
+        <x-button :href="route('prestamos.exportExcel', $prestamo)" variant="success" icon="download">Exportar Excel</x-button>
 
 
 
@@ -323,29 +308,17 @@
                             @csrf
                             @method('PUT')
                             <input type="hidden" name="estatus" value="aprobado">
-                            <button type="submit" 
-                                    class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-base font-medium rounded-md text-white transition-colors duration-200 {{ $stockSuficiente ? 'bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 focus:ring-green-500' : 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' }}"
-                                    {{ !$stockSuficiente ? 'disabled' : '' }}
-                                    @if($stockSuficiente) onclick="return confirm('¿Aprobar este préstamo?\n\nEsto descontará {{ $prestamo->total_unidades_prestadas }} unidades de {{ $prestamo->total_productos }} productos del inventario.')" @endif>
-                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                                </svg>
-                                {{ $stockSuficiente ? 'Aprobar Préstamo' : 'Stock Insuficiente' }}
-                            </button>
+                            <x-button type="submit" variant="success" icon="check" class="w-full" :disabled="!$stockSuficiente"
+                                @if($stockSuficiente) onclick="return confirm('¿Aprobar este préstamo?\n\nEsto descontará {{ $prestamo->total_unidades_prestadas }} unidades de {{ $prestamo->total_productos }} productos del inventario.')" @endif>
+                                {{ $stockSuficiente ? 'Aprobar préstamo' : 'Stock insuficiente' }}
+                            </x-button>
                         </form>
                         
                         <form method="POST" action="{{ route('prestamos.updateEstatus', $prestamo) }}" class="flex-1">
                             @csrf
                             @method('PUT')
                             <input type="hidden" name="estatus" value="denegado">
-                            <button type="submit" 
-                                    class="w-full inline-flex justify-center items-center px-4 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200"
-                                    onclick="return confirm('¿Denegar este préstamo?')">
-                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                </svg>
-                                Denegar Préstamo
-                            </button>
+                            <x-button type="submit" variant="danger" icon="close" class="w-full" onclick="return confirm('¿Denegar este préstamo?')">Denegar préstamo</x-button>
                         </form>
                     </div>
                 </div>

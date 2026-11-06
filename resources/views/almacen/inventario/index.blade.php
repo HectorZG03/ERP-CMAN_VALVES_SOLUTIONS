@@ -56,7 +56,7 @@
 
 
             {{-- PDF --}}
-            <a href="{{ route('inventario.export.pdf') }}" class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">Descargar PDF</a>
+            <x-button :href="route('inventario.export.pdf')" variant="danger" icon="download">Descargar PDF</x-button>
 
 
             {{-- Agregar producto --}}
@@ -234,16 +234,7 @@
                                class="block w-full rounded-lg border border-gray-300 bg-gray-50 py-2.5 pl-10 pr-10 text-sm text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400">
 
 
-                        <button type="button"
-                                id="clear-search"
-                                @if(!$search) hidden @endif
-                                class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 transition hover:text-gray-700 dark:hover:text-gray-200"
-                                title="Limpiar búsqueda"
-                                aria-label="Limpiar búsqueda">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                            </svg>
-                        </button>
+                        <x-button type="button" id="clear-search" class="absolute inset-y-0 right-0 {{ !$search ? 'hidden' : '' }}" variant="ghost" size="sm" icon="close" icon-only title="Limpiar búsqueda" aria-label="Limpiar búsqueda" />
 
                     </div>
 
@@ -281,12 +272,7 @@
                 </select>
                 <span class="text-sm text-gray-600 dark:text-gray-300">por página</span>
 
-                <button type="button"
-                        id="clear-filters"
-                        @if($filter === 'all' && $search === '') hidden @endif
-                        class="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white">
-                    Limpiar filtros
-                </button>
+                <x-button type="button" id="clear-filters" class="{{ $filter === 'all' && $search === '' ? 'hidden' : '' }}" variant="secondary" size="sm" icon="close">Limpiar filtros</x-button>
             </div>
         </div>
 
@@ -323,7 +309,7 @@
                             Precio
                         </th>
 
-                        <th class="w-[13%] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                        <th class="w-[18%] min-w-[260px] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
                             Acciones
                         </th>
                     </tr>
