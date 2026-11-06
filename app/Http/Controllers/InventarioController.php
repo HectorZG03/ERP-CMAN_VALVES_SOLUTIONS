@@ -299,6 +299,7 @@ class InventarioController extends Controller
     }
 
 
+
     public function exportPDF()
     {
         $inventarios = Inventario::all();
@@ -358,44 +359,4 @@ class InventarioController extends Controller
     }
 
 
-    public function viewPDF()
-    {
-        $inventarios = Inventario::all();
-
-        $totalProductos = $inventarios->count();
-
-        $totalEnStock = $inventarios
-            ->where('existencia', '>', 0)
-            ->count();
-
-        $totalSinStock = $inventarios
-            ->where('existencia', '<=', 0)
-            ->count();
-
-        $valorTotal = $inventarios
-            ->sum('precio_total');
-
-        $data = [
-            'inventarios' => $inventarios,
-            'totalProductos' => $totalProductos,
-            'totalEnStock' => $totalEnStock,
-            'totalSinStock' => $totalSinStock,
-            'valorTotal' => $valorTotal,
-            'fechaGeneracion' => now()
-        ];
-
-        $pdf = PDF::loadView(
-            'almacen.inventario.pdf',
-            $data
-        );
-
-        $pdf->setPaper(
-            'A4',
-            'landscape'
-        );
-
-        return $pdf->stream(
-            'inventario_completo.pdf'
-        );
-    }
 }

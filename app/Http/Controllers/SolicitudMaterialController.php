@@ -34,7 +34,7 @@ class SolicitudMaterialController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $filterStatus = $request->get('status', 'all');
+        $filterStatus = $request->query('status', 'all');
 
         $estatusValidos = [
             'all',
@@ -81,20 +81,16 @@ class SolicitudMaterialController extends Controller
         ];
 
         if ($filterStatus !== 'all') {
-            $solicitudes = $baseQuery
-                ->where('estatus', $filterStatus)
-                ->orderByDesc('created_at')
-                ->get();
-
-            $isPaginated = false;
-        } else {
-            $solicitudes = $baseQuery
-                ->orderByDesc('created_at')
-                ->paginate(15)
-                ->withQueryString();
-
-            $isPaginated = true;
+            $baseQuery->where('estatus', $filterStatus);
         }
+
+        $solicitudes = $baseQuery
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->withQueryString();
+
+        $isPaginated = true;
 
         return view('solicitudes.index', compact(
             'solicitudes',

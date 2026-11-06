@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Salida;
 use App\Models\SolicitudMaterial;
+use App\Services\SalidaAccessService;
 use App\Services\SalidaPdfService;
 use App\Services\SalidaService;
 use App\Services\SolicitudSalidaService;
@@ -15,7 +16,8 @@ class SalidaController extends Controller
     public function __construct(
         private SalidaService $salidaService,
         private SolicitudSalidaService $solicitudSalidaService,
-        private SalidaPdfService $salidaPdfService
+        private SalidaPdfService $salidaPdfService,
+        private SalidaAccessService $salidaAccessService
     ) {
     }
 
@@ -37,25 +39,46 @@ class SalidaController extends Controller
             'detalles.inventario',
         ]);
 
+        // Operaciones y Logística solo ven las salidas del área relacionada.
+        $query = $this->salidaAccessService->filtrarListado(
+            $query,
+            auth()->user()
+        );
+
         if ($buscar !== '') {
             $fecha = null;
 
             // Acepta fechas d/m/Y y Y-m-d.
             try {
-                $fechaCandidata = \Carbon\Carbon::createFromFormat('d/m/Y', $buscar);
+                $fechaCandidata = \Carbon\Carbon::createFromFormat(
+                    'd/m/Y',
+                    $buscar
+                );
 
-                if ($fechaCandidata && $fechaCandidata->format('d/m/Y') === $buscar) {
+                if (
+                    $fechaCandidata &&
+                    $fechaCandidata->format('d/m/Y') === $buscar
+                ) {
                     $fecha = $fechaCandidata->format('Y-m-d');
                 }
             } catch (\Throwable $e) {
                 // El término no tiene formato d/m/Y.
             }
 
-            if (!$fecha && preg_match('/^\d{4}-\d{2}-\d{2}$/', $buscar)) {
+            if (
+                !$fecha &&
+                preg_match('/^\d{4}-\d{2}-\d{2}$/', $buscar)
+            ) {
                 try {
-                    $fechaCandidata = \Carbon\Carbon::createFromFormat('Y-m-d', $buscar);
+                    $fechaCandidata = \Carbon\Carbon::createFromFormat(
+                        'Y-m-d',
+                        $buscar
+                    );
 
-                    if ($fechaCandidata && $fechaCandidata->format('Y-m-d') === $buscar) {
+                    if (
+                        $fechaCandidata &&
+                        $fechaCandidata->format('Y-m-d') === $buscar
+                    ) {
                         $fecha = $buscar;
                     }
                 } catch (\Throwable $e) {
@@ -72,25 +95,63 @@ class SalidaController extends Controller
                     ->orWhereHas('user', function ($usuario) use ($buscar) {
                         $usuario->where('name', 'like', "%{$buscar}%");
                     })
-                    ->orWhereHas('solicitudMaterial', function ($solicitud) use ($buscar) {
-                        $solicitud->where('destino', 'like', "%{$buscar}%")
-                            ->orWhereHas('user', function ($usuario) use ($buscar) {
-                                $usuario->where('name', 'like', "%{$buscar}%");
-                            })
-                            ->orWhereHas('operadorPersonal', function ($personal) use ($buscar) {
-                                $personal->whereRaw(
-                                    "CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?",
-                                    ["%{$buscar}%"]
+                    ->orWhereHas(
+                        'solicitudMaterial',
+                        function ($solicitud) use ($buscar) {
+                            $solicitud
+                                ->where('destino', 'like', "%{$buscar}%")
+                                ->orWhereHas(
+                                    'user',
+                                    function ($usuario) use ($buscar) {
+                                        $usuario->where(
+                                            'name',
+                                            'like',
+                                            "%{$buscar}%"
+                                        );
+                                    }
                                 )
-                                    ->orWhere('nombre', 'like', "%{$buscar}%")
-                                    ->orWhere('ape_pat', 'like', "%{$buscar}%")
-                                    ->orWhere('ape_mat', 'like', "%{$buscar}%");
-                            });
-                    })
-                    ->orWhereHas('detalles.inventario', function ($inventario) use ($buscar) {
-                        $inventario->where('nombre_producto', 'like', "%{$buscar}%")
-                            ->orWhere('categoria', 'like', "%{$buscar}%");
-                    });
+                                ->orWhereHas(
+                                    'operadorPersonal',
+                                    function ($personal) use ($buscar) {
+                                        $personal->whereRaw(
+                                            "CONCAT_WS(' ', nombre, ape_pat, ape_mat) LIKE ?",
+                                            ["%{$buscar}%"]
+                                        )
+                                            ->orWhere(
+                                                'nombre',
+                                                'like',
+                                                "%{$buscar}%"
+                                            )
+                                            ->orWhere(
+                                                'ape_pat',
+                                                'like',
+                                                "%{$buscar}%"
+                                            )
+                                            ->orWhere(
+                                                'ape_mat',
+                                                'like',
+                                                "%{$buscar}%"
+                                            );
+                                    }
+                                );
+                        }
+                    )
+                    ->orWhereHas(
+                        'detalles.inventario',
+                        function ($inventario) use ($buscar) {
+                            $inventario
+                                ->where(
+                                    'nombre_producto',
+                                    'like',
+                                    "%{$buscar}%"
+                                )
+                                ->orWhere(
+                                    'categoria',
+                                    'like',
+                                    "%{$buscar}%"
+                                );
+                        }
+                    );
 
                 if ($fecha) {
                     $q->orWhereDate('fecha_salida', $fecha)
@@ -135,31 +196,21 @@ class SalidaController extends Controller
             (string) ($validated['q'] ?? '')
         );
 
-        $solicitudes =
-            $this->solicitudSalidaService
-                ->buscarSolicitudes($termino);
+        $solicitudes = $this->solicitudSalidaService
+            ->buscarSolicitudes($termino);
 
-        return response()->json(
-            $solicitudes
-        );
+        return response()->json($solicitudes);
     }
 
     /**
-     * Obtener los datos y materiales pendientes
-     * de una solicitud.
+     * Obtener los datos y materiales pendientes de una solicitud.
      */
-    public function obtenerSolicitud(
-        SolicitudMaterial $solicitud
-    ) {
-        $datos =
-            $this->solicitudSalidaService
-                ->obtenerSolicitud(
-                    $solicitud
-                );
+    public function obtenerSolicitud(SolicitudMaterial $solicitud)
+    {
+        $datos = $this->solicitudSalidaService
+            ->obtenerSolicitud($solicitud);
 
-        return response()->json(
-            $datos
-        );
+        return response()->json($datos);
     }
 
     /**
@@ -205,73 +256,41 @@ class SalidaController extends Controller
         ]);
 
         try {
-            $salida =
-                $this->salidaService->registrar(
-                    $validated,
-                    (int) auth()->id()
-                );
+            $salida = $this->salidaService->registrar(
+                $validated,
+                (int) auth()->id()
+            );
 
-            $nombreSolicitante =
-                $salida
-                    ->solicitudMaterial
-                    ?->user
-                    ?->name ??
-                'N/A';
+            $nombreSolicitante = $salida
+                ->solicitudMaterial
+                ?->user
+                ?->name ?? 'N/A';
 
-            $destino =
-                $salida
-                    ->solicitudMaterial
-                    ?->nombre ??
-                'N/A';
+            $destino = $salida
+                ->solicitudMaterial
+                ?->nombre ?? 'N/A';
 
             /*
              * Solo se almacenan los campos utilizados
              * por el resumen de create.blade.php.
              */
-            session()->flash(
-                'salida_reciente',
-                [
-                    'fecha' =>
-                        $salida
-                            ->created_at
-                            ->format(
-                                'd/m/Y H:i'
-                            ),
-
-                    'cliente_nombre' =>
-                        $nombreSolicitante,
-
-                    'cliente_area' =>
-                        $destino,
-
-                    'cantidad_productos' =>
-                        $salida
-                            ->cantidad_productos,
-
-                    'subtotal' =>
-                        $salida->precio_total,
-
-                    'iva' =>
-                        $salida->iva,
-
-                    'total' =>
-                        $salida
-                            ->total_con_iva,
-                ]
-            );
+            session()->flash('salida_reciente', [
+                'fecha' => $salida->created_at->format('d/m/Y H:i'),
+                'cliente_nombre' => $nombreSolicitante,
+                'cliente_area' => $destino,
+                'cantidad_productos' => $salida->cantidad_productos,
+                'subtotal' => $salida->precio_total,
+                'iva' => $salida->iva,
+                'total' => $salida->total_con_iva,
+            ]);
 
             return redirect()
-                ->route(
-                    'salidas.show',
-                    $salida
-                )
+                ->route('salidas.show', $salida)
                 ->with(
                     'success',
                     'Salida registrada correctamente'
                 );
-        } catch (
-            ValidationException $exception
-        ) {
+        } catch (ValidationException $exception) {
             throw $exception;
         } catch (\Throwable $exception) {
             report($exception);
@@ -290,6 +309,11 @@ class SalidaController extends Controller
      */
     public function show(Salida $salida)
     {
+        $this->salidaAccessService->autorizarConsulta(
+            auth()->user(),
+            $salida
+        );
+
         $salida->load([
             /*
              * Cliente se conserva para mostrar
@@ -311,18 +335,15 @@ class SalidaController extends Controller
     /**
      * Descargar el PDF de la salida.
      */
+
     public function generatePDF(Salida $salida)
     {
-        return $this->salidaPdfService
-            ->download($salida);
+        $this->salidaAccessService->autorizarConsulta(
+            auth()->user(),
+            $salida
+        );
+
+        return $this->salidaPdfService->download($salida);
     }
 
-    /**
-     * Visualizar el PDF de la salida.
-     */
-    public function viewPDF(Salida $salida)
-    {
-        return $this->salidaPdfService
-            ->stream($salida);
-    }
 }

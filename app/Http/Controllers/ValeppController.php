@@ -581,7 +581,7 @@ class ValeppController extends Controller
             ->route('valepp.show', $valepp)
             ->with('success', 'Vale EPP registrado correctamente.');
     }
-    
+
     /**
      * Mostrar el formulario para corregir un vale EPP.
      */
@@ -873,7 +873,18 @@ class ValeppController extends Controller
     /**
      * Descargar el PDF del vale EPP.
      */
+
     public function exportPDF(Valepp $valepp)
+    {
+        [$pdf, $nombreArchivo] = $this->prepararPdfValeEpp($valepp);
+
+        return $pdf->download($nombreArchivo);
+    }
+
+    /**
+     * Preparar el PDF y su nombre de archivo.
+     */
+    private function prepararPdfValeEpp(Valepp $valepp): array
     {
         $valepp->load([
             'personal',
@@ -914,7 +925,10 @@ class ValeppController extends Controller
 
         $nombreArchivo = "vale_epp_{$valepp->numero_vale}_{$nombreOperadorArchivo}.pdf";
 
-        return $pdf->download(mb_strtoupper($nombreArchivo, 'UTF-8'));
+        return [
+            $pdf,
+            mb_strtoupper($nombreArchivo, 'UTF-8'),
+        ];
     }
 
     /**

@@ -264,14 +264,7 @@
                                     </a>
 
                                     <!-- PDF -->
-                                    <a href="{{ route('requisiciones.pdf', $requisicion) }}"
-                                        target="_blank"
-                                        class="inline-flex items-center px-2 py-1 bg-red-100 hover:bg-red-200 dark:bg-yellow-900/30 dark:hover:bg-red-900/50 text-red-800 dark:text-red-300 text-xs font-medium rounded-md transition-colors duration-200">
-                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                            <path d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0014.414 6L10 1.586A2 2 0 008.586 1H6zM13 8V3.5L17.5 8H13z"/>
-                                        </svg>
-                                        PDF
-                                    </a>
+                                    <a href="{{ route('requisiciones.pdf', $requisicion) }}" class="inline-flex items-center rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-700">Descargar PDF</a>
 
                                     <!-- Botones FINANZAS -->
                                     @if(auth()->user()->canApproveFinanzas() && $requisicion->estatus_finanzas === 'pendiente')

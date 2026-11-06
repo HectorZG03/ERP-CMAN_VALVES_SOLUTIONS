@@ -54,34 +54,6 @@ class SalidaPdfService
         );
     }
 
-    /**
-     * Visualizar el PDF de una salida.
-     */
-    public function stream(Salida $salida)
-    {
-        $salida->load(
-            $this->relacionesParaPdf()
-        );
-
-        $datosFirmas = $this->obtenerDatosFirmas(
-            $salida
-        );
-
-        $pdf = Pdf::loadView(
-            'almacen.salidas.pdf',
-            array_merge(
-                ['salida' => $salida],
-                $datosFirmas
-            )
-        )->setPaper(
-            'letter',
-            'portrait'
-        );
-
-        return $pdf->stream(
-            'vale-salida.pdf'
-        );
-    }
 
     /**
      * Relaciones necesarias para generar el PDF.

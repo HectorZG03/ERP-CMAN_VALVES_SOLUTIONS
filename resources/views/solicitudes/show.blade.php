@@ -95,26 +95,7 @@
                 </span>
             @endif
 
-            <a
-                href="{{ route('solicitudes.pdf', $solicitud) }}"
-                target="_blank"
-                class="inline-flex h-10 items-center gap-2 rounded-lg bg-gray-700 px-4 text-sm font-bold text-white shadow-sm transition hover:bg-gray-800 dark:bg-gray-600 dark:hover:bg-gray-500"
-            >
-                <svg
-                    class="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M7 3h7l5 5v13H7V3zm7 0v5h5M9 13h6M9 17h6"
-                    />
-                </svg>
-                Ver PDF
-            </a>
+            <a href="{{ route('solicitudes.pdf', $solicitud) }}" class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700">Descargar PDF</a>
         </div>
     </header>
 

@@ -74,11 +74,6 @@ Route::middleware(['auth'])->group(function () {
         )->name('inventario.export.excel');
 
         Route::get(
-            'inventario/view/pdf',
-            [InventarioController::class, 'viewPDF']
-        )->name('inventario.view.pdf');
-
-        Route::get(
             'inventario/api/all',
             [InventarioController::class, 'getAll']
         )->name('inventario.api.all');
@@ -125,12 +120,17 @@ Route::middleware(['auth'])->group(function () {
             [EntradaController::class, 'generatePDF']
         )->name('entradas.pdf');
 
-        Route::get(
-            'entradas/{entrada}/view-pdf',
-            [EntradaController::class, 'viewPDF']
-        )->name('entradas.view-pdf');
+    });
 
-        // Búsqueda y consulta para salidas
+    /*
+     * Gestión de salidas.
+     * Las rutas específicas van antes de salidas/{salida}.
+     * Solo Almacén y Auxiliar de Almacén pueden registrar salidas.
+     */
+    Route::middleware([
+        'can:view-salidas',
+        'can:manage-inventory',
+    ])->group(function () {
         Route::get(
             'salidas/buscar-solicitudes',
             [SalidaController::class, 'buscarSolicitudes']
@@ -141,18 +141,34 @@ Route::middleware(['auth'])->group(function () {
             [SalidaController::class, 'obtenerSolicitud']
         )->name('salidas.solicitudes.show');
 
-        Route::resource('salidas', SalidaController::class)
-            ->only(['index', 'create', 'store', 'show']);
+        Route::get(
+            'salidas/create',
+            [SalidaController::class, 'create']
+        )->name('salidas.create');
+
+        Route::post(
+            'salidas',
+            [SalidaController::class, 'store']
+        )->name('salidas.store');
+    });
+
+    // Consulta compartida de salidas
+    Route::middleware('can:view-salidas')->group(function () {
+        Route::get(
+            'salidas',
+            [SalidaController::class, 'index']
+        )->name('salidas.index');
+
+        Route::get(
+            'salidas/{salida}',
+            [SalidaController::class, 'show']
+        )->name('salidas.show');
 
         Route::get(
             'salidas/{salida}/pdf',
             [SalidaController::class, 'generatePDF']
         )->name('salidas.pdf');
 
-        Route::get(
-            'salidas/{salida}/view-pdf',
-            [SalidaController::class, 'viewPDF']
-        )->name('salidas.view-pdf');
     });
 
     // Solicitudes de material
@@ -423,6 +439,11 @@ Route::middleware(['auth', 'finanzas.access'])->group(function () {
         ->parameters([
             'orden-compra' => 'ordenCompra',
         ]);
+
+    Route::get(
+        'orden-compra/{ordenCompra}/pdf',
+        [OrdenCompraController::class, 'pdf']
+    )->name('orden-compra.pdf');
 });
 
 // PDF de orden de compra
