@@ -145,26 +145,7 @@
                         placeholder="Folio, fecha, destino, solicitante, tipo o estatus..."
                     >
 
-                    <button
-                        type="button"
-                        id="limpiar-busqueda"
-                        class="absolute right-2 top-1/2 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-600 dark:hover:text-white"
-                        aria-label="Limpiar búsqueda"
-                    >
-                        <svg
-                            class="h-4 w-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        </svg>
-                    </button>
+                    <x-button type="button" id="limpiar-busqueda" class="absolute right-2 top-1/2 hidden -translate-y-1/2" variant="ghost" size="sm" icon="close" icon-only aria-label="Limpiar búsqueda" title="Limpiar búsqueda" />
                 </div>
             </div>
 
@@ -217,7 +198,7 @@
                             Estatus
                         </th>
 
-                        <th class="px-5 py-3 text-right text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-300">
+                        <th class="min-w-[260px] px-5 py-3 text-right text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-300">
                             Acciones
                         </th>
                     </tr>
@@ -419,8 +400,8 @@
                                 @endif
                             </td>
 
-                            <td class="px-5 py-4 text-right align-middle">
-                                <div class="flex items-center justify-end gap-2">
+                            <td class="min-w-[260px] px-5 py-4 text-right align-middle">
+                                <div class="flex flex-wrap items-center justify-end gap-2">
                                     <a
                                         href="{{ route('solicitudes.show', $solicitud) }}"
                                         class="inline-flex h-8 items-center gap-1 rounded-md bg-blue-100 px-3 text-xs font-semibold text-blue-800 transition hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
@@ -428,7 +409,7 @@
                                         Ver
                                     </a>
 
-                                    <a href="{{ route('solicitudes.pdf', $solicitud) }}" class="inline-flex h-8 items-center rounded-md bg-red-600 px-3 text-xs font-semibold text-white transition hover:bg-red-700">Descargar PDF</a>
+                                    <x-button :href="route('solicitudes.pdf', $solicitud)" variant="danger" size="sm" icon="download">PDF</x-button>
 
                                     @if(
                                         $usuarioActual->canApproveRequests()
@@ -450,13 +431,8 @@
                                                 value="aprobado"
                                             >
 
-                                            <button
-                                                type="submit"
-                                                class="inline-flex h-8 items-center rounded-md bg-green-100 px-3 text-xs font-semibold text-green-800 transition hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300 dark:hover:bg-green-900/50"
-                                                onclick="return confirm('¿Aprobar esta solicitud? La aprobación no descuenta inventario; el descuento se realizará al registrar la salida.')"
-                                            >
-                                                Aprobar
-                                            </button>
+                                            <x-button type="submit" variant="success" size="sm" icon="check"
+                                                onclick="return confirm('¿Aprobar esta solicitud? La aprobación no descuenta inventario; el descuento se realizará al registrar la salida.')">Aprobar</x-button>
                                         </form>
 
                                         <form
@@ -475,13 +451,8 @@
                                                 value="denegado"
                                             >
 
-                                            <button
-                                                type="submit"
-                                                class="inline-flex h-8 items-center rounded-md bg-red-100 px-3 text-xs font-semibold text-red-800 transition hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50"
-                                                onclick="return confirm('¿Denegar esta solicitud?')"
-                                            >
-                                                Denegar
-                                            </button>
+                                            <x-button type="submit" variant="danger" size="sm" icon="close"
+                                                onclick="return confirm('¿Denegar esta solicitud?')">Denegar</x-button>
                                         </form>
                                     @endif
                                 </div>

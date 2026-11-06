@@ -207,21 +207,8 @@
             <div class="flex justify-end gap-2 border-t border-gray-200 px-5 py-4
                         dark:border-gray-700">
 
-                <a href="{{ route('inventario.index') }}"
-                   class="rounded-lg border border-gray-300 bg-white px-4 py-2.5
-                          text-sm font-medium text-gray-700 hover:bg-gray-50
-                          dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200
-                          dark:hover:bg-gray-600">
-                    Cancelar
-                </a>
-
-                <button type="submit"
-                        class="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold
-                               text-white hover:bg-blue-700 focus:outline-none
-                               focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                               dark:focus:ring-offset-gray-800">
-                    Guardar cambios
-                </button>
+                <x-button :href="route('inventario.index')" variant="secondary" icon="back">Cancelar</x-button>
+                <x-button type="submit" icon="save">Guardar cambios</x-button>
 
             </div>
 
@@ -552,13 +539,7 @@
                 {{-- Botón --}}
                 <div class="mt-5 flex justify-end">
 
-                    <button type="submit"
-                            class="rounded-lg bg-amber-600 px-5 py-2.5 text-sm font-semibold
-                                   text-white hover:bg-amber-700
-                                   focus:outline-none focus:ring-2 focus:ring-amber-500
-                                   focus:ring-offset-2 dark:focus:ring-offset-gray-800">
-                        Registrar ajuste
-                    </button>
+                    <x-button type="submit" variant="warning" icon="save">Registrar ajuste</x-button>
 
                 </div>
 

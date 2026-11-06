@@ -198,7 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             if (submitButton) {
-                submitButton.innerHTML =
+                const label = submitButton.querySelector('[data-button-label]') || submitButton;
+                label.innerHTML =
                     '<i class="fas fa-save" aria-hidden="true"></i> Guardar cambios';
             }
 
@@ -222,7 +223,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 puesto: 'Agregar puesto',
             };
 
-            submitButton.innerHTML =
+            const label = submitButton.querySelector('[data-button-label]') || submitButton;
+            label.innerHTML =
                 `<i class="fas fa-plus" aria-hidden="true"></i> ${buttonLabels[entity] || 'Agregar'}`;
         }
 

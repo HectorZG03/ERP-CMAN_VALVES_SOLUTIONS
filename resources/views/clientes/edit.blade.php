@@ -54,10 +54,7 @@
             </div>
 
             <div class="mt-6 flex justify-end">
-                <button type="submit" 
-                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                    Actualizar Cliente
-                </button>
+                <x-button type="submit" variant="success" icon="save">Actualizar cliente</x-button>
             </div>
         </form>
     </div>

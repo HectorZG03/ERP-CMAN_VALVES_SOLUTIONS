@@ -103,20 +103,10 @@
             </div>
 
             <div class="col-span-2 flex items-end gap-2">
-                <button
-                    type="submit"
-                    class="flex-1 rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2"
-                >
-                    Buscar
-                </button>
+                <x-button type="submit" variant="accent" icon="search" class="flex-1">Buscar</x-button>
 
                 @if($search !== '' || $fecha)
-                    <a
-                        href="{{ route('valepp.index') }}"
-                        class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
-                    >
-                        Limpiar
-                    </a>
+                    <x-button :href="route('valepp.index')" variant="secondary" icon="close">Limpiar</x-button>
                 @endif
             </div>
         </form>
@@ -259,7 +249,7 @@
                                         Ver detalle
                                     </a>
 
-                                    <a href="{{ route('valepp.exportPDF', $vale) }}" class="inline-flex items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-700">Descargar PDF</a>
+                                    <x-button :href="route('valepp.exportPDF', $vale)" variant="danger" size="sm" icon="download">PDF</x-button>
                                 </div>
                             </td>
                         </tr>

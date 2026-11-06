@@ -227,16 +227,7 @@
                     </div>
                 </div>
 
-                <button
-                    type="button"
-                    id="agregarMaterialBtn"
-                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                >
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Agregar material
-                </button>
+                <x-button type="button" id="agregarMaterialBtn" variant="primary" icon="add">Agregar material</x-button>
             </div>
 
             <div class="p-5 sm:p-6">
@@ -355,30 +346,12 @@
         </section>
 
         <div class="flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 dark:border-gray-700 sm:flex-row sm:items-center sm:justify-between">
-            <button
-                type="button"
-                id="limpiarFormularioBtn"
-                class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-            >
-                Limpiar formulario
-            </button>
+            <x-button type="button" id="limpiarFormularioBtn" variant="secondary" icon="close">Limpiar formulario</x-button>
 
             <div class="flex flex-col gap-3 sm:flex-row">
-                <a href="{{ route('entradas.index') }}"
-                   class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
-                    Cancelar
-                </a>
+                <x-button :href="route('entradas.index')" variant="secondary" icon="back">Cancelar</x-button>
 
-                <button
-                    type="submit"
-                    id="registrarEntradaBtn"
-                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                >
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                    </svg>
-                    Registrar entrada
-                </button>
+                <x-button type="submit" id="registrarEntradaBtn" variant="success" icon="save">Registrar entrada</x-button>
             </div>
         </div>
     </form>

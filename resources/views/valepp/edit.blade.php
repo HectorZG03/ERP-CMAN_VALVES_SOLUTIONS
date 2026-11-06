@@ -143,14 +143,7 @@
                 </div>
 
                 <div class="flex items-end">
-                    <button
-                        id="agregar-producto-btn"
-                        type="button"
-                        disabled
-                        class="w-full rounded-lg bg-orange-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
-                    >
-                        Agregar producto
-                    </button>
+                    <x-button id="agregar-producto-btn" type="button" variant="accent" icon="add" disabled class="w-full sm:w-auto">Agregar producto</x-button>
                 </div>
             </div>
 
@@ -228,19 +221,8 @@
                 </div>
 
                 <div class="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                    <a
-                        href="{{ route('valepp.show', $valepp) }}"
-                        class="rounded-lg border border-gray-300 px-4 py-2.5 text-center text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
-                    >
-                        Cancelar
-                    </a>
-                    <button
-                        id="guardar-vale-btn"
-                        type="submit"
-                        class="rounded-lg bg-orange-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-700 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        Guardar cambios
-                    </button>
+                    <x-button :href="route('valepp.show', $valepp)" variant="secondary" icon="back">Cancelar</x-button>
+                    <x-button id="guardar-vale-btn" type="submit" variant="accent" icon="save">Guardar cambios</x-button>
                 </div>
             </div>
         </section>

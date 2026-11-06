@@ -5,14 +5,8 @@
     <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold text-gray-900">Detalle del Cliente</h1>
         <div class="space-x-2">
-            <a href="{{ route('clientes.edit', $cliente) }}" 
-               class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded">
-                Editar
-            </a>
-            <a href="{{ route('clientes.index') }}" 
-               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                Volver
-            </a>
+            <x-button :href="route('clientes.edit', $cliente)" variant="accent" icon="edit">Editar</x-button>
+            <x-button :href="route('clientes.index')" variant="secondary" icon="back">Volver</x-button>
         </div>
     </div>
 

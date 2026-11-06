@@ -25,13 +25,7 @@
                 </p>
             </div>
 
-            <button
-                type="button"
-                class="close-personal-info-modal inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition hover:bg-white hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-white"
-                aria-label="Cerrar"
-            >
-                <span aria-hidden="true" class="text-2xl leading-none">&times;</span>
-            </button>
+            <x-button type="button" class="close-personal-info-modal" variant="ghost" size="sm" icon="close" icon-only aria-label="Cerrar" title="Cerrar" />
         </header>
 
         <div class="space-y-6 p-6">
@@ -89,12 +83,7 @@
         </div>
 
         <footer class="flex justify-end border-t border-gray-200 px-6 py-4 dark:border-gray-700">
-            <button
-                type="button"
-                class="close-personal-info-modal rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
-            >
-                Cerrar
-            </button>
+            <x-button type="button" class="close-personal-info-modal" variant="secondary" icon="close">Cerrar</x-button>
         </footer>
     </section>
 </div>

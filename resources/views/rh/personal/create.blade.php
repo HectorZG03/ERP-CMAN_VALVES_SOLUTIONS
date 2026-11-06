@@ -321,14 +321,8 @@
         </div>
 
         <div class="flex flex-col-reverse gap-3 border-t border-gray-200 pt-5 dark:border-gray-700 sm:flex-row sm:justify-end">
-            <a href="{{ route('personal.index') }}"
-               class="inline-flex items-center justify-center rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
-                Cancelar
-            </a>
-            <button type="submit"
-                    class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
-                Guardar colaborador
-            </button>
+            <x-button :href="route('personal.index')" variant="secondary" icon="back">Cancelar</x-button>
+            <x-button type="submit" icon="save">Guardar colaborador</x-button>
         </div>
     </form>
 </div>

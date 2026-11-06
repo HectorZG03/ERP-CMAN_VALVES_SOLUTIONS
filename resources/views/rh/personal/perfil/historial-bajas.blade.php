@@ -71,11 +71,7 @@
                 </div>
 
                 <div class="flex items-end">
-                    <button id="historial-bajas-limpiar"
-                            type="button"
-                            class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
-                        Limpiar filtros
-                    </button>
+                    <x-button id="historial-bajas-limpiar" type="button" variant="secondary" icon="close" class="w-full">Limpiar filtros</x-button>
                 </div>
 
                 <div>

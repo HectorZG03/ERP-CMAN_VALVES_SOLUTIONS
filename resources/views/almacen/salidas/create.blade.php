@@ -258,24 +258,7 @@
                         </p>
                     </div>
 
-                    <button type="button"
-                        id="recargar-materiales"
-                        class="inline-flex items-center justify-center bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
-
-                        <svg class="w-5 h-5 mr-2"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 20 20">
-
-                            <path stroke-linecap="round"
-                                stroke-linejoin="round"
-                                stroke-width="2"
-                                d="M4 4v5h5M16 16v-5h-5M5.5 13.5A6 6 0 0015 11M14.5 6.5A6 6 0 005 9">
-                            </path>
-                        </svg>
-
-                        Recargar materiales
-                    </button>
+                    <x-button type="button" id="recargar-materiales" variant="primary" size="sm" icon="refresh">Recargar materiales</x-button>
                 </div>
 
                 <div id="productos-container" class="space-y-4">
@@ -356,32 +339,11 @@
 
             {{-- Acciones --}}
             <div class="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                <button type="button"
-                    id="limpiar-formulario"
-                    class="bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-bold py-2 px-6 rounded transition-colors duration-200">
-                    Limpiar
-                </button>
+                <x-button type="button" id="limpiar-formulario" variant="secondary" icon="close">Limpiar</x-button>
 
-                <a href="{{ route('salidas.index') }}"
-                    class="text-center bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700 text-white font-bold py-2 px-6 rounded transition-colors duration-200">
-                    Cancelar
-                </a>
+                <x-button :href="route('salidas.index')" variant="secondary" icon="back">Cancelar</x-button>
 
-                <button type="submit"
-                    class="inline-flex items-center justify-center bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 text-white font-bold py-2 px-6 rounded transition-colors duration-200">
-
-                    <svg class="w-5 h-5 mr-2"
-                        fill="currentColor"
-                        viewBox="0 0 20 20">
-
-                        <path fill-rule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clip-rule="evenodd">
-                        </path>
-                    </svg>
-
-                    Registrar salida
-                </button>
+                <x-button type="submit" variant="success" icon="save">Registrar salida</x-button>
             </div>
         </form>
     </div>

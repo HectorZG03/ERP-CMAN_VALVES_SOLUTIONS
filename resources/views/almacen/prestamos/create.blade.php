@@ -4,10 +4,7 @@
 <div class="space-y-6">
     <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Nueva Solicitud de Préstamo</h1>
-        <a href="{{ route('prestamos.index') }}" 
-           class="bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
-            Volver
-        </a>
+        <x-button :href="route('prestamos.index')" variant="secondary" icon="back">Volver</x-button>
     </div>
 
     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">
@@ -159,17 +156,8 @@
 
             <!-- Botones -->
             <div class="flex justify-end space-x-3">
-                <button type="button" 
-                        onclick="limpiarPrestamo()"
-                        class="bg-gray-500 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
-                    Limpiar Todo
-                </button>
-                <button type="submit" 
-                        id="btn-enviar"
-                        class="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50 transition-colors duration-200"
-                        disabled>
-                    Enviar Solicitud de Préstamo
-                </button>
+                <x-button type="button" onclick="limpiarPrestamo()" variant="secondary" icon="close">Limpiar todo</x-button>
+                <x-button type="submit" id="btn-enviar" icon="save" disabled>Enviar solicitud de préstamo</x-button>
             </div>
         </form>
     </div>
@@ -182,13 +170,7 @@
             <div class="flex-1">
                 <div class="flex items-center justify-between mb-2">
                     <h4 class="font-semibold text-gray-900 dark:text-white producto-nombre"></h4>
-                    <button type="button" 
-                            class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 btn-eliminar transition-colors duration-200"
-                            onclick="eliminarProducto(this)">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                    </button>
+                    <x-button type="button" class="btn-eliminar" onclick="eliminarProducto(this)" variant="danger" size="sm" icon="delete" icon-only aria-label="Eliminar producto" title="Eliminar producto" />
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">

@@ -63,10 +63,7 @@
             </div>
         </div>
 
-        <a href="{{ route('personal.index') }}"
-           class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
-            Volver al personal
-        </a>
+        <x-button :href="route('personal.index')" variant="secondary" icon="back">Volver al personal</x-button>
     </header>
 
     <input type="hidden" id="active-profile-tab" value="{{ $activeTab }}">
@@ -153,10 +150,7 @@
                 @include('rh.personal.perfil.datos-laborales')
 
                 <div class="flex justify-end border-t border-gray-200 pt-5 dark:border-gray-700">
-                    <button type="submit" class="{{ $saveButtonClass }}">
-                        <i class="fas fa-save" aria-hidden="true"></i>
-                        Guardar datos laborales
-                    </button>
+                    <x-button type="submit" icon="save">Guardar datos laborales</x-button>
                 </div>
             </form>
         </div>
@@ -180,10 +174,7 @@
                 @include('rh.personal.perfil.datos-personales')
 
                 <div class="flex justify-end border-t border-gray-200 pt-5 dark:border-gray-700">
-                    <button type="submit" class="{{ $saveButtonClass }}">
-                        <i class="fas fa-save" aria-hidden="true"></i>
-                        Guardar datos personales
-                    </button>
+                    <x-button type="submit" icon="save">Guardar datos personales</x-button>
                 </div>
             </form>
         </div>
@@ -206,10 +197,7 @@
                 @include('rh.personal.perfil.contacto-documentos')
 
                 <div class="flex justify-end border-t border-gray-200 pt-5 dark:border-gray-700">
-                    <button type="submit" class="{{ $saveButtonClass }}">
-                        <i class="fas fa-save" aria-hidden="true"></i>
-                        Guardar contacto y documentos
-                    </button>
+                    <x-button type="submit" icon="save">Guardar contacto y documentos</x-button>
                 </div>
             </form>
         </div>

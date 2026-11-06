@@ -235,41 +235,29 @@
 
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center space-x-2">
-                                    <a href="{{ route('prestamos.show', $prestamo) }}" 
-                                       class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">
-                                        Ver
-                                    </a>
+                                    <x-button :href="route('prestamos.show', $prestamo)" variant="secondary" size="sm" icon="view">Ver</x-button>
 
                                     @if(auth()->user()->canApproveRequests() && $prestamo->estatus === 'pendiente')
                                         <form method="POST" action="{{ route('prestamos.updateEstatus', $prestamo) }}" class="inline">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="estatus" value="aprobado">
-                                            <button type="submit" 
-                                                    class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300"
-                                                    onclick="return confirm('¿Aprobar este préstamo?')">
-                                                Aprobar
-                                            </button>
+                                            <x-button type="submit" variant="success" size="sm" icon="check"
+                                                onclick="return confirm('¿Aprobar este préstamo?')">Aprobar</x-button>
                                             {{-- // boton para denegar --}}
                                             <form method="POST" action="{{ route('prestamos.updateEstatus', $prestamo) }}" class="inline">
                                                 @csrf
                                                 @method('PUT')
                                                 <input type="hidden" name="estatus" value="denegado">
-                                                <button type="submit" 
-                                                        class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
-                                                        onclick="return confirm('¿Denegar este préstamo?')">
-                                                    Denegar
-                                                </button>
+                                                <x-button type="submit" variant="danger" size="sm" icon="close"
+                                                    onclick="return confirm('¿Denegar este préstamo?')">Denegar</x-button>
                                             </form>
                                         </div>
                                         </form>
                                     @endif
 
                                     @if(auth()->user()->canManageInventory() && $prestamo->estatus === 'prestado')
-                                        <a href="{{ route('prestamos.devolucion', $prestamo) }}" 
-                                           class="text-purple-600 hover:text-purple-900 dark:text-purple-400 dark:hover:text-purple-300">
-                                            Devolución
-                                        </a>
+                                        <x-button :href="route('prestamos.devolucion', $prestamo)" variant="accent" size="sm" icon="refresh">Devolución</x-button>
                                     @endif
                                 </div>
                             </td>

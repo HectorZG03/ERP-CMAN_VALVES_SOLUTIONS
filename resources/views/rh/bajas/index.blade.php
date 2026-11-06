@@ -18,13 +18,7 @@
             </div>
         </div>
 
-        <button
-            type="button"
-            class="open-baja-modal inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-        >
-            <i class="fas fa-plus" aria-hidden="true"></i>
-            Registrar baja
-        </button>
+        <x-button type="button" class="open-baja-modal" variant="danger" icon="add">Registrar baja</x-button>
     </header>
 
     <section class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -113,21 +107,10 @@
                     </option>
                 </select>
 
-                <button
-                    type="submit"
-                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
-                >
-                    <i class="fas fa-filter" aria-hidden="true"></i>
-                    Aplicar
-                </button>
+                <x-button type="submit" variant="primary" icon="filter">Aplicar filtros</x-button>
 
                 @if ($search !== '' || $estado !== 'todas')
-                    <a
-                        href="{{ route('bajas.index') }}"
-                        class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
-                    >
-                        Limpiar
-                    </a>
+                    <x-button :href="route('bajas.index')" variant="secondary" icon="close">Limpiar</x-button>
                 @endif
             </form>
         </div>
@@ -255,13 +238,7 @@
                                                 @csrf
                                                 @method('PATCH')
 
-                                                <button
-                                                    type="submit"
-                                                    class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
-                                                >
-                                                    <i class="fas fa-undo" aria-hidden="true"></i>
-                                                    Reactivar
-                                                </button>
+                                                <x-button type="submit" variant="success" size="sm" icon="refresh">Reactivar</x-button>
                                             </form>
                                         @endunless
                                     </div>

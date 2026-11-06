@@ -28,13 +28,7 @@
                 </p>
             </div>
 
-            <button
-                type="button"
-                class="close-baja-modal inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500 dark:text-gray-300 dark:hover:bg-gray-700"
-                aria-label="Cerrar ventana"
-            >
-                <i class="fas fa-times" aria-hidden="true"></i>
-            </button>
+            <x-button type="button" class="close-baja-modal" variant="ghost" size="sm" icon="close" icon-only aria-label="Cerrar ventana" title="Cerrar ventana" />
         </div>
 
         <form method="POST" action="{{ route('bajas.store') }}" class="mt-5 space-y-4">
@@ -113,19 +107,8 @@
 
             <!-- Botones de acción -->
             <div class="flex flex-col-reverse gap-2 border-t border-gray-200 pt-4 sm:flex-row sm:justify-end dark:border-gray-700">
-                <button
-                    type="button"
-                    class="close-baja-modal rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
-                >
-                    Cancelar
-                </button>
-                <button
-                    type="submit"
-                    class="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
-                >
-                    <i class="fas fa-user-minus" aria-hidden="true"></i>
-                    Registrar baja
-                </button>
+                <x-button type="button" class="close-baja-modal" variant="secondary" icon="close">Cancelar</x-button>
+                <x-button type="submit" variant="danger" icon="delete">Registrar baja</x-button>
             </div>
         </form>
     </section>
