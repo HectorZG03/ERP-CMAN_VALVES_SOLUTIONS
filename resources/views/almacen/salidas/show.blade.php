@@ -28,10 +28,7 @@
             </h1>
         </div>
 
-        <a href="{{ route('salidas.pdf', $salida) }}"
-            class="inline-flex items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700">
-            Descargar PDF
-        </a>
+        <a href="{{ route('salidas.pdf', $salida) }}" class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">Descargar PDF</a>
     </div>
 
     <div class="rounded-lg bg-white p-5 shadow dark:bg-gray-800">

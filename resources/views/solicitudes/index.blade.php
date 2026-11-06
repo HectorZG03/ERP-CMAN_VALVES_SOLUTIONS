@@ -428,13 +428,7 @@
                                         Ver
                                     </a>
 
-                                    <a
-                                        href="{{ route('solicitudes.pdf', $solicitud) }}"
-                                        target="_blank"
-                                        class="inline-flex h-8 items-center gap-1 rounded-md bg-gray-100 px-3 text-xs font-semibold text-gray-700 transition hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                                    >
-                                        PDF
-                                    </a>
+                                    <a href="{{ route('solicitudes.pdf', $solicitud) }}" class="inline-flex h-8 items-center rounded-md bg-red-600 px-3 text-xs font-semibold text-white transition hover:bg-red-700">Descargar PDF</a>
 
                                     @if(
                                         $usuarioActual->canApproveRequests()

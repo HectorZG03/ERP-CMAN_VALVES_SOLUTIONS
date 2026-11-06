@@ -30,10 +30,7 @@
                 Nueva entrada
             </a>
 
-            <a href="{{ route('entradas.pdf', $entrada) }}"
-               class="inline-flex items-center rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-800">
-                Descargar PDF
-            </a>
+            <a href="{{ route('entradas.pdf', $entrada) }}" class="inline-flex items-center rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700">Descargar PDF</a>
         </div>
     </header>
 

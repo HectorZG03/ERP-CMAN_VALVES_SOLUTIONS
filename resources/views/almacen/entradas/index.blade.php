@@ -213,11 +213,7 @@
                                         Ver
                                     </a>
 
-                                    <a href="{{ route('entradas.pdf', $entrada) }}"
-                                       class="inline-flex items-center justify-center rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                       aria-label="Descargar PDF de la entrada">
-                                        PDF
-                                    </a>
+                                    <a href="{{ route('entradas.pdf', $entrada) }}" class="inline-flex items-center justify-center rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-700">Descargar PDF</a>
                                 </div>
                             </td>
                         </tr>

@@ -334,6 +334,7 @@ class EntradaController extends Controller
         ];
     }
 
+
     public function generatePDF(Entrada $entrada)
     {
         $entrada->load(['proveedor', 'user', 'detalles.inventario']);
@@ -356,21 +357,4 @@ class EntradaController extends Controller
         return $pdf->download($filename);
     }
 
-    public function viewPDF(Entrada $entrada)
-    {
-        $entrada->load(['proveedor', 'user', 'detalles.inventario']);
-
-        $datosFirma = $this->obtenerFirma($entrada);
-
-        $pdf = Pdf::loadView(
-            'almacen.entradas.pdf',
-            array_merge(compact('entrada'), $datosFirma)
-        );
-
-        $pdf->setPaper('letter', 'portrait');
-
-        return $pdf->stream(
-            'entrada_' . $entrada->numero_factura . '.pdf'
-        );
-    }
 }

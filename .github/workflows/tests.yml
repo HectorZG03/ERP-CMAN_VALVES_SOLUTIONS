@@ -3,9 +3,12 @@ name: Tests
 on:
   push:
     branches:
-      - master
-      - '*.x'
+      - main
+      - test
   pull_request:
+    branches:
+      - main
+      - test
   schedule:
     - cron: '0 0 * * *'
 
@@ -37,11 +40,11 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
 
-      - name: Copy environment file
-        run: cp .env.example .env
+      - name: Create environment file
+        run: touch .env
 
       - name: Generate app key
-        run: php artisan key:generate
+        run: php artisan key:generate --no-interaction
 
       - name: Execute tests
         run: php artisan test

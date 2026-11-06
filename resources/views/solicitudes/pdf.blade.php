@@ -36,46 +36,11 @@
             background: var(--page-bg);
         }
 
-        /* ── BARRA DE ACCIONES ── */
-        .action-bar {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            background: var(--navy); border-bottom: 2px solid var(--gold);
-            padding: 9px 28px; display: flex; align-items: center; justify-content: space-between;
-        }
-        .doc-ref {
-            color: #fff;  /* antes #8a9bbf */
-            font-size: 12px;
-            font-family: 'IBM Plex Mono', monospace;
-        }
-        .doc-ref strong { color: #fff; } /* antes #e2e8f2 */
+        .action-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: var(--navy); border-bottom: 2px solid var(--gold); padding: 9px 28px; display: flex; align-items: center; justify-content: space-between; }
+        .doc-ref { color: #fff; font-size: 12px; font-family: 'IBM Plex Mono', monospace; }
         .btns { display: flex; gap: 10px; }
-        .btn-print {
-            background: var(--gold);
-            color: var(--text);
-            border: none;
-            padding: 6px 20px;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            border-radius: 3px;
-            letter-spacing: 0.3px;
-        }
-        .btn-print:hover { background: var(--gold2); }
-        .btn-back {
-            background: transparent;
-            color: #fff; /* antes #8a9bbf */
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 6px 18px;
-            font-size: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            border-radius: 3px;
-        }
-        .btn-back:hover { background: rgba(255,255,255,0.1); }
+        .btn-print { background: var(--gold); color: var(--text); border: none; padding: 6px 20px; font-size: 12px; font-weight: 700; cursor: pointer; border-radius: 3px; letter-spacing: 0.3px; }
+        .btn-back { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 6px 18px; font-size: 12px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; border-radius: 3px; }
 
         /* ── CONTENEDOR ── */
         .page-wrapper {
@@ -296,9 +261,7 @@
                 font-size: 9px;
             }
 
-            .action-bar {
-                display: none !important;
-            }
+            .action-bar { display: none !important; }
 
             .page-wrapper {
                 width: 100%;
@@ -601,21 +564,8 @@
 </head>
 <body>
 
-    {{-- ── BARRA DE ACCIONES ── --}}
     <div class="action-bar">
-        <span class="doc-ref">
-            SOL &nbsp;<strong>#{{ str_pad($solicitud->id, 4, '0', STR_PAD_LEFT) }}</strong>
-            &nbsp;/&nbsp; {{ $solicitud->created_at->format('d.m.Y') }}
-            &nbsp;/&nbsp; TIPO: <strong>{{ $tipoSolicitudTexto }}</strong>
-            &nbsp;/&nbsp;
-            @if($solicitud->estatus === 'aprobado')
-                <span style="color:#10b981; font-weight:700;">&#9679; APROBADO</span>
-            @elseif($solicitud->estatus === 'pendiente')
-                <span style="color:#f59e0b; font-weight:700;">&#9679; PENDIENTE</span>
-            @else
-                <span style="color:#ef4444; font-weight:700;">&#9679; DENEGADO</span>
-            @endif
-        </span>
+        <span class="doc-ref">SOL &nbsp;<strong>#{{ str_pad($solicitud->id, 4, '0', STR_PAD_LEFT) }}</strong> &nbsp;/&nbsp; {{ $solicitud->created_at->format('d.m.Y') }}</span>
         <div class="btns">
             <a href="{{ route('solicitudes.index') }}" class="btn-back">&#8592; Regresar</a>
             <button class="btn-print" onclick="window.print()">&#128438; Imprimir / Guardar PDF</button>

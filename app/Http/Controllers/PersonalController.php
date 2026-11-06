@@ -483,7 +483,21 @@ class PersonalController extends Controller
         ]);
     }
 
+    /**
+     * Descargar el reporte de personal en PDF.
+     */
+
     public function exportPDF()
+    {
+        [$pdf, $nombreArchivo] = $this->prepararPdfPersonal();
+
+        return $pdf->download($nombreArchivo);
+    }
+
+    /**
+     * Preparar el PDF y el nombre del reporte de personal.
+     */
+    private function prepararPdfPersonal(): array
     {
         $personal = Personal::with([
             'datosLaborales.puesto.departamento.area',
@@ -494,28 +508,40 @@ class PersonalController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        $totalActivo = Personal::whereHas('datosLaborales.estadoLaboral', function ($query) {
-            $query->where('clave', 'activo');
-        })->count();
+        $totalActivo = Personal::whereHas(
+            'datosLaborales.estadoLaboral',
+            function ($query) {
+                $query->where('clave', 'activo');
+            }
+        )->count();
 
-        $totalBaja = Personal::whereHas('datosLaborales.estadoLaboral', function ($query) {
-            $query->where('clave', 'baja');
-        })->count();
+        $totalBaja = Personal::whereHas(
+            'datosLaborales.estadoLaboral',
+            function ($query) {
+                $query->where('clave', 'baja');
+            }
+        )->count();
 
-        $totalSueldos = DatosLaborales::whereHas('estadoLaboral', function ($query) {
-            $query->where('clave', 'activo');
-        })->sum('sueldo');
+        $totalSueldos = DatosLaborales::whereHas(
+            'estadoLaboral',
+            function ($query) {
+                $query->where('clave', 'activo');
+            }
+        )->sum('sueldo');
+
+        $fechaGeneracion = now();
 
         $pdf = Pdf::loadView('rh.personal.pdf', [
             'personal' => $personal,
             'totalActivo' => $totalActivo,
             'totalBaja' => $totalBaja,
             'totalSueldos' => $totalSueldos,
-            'fechaGeneracion' => now(),
-        ]);
+            'fechaGeneracion' => $fechaGeneracion,
+        ])->setPaper('A4', 'landscape');
 
-        $pdf->setPaper('A4', 'landscape');
+        $nombreArchivo = 'personal_' . $fechaGeneracion->format('Y-m-d') . '.pdf';
 
-        return $pdf->download('personal_' . now()->format('Y-m-d') . '.pdf');
+        return [$pdf, $nombreArchivo];
     }
+
 }

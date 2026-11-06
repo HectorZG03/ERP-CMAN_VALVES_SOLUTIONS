@@ -28,6 +28,19 @@ class AppServiceProvider extends ServiceProvider
             return in_array($user->role, ['almacen', 'aux_almacen']);
         });
 
+        Gate::define('view-salidas', function ($user) {
+            return in_array($user->role, [
+                'almacen',
+                'aux_almacen',
+                'direccion',
+                'ti',
+                'operaciones',
+                'aux_operaciones',
+                'logistica',
+                'aux_logistica',
+            ], true);
+        });
+
         Gate::define('approve-requests', function ($user) {
             return $user->role === 'direccion';
         });
@@ -42,4 +55,4 @@ class AppServiceProvider extends ServiceProvider
             return true;
         });
     }
-}
+}   
