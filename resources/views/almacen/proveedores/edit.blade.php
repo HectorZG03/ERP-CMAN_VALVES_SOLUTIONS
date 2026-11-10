@@ -18,7 +18,9 @@
 
     <div class="bg-white dark:bg-gray-800 shadow sm:rounded-lg transition-colors duration-200">
         <div class="px-4 py-5 sm:p-6">
-            <form method="POST" action="{{ route('proveedores.update', $proveedor) }}">
+            <form method="POST" action="{{ route('proveedores.update', $proveedor) }}"
+                  data-confirm="¿Guardar los cambios de este proveedor?"
+                  data-confirm-title="Actualizar proveedor" data-confirm-text="Guardar cambios" data-confirm-variant="success">
                 @csrf
                 @method('PUT')
 

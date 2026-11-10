@@ -66,6 +66,8 @@
         id="valepp-edit-form"
         method="POST"
         action="{{ route('valepp.update', $valepp) }}"
+        data-confirm="¿Guardar los cambios realizados en este vale EPP?"
+        data-confirm-title="Actualizar vale EPP" data-confirm-text="Guardar cambios" data-confirm-variant="success"
         class="space-y-6"
     >
         @csrf

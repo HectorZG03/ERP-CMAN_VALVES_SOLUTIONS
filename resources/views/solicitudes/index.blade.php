@@ -421,6 +421,8 @@
                                                 'solicitudes.updateEstatus',
                                                 $solicitud
                                             ) }}"
+                                            data-confirm="¿Aprobar esta solicitud? La aprobación no descuenta inventario; el descuento se realizará al registrar la salida."
+                                            data-confirm-title="Aprobar solicitud" data-confirm-variant="success"
                                         >
                                             @csrf
                                             @method('PUT')
@@ -431,8 +433,7 @@
                                                 value="aprobado"
                                             >
 
-                                            <x-button type="submit" variant="success" size="sm" icon="check"
-                                                onclick="return confirm('¿Aprobar esta solicitud? La aprobación no descuenta inventario; el descuento se realizará al registrar la salida.')">Aprobar</x-button>
+                                            <x-button type="submit" variant="success" size="sm" icon="check">Aprobar</x-button>
                                         </form>
 
                                         <form
@@ -441,6 +442,8 @@
                                                 'solicitudes.updateEstatus',
                                                 $solicitud
                                             ) }}"
+                                            data-confirm="¿Denegar esta solicitud?"
+                                            data-confirm-title="Denegar solicitud" data-confirm-variant="danger" data-confirm-text="Denegar"
                                         >
                                             @csrf
                                             @method('PUT')
@@ -451,8 +454,7 @@
                                                 value="denegado"
                                             >
 
-                                            <x-button type="submit" variant="danger" size="sm" icon="close"
-                                                onclick="return confirm('¿Denegar esta solicitud?')">Denegar</x-button>
+                                            <x-button type="submit" variant="danger" size="sm" icon="close">Denegar</x-button>
                                         </form>
                                     @endif
                                 </div>

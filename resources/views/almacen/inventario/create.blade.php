@@ -59,7 +59,9 @@
     {{-- ============================================================
         FORMULARIO
     ============================================================ --}}
-    <form method="POST" action="{{ route('inventario.store') }}">
+    <form method="POST" action="{{ route('inventario.store') }}"
+          data-confirm="¿Crear este producto en el inventario?"
+          data-confirm-title="Guardar producto" data-confirm-text="Crear producto" data-confirm-variant="success">
         @csrf
 
         <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm

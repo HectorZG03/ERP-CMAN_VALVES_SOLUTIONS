@@ -35,6 +35,8 @@
         method="POST"
         action="{{ route('valepp.store') }}"
         id="valepp-form"
+        data-confirm="¿Registrar este vale de EPP con los productos y cantidades asignados?"
+        data-confirm-title="Registrar vale EPP" data-confirm-text="Registrar vale" data-confirm-variant="success"
         class="space-y-5"
     >
         @csrf

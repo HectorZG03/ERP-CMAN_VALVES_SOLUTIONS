@@ -291,7 +291,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const entity = deleteButton.dataset.delete;
         const name = deleteButton.dataset.name || `este ${labels[entity] || 'registro'}`;
 
-        if (!window.confirm(`¿Eliminar ${labels[entity] || 'registro'} "${name}"?`)) {
+        const confirmed = await window.erpConfirm(
+            `¿Eliminar ${labels[entity] || 'registro'} "${name}"?`,
+            { title: 'Eliminar registro', confirmText: 'Eliminar', variant: 'danger' }
+        );
+
+        if (!confirmed) {
             return;
         }
 
@@ -380,6 +385,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     methodField.value = 'POST';
                 }
             }
+
+            const confirmation = await window.erpConfirm(
+                editingId
+                    ? `¿Guardar los cambios de ${labels[entity] || 'este registro'}?`
+                    : `¿Crear ${labels[entity] || 'este registro'}?`,
+                {
+                    title: editingId ? 'Guardar cambios' : 'Crear registro',
+                    confirmText: editingId ? 'Guardar cambios' : 'Crear',
+                    variant: 'success',
+                }
+            );
+
+            if (!confirmation) return;
 
             if (submitButton) {
                 submitButton.disabled = true;

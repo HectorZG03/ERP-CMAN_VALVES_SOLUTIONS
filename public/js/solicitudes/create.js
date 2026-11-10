@@ -583,30 +583,26 @@ document.addEventListener('DOMContentLoaded', () => {
             'input[name="tipo_solicitud"][type="radio"]'
         )
         .forEach((radio) => {
-            radio.addEventListener('change', (evento) => {
+            radio.addEventListener('change', async (evento) => {
                 const nuevoTipo = evento.target.value;
 
-                if (
-                    productos.size > 0
-                    && !window.confirm(
+                if (productos.size > 0) {
+                    const confirmado = await window.erpConfirm(
                         'Al cambiar el tipo de solicitud '
                         + 'se eliminarán los productos agregados. '
-                        + '¿Deseas continuar?'
-                    )
-                ) {
-                    const radioAnterior = document.querySelector(
-                        `input[name="tipo_solicitud"]`
-                        + `[value="${tipoAnterior}"]`
+                        + '¿Deseas continuar?',
+                        { title: 'Cambiar tipo de solicitud', confirmText: 'Continuar', variant: 'warning' }
                     );
 
-                    if (radioAnterior) {
-                        radioAnterior.checked = true;
+                    if (!confirmado) {
+                        const radioAnterior = document.querySelector(
+                            `input[name="tipo_solicitud"]`
+                            + `[value="${tipoAnterior}"]`
+                        );
+
+                        if (radioAnterior) radioAnterior.checked = true;
+                        return;
                     }
-
-                    return;
-                }
-
-                if (productos.size > 0) {
                     vaciarProductos();
                 }
 
@@ -635,15 +631,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    botonLimpiar.addEventListener('click', () => {
-        if (
-            productos.size > 0
-            && !window.confirm(
+    botonLimpiar.addEventListener('click', async () => {
+        if (productos.size > 0) {
+            const confirmado = await window.erpConfirm(
                 '¿Estás seguro de que deseas '
-                + 'limpiar toda la solicitud?'
-            )
-        ) {
-            return;
+                + 'limpiar toda la solicitud?',
+                { title: 'Limpiar solicitud', confirmText: 'Limpiar', variant: 'danger' }
+            );
+
+            if (!confirmado) return;
         }
 
         formulario.reset();

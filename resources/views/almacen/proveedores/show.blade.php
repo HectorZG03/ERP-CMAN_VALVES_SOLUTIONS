@@ -183,10 +183,10 @@
                     Editar Información
                 </a>
 
-                <form method="POST" action="{{ route('proveedores.destroy', $proveedor) }}" class="inline">
+                <form method="POST" action="{{ route('proveedores.destroy', $proveedor) }}" class="inline" data-confirm="¿Estás seguro de eliminar este proveedor? Esta acción no se puede deshacer y eliminará toda la información relacionada." data-confirm-title="Eliminar proveedor" data-confirm-text="Eliminar" data-confirm-variant="danger">
                     @csrf
                     @method('DELETE')
-                    <x-button type="submit" variant="danger" icon="delete" onclick="return confirm('¿Estás seguro de eliminar este proveedor?\\n\\nEsta acción no se puede deshacer y eliminará toda la información relacionada.')">Eliminar proveedor</x-button>
+                    <x-button type="submit" variant="danger" icon="delete">Eliminar proveedor</x-button>
                 </form>
             </div>
         </div>

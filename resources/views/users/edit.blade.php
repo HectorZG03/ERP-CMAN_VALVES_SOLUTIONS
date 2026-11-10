@@ -17,7 +17,9 @@
     </div>
 
     <div class="bg-white shadow-xl rounded-xl overflow-hidden">
-        <form method="POST" action="{{ route('users.update', $user) }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('users.update', $user) }}" enctype="multipart/form-data"
+              data-confirm="¿Guardar los cambios de este usuario?"
+              data-confirm-title="Actualizar usuario" data-confirm-text="Guardar cambios" data-confirm-variant="success">
             @csrf
             @method('PUT')
             

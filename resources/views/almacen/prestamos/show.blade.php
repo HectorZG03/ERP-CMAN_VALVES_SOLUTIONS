@@ -304,21 +304,23 @@
                     @endif
                     
                     <div class="flex space-x-4">
-                        <form method="POST" action="{{ route('prestamos.updateEstatus', $prestamo) }}" class="flex-1">
+                        <form method="POST" action="{{ route('prestamos.updateEstatus', $prestamo) }}" class="flex-1"
+                              data-confirm="{{ $stockSuficiente ? 'Aprobar este préstamo descontará ' . $prestamo->total_unidades_prestadas . ' unidades de ' . $prestamo->total_productos . ' productos del inventario.' : '' }}"
+                              data-confirm-title="Aprobar préstamo" data-confirm-variant="success">
                             @csrf
                             @method('PUT')
                             <input type="hidden" name="estatus" value="aprobado">
-                            <x-button type="submit" variant="success" icon="check" class="w-full" :disabled="!$stockSuficiente"
-                                @if($stockSuficiente) onclick="return confirm('¿Aprobar este préstamo?\n\nEsto descontará {{ $prestamo->total_unidades_prestadas }} unidades de {{ $prestamo->total_productos }} productos del inventario.')" @endif>
+                            <x-button type="submit" variant="success" icon="check" class="w-full" :disabled="!$stockSuficiente">
                                 {{ $stockSuficiente ? 'Aprobar préstamo' : 'Stock insuficiente' }}
                             </x-button>
                         </form>
                         
-                        <form method="POST" action="{{ route('prestamos.updateEstatus', $prestamo) }}" class="flex-1">
+                        <form method="POST" action="{{ route('prestamos.updateEstatus', $prestamo) }}" class="flex-1"
+                              data-confirm="¿Denegar este préstamo?" data-confirm-title="Denegar préstamo" data-confirm-text="Denegar" data-confirm-variant="danger">
                             @csrf
                             @method('PUT')
                             <input type="hidden" name="estatus" value="denegado">
-                            <x-button type="submit" variant="danger" icon="close" class="w-full" onclick="return confirm('¿Denegar este préstamo?')">Denegar préstamo</x-button>
+                            <x-button type="submit" variant="danger" icon="close" class="w-full">Denegar préstamo</x-button>
                         </form>
                     </div>
                 </div>

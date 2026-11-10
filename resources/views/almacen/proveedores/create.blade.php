@@ -53,6 +53,8 @@
     <!-- Formulario -->
     <form method="POST"
           action="{{ route('proveedores.store') }}"
+          data-confirm="¿Guardar este nuevo proveedor?"
+          data-confirm-title="Crear proveedor" data-confirm-text="Crear proveedor" data-confirm-variant="success"
           class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         @csrf
 

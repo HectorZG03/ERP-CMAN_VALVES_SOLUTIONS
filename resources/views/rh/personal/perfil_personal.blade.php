@@ -140,6 +140,8 @@
              @if ($activeTab !== 'laboral') hidden @endif>
             <form method="POST"
                   action="{{ route('personal.update', $personal) }}"
+                  data-confirm="¿Guardar los cambios de la información laboral?"
+                  data-confirm-title="Guardar información laboral" data-confirm-text="Guardar cambios" data-confirm-variant="success"
                   class="space-y-6">
                 @csrf
                 @method('PUT')
@@ -164,6 +166,8 @@
             <form method="POST"
                   action="{{ route('personal.update', $personal) }}"
                   enctype="multipart/form-data"
+                  data-confirm="¿Guardar los cambios de la información personal y documentos?"
+                  data-confirm-title="Guardar información personal" data-confirm-text="Guardar cambios" data-confirm-variant="success"
                   class="space-y-6">
                 @csrf
                 @method('PUT')
@@ -187,6 +191,8 @@
              @if ($activeTab !== 'contacto') hidden @endif>
             <form method="POST"
                   action="{{ route('personal.update', $personal) }}"
+                  data-confirm="¿Guardar los cambios de contacto y documentos?"
+                  data-confirm-title="Guardar contacto" data-confirm-text="Guardar cambios" data-confirm-variant="success"
                   class="space-y-6">
                 @csrf
                 @method('PUT')

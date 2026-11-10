@@ -8,7 +8,9 @@
     </div>
 
     <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">
-        <form method="POST" action="{{ route('prestamos.store') }}" id="prestamoForm">
+        <form method="POST" action="{{ route('prestamos.store') }}" id="prestamoForm"
+              data-confirm="¿Enviar esta solicitud de préstamo?"
+              data-confirm-title="Crear préstamo" data-confirm-text="Enviar solicitud" data-confirm-variant="success">
             @csrf
             
             <!-- Fechas del préstamo -->
@@ -505,9 +507,14 @@ function limpiarBuscador() {
 }
 
 // Función para limpiar todo el préstamo
-function limpiarPrestamo() {
-    if (productosAgregados.length > 0 && !confirm('¿Estás seguro de que deseas limpiar toda la solicitud?')) {
-        return;
+async function limpiarPrestamo() {
+    if (productosAgregados.length > 0) {
+        const confirmado = await window.erpConfirm(
+            '¿Estás seguro de que deseas limpiar toda la solicitud?',
+            { title: 'Limpiar préstamo', confirmText: 'Limpiar', variant: 'danger' }
+        );
+
+        if (!confirmado) return;
     }
     
     productosAgregados = [];

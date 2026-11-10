@@ -238,12 +238,12 @@
 
                                 <td class="whitespace-nowrap px-4 py-3 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <x-button :href="route('personal.show', $persona)" variant="secondary" size="sm" icon="view" icon-only aria-label="Abrir perfil de {{ $persona->nombre_mostrar }}" title="Ver perfil" />
+                                        <x-button :href="route('personal.show', $persona)" variant="info" size="sm" icon="user" icon-only aria-label="Abrir perfil de {{ $persona->nombre_mostrar }}" title="Ver perfil" />
 
                                         <x-button
                                             type="button"
                                             class="open-personal-info-modal"
-                                            variant="secondary"
+                                            variant="accent"
                                             size="sm"
                                             icon="view"
                                             icon-only

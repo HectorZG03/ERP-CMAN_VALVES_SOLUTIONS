@@ -17,7 +17,9 @@
     </div>
 
     <div class="bg-white shadow-xl rounded-xl overflow-hidden">
-        <form method="POST" action="{{ route('users.store') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('users.store') }}" enctype="multipart/form-data"
+              data-confirm="¿Crear este usuario con los datos capturados?"
+              data-confirm-title="Crear usuario" data-confirm-text="Crear usuario" data-confirm-variant="success">
             @csrf
             
             <!-- Información Personal y Fotos -->

@@ -58,8 +58,9 @@
                                     <x-button :href="route('users.show', $user)" variant="secondary" size="sm" icon="view">Ver</x-button>
                                     <x-button :href="route('users.edit', $user)" variant="accent" size="sm" icon="edit">Editar</x-button>
                                 @if($user->id !== auth()->id())
-                                <form method="POST" action="{{ route('users.destroy', $user) }}" 
-                                      class="inline" onsubmit="return confirm('¿Estás seguro?')">
+                                <form method="POST" action="{{ route('users.destroy', $user) }}"
+                                      class="inline" data-confirm="¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer."
+                                      data-confirm-title="Eliminar usuario" data-confirm-text="Eliminar" data-confirm-variant="danger">
                                     @csrf
                                     @method('DELETE')
                                     <x-button type="submit" variant="danger" size="sm" icon="delete">Eliminar</x-button>

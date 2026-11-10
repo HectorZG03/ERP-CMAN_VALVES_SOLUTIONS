@@ -295,24 +295,31 @@
                                 method="POST"
                                 action="{{ route('requisiciones.updateEstatusFinanzas', $requisicion) }}"
                                 class="min-w-0 flex-1"
+                                data-confirm="¿Aprobar esta requisición desde finanzas?"
+                                data-confirm-title="Aprobar requisición"
+                                data-confirm-variant="success"
                             >
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="estatus_finanzas" value="aprobado">
 
-                                <x-button type="submit" variant="success" icon="check" class="w-full" onclick="return confirm('¿Aprobar esta requisición desde finanzas?')">Aprobar (Finanzas)</x-button>
+                                <x-button type="submit" variant="success" icon="check" class="w-full">Aprobar (Finanzas)</x-button>
                             </form>
 
                             <form
                                 method="POST"
                                 action="{{ route('requisiciones.updateEstatusFinanzas', $requisicion) }}"
                                 class="min-w-0 flex-1"
+                                data-confirm="¿Denegar esta requisición desde finanzas?"
+                                data-confirm-title="Denegar requisición"
+                                data-confirm-text="Denegar"
+                                data-confirm-variant="danger"
                             >
                                 @csrf
                                 @method('PATCH')
                                 <input type="hidden" name="estatus_finanzas" value="denegado">
 
-                                <x-button type="submit" variant="danger" icon="close" class="w-full" onclick="return confirm('¿Denegar esta requisición desde finanzas?')">Denegar (Finanzas)</x-button>
+                                <x-button type="submit" variant="danger" icon="close" class="w-full">Denegar (Finanzas)</x-button>
                             </form>
                         </div>
                     </div>
@@ -337,24 +344,31 @@
                                 method="POST"
                                 action="{{ route('requisiciones.updateEstatus', $requisicion) }}"
                                 class="min-w-0 flex-1"
+                                data-confirm="¿Aprobar esta requisición?"
+                                data-confirm-title="Aprobar requisición"
+                                data-confirm-variant="success"
                             >
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="estatus" value="aprobado">
 
-                                <x-button type="submit" variant="success" icon="check" class="w-full" onclick="return confirm('¿Aprobar esta requisición?')">Aprobar requisición</x-button>
+                                <x-button type="submit" variant="success" icon="check" class="w-full">Aprobar requisición</x-button>
                             </form>
 
                             <form
                                 method="POST"
                                 action="{{ route('requisiciones.updateEstatus', $requisicion) }}"
                                 class="min-w-0 flex-1"
+                                data-confirm="¿Denegar esta requisición?"
+                                data-confirm-title="Denegar requisición"
+                                data-confirm-text="Denegar"
+                                data-confirm-variant="danger"
                             >
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="estatus" value="denegado">
 
-                                <x-button type="submit" variant="danger" icon="close" class="w-full" onclick="return confirm('¿Denegar esta requisición?')">Denegar requisición</x-button>
+                                <x-button type="submit" variant="danger" icon="close" class="w-full">Denegar requisición</x-button>
                             </form>
                         </div>
                     </div>

@@ -75,6 +75,8 @@
             method="POST"
             action="{{ route('solicitudes.store') }}"
             id="solicitudForm"
+            data-confirm="¿Enviar esta solicitud de material?"
+            data-confirm-title="Crear solicitud" data-confirm-text="Enviar solicitud" data-confirm-variant="success"
             data-buscar-productos-url="{{ route('solicitudes.buscar-productos') }}"
             data-producto-base-url="{{ url('solicitudes/producto') }}"
             novalidate
