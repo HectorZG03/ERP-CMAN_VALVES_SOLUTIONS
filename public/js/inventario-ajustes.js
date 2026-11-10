@@ -73,14 +73,35 @@ document.addEventListener('DOMContentLoaded', () => {
     radios.forEach((radio) => radio.addEventListener('change', actualizarVista));
     [nuevaExistencia, costoAjuste, nuevoCosto].forEach((input) => input.addEventListener('input', actualizarVista));
 
-    form.addEventListener('submit', (event) => {
+    let confirmacionAprobada = false;
+
+    form.addEventListener('submit', async (event) => {
         const operacion = getOperacion();
         const mensaje = operacion === 'stock'
             ? '¿Confirmas el ajuste de existencias? Esta operación quedará registrada en el historial.'
             : '¿Confirmas la revaluación del producto? Esta operación quedará registrada en el historial.';
 
-        if (!window.confirm(mensaje)) {
-            event.preventDefault();
+        if (confirmacionAprobada) {
+            confirmacionAprobada = false;
+            return;
+        }
+
+        event.preventDefault();
+        const confirmado = await window.erpConfirm(mensaje, {
+            title: 'Confirmar ajuste de inventario',
+            confirmText: 'Confirmar ajuste',
+            variant: 'warning',
+        });
+
+        if (!confirmado) {
+            return;
+        }
+
+        confirmacionAprobada = true;
+        if (form.requestSubmit) {
+            form.requestSubmit(event.submitter || undefined);
+        } else {
+            form.submit();
         }
     });
 

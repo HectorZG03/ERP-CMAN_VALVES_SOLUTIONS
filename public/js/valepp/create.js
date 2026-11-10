@@ -556,8 +556,13 @@
                 return;
             }
 
-            saveButton.disabled = true;
-            saveButton.textContent = 'Registrando…';
+            if (form.dataset.confirmApproved === 'true') {
+                delete form.dataset.confirmApproved;
+                saveButton.disabled = true;
+                const label = saveButton.querySelector('[data-button-label]');
+                if (label) label.textContent = 'Registrando…';
+                else saveButton.textContent = 'Registrando…';
+            }
         });
 
         if (oldRequestId > 0) {

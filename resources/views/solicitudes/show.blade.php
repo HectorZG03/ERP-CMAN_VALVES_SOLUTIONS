@@ -464,6 +464,9 @@
                         <form
                             method="POST"
                             action="{{ route('solicitudes.updateEstatus', $solicitud) }}"
+                            data-confirm="¿Aprobar esta solicitud? La aprobación no descontará inventario."
+                            data-confirm-title="Aprobar solicitud"
+                            data-confirm-variant="success"
                         >
                             @csrf
                             @method('PUT')
@@ -474,13 +477,16 @@
                                 value="aprobado"
                             >
 
-                            <x-button type="submit" variant="success" icon="check" class="w-full"
-                                onclick="return confirm('¿Aprobar esta solicitud? La aprobación no descontará inventario.')">Aprobar</x-button>
+                            <x-button type="submit" variant="success" icon="check" class="w-full">Aprobar</x-button>
                         </form>
 
                         <form
                             method="POST"
                             action="{{ route('solicitudes.updateEstatus', $solicitud) }}"
+                            data-confirm="¿Denegar esta solicitud?"
+                            data-confirm-title="Denegar solicitud"
+                            data-confirm-text="Denegar"
+                            data-confirm-variant="danger"
                         >
                             @csrf
                             @method('PUT')
@@ -491,8 +497,7 @@
                                 value="denegado"
                             >
 
-                            <x-button type="submit" variant="danger" icon="close" class="w-full"
-                                onclick="return confirm('¿Denegar esta solicitud?')">Denegar</x-button>
+                            <x-button type="submit" variant="danger" icon="close" class="w-full">Denegar</x-button>
                         </form>
                     </div>
                 </section>

@@ -238,21 +238,19 @@
                                     <x-button :href="route('prestamos.show', $prestamo)" variant="secondary" size="sm" icon="view">Ver</x-button>
 
                                     @if(auth()->user()->canApproveRequests() && $prestamo->estatus === 'pendiente')
-                                        <form method="POST" action="{{ route('prestamos.updateEstatus', $prestamo) }}" class="inline">
+                                        <form method="POST" action="{{ route('prestamos.updateEstatus', $prestamo) }}" class="inline"
+                                              data-confirm="¿Aprobar este préstamo?" data-confirm-title="Aprobar préstamo" data-confirm-variant="success">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="estatus" value="aprobado">
-                                            <x-button type="submit" variant="success" size="sm" icon="check"
-                                                onclick="return confirm('¿Aprobar este préstamo?')">Aprobar</x-button>
-                                            {{-- // boton para denegar --}}
-                                            <form method="POST" action="{{ route('prestamos.updateEstatus', $prestamo) }}" class="inline">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="hidden" name="estatus" value="denegado">
-                                                <x-button type="submit" variant="danger" size="sm" icon="close"
-                                                    onclick="return confirm('¿Denegar este préstamo?')">Denegar</x-button>
-                                            </form>
-                                        </div>
+                                            <x-button type="submit" variant="success" size="sm" icon="check">Aprobar</x-button>
+                                        </form>
+                                        <form method="POST" action="{{ route('prestamos.updateEstatus', $prestamo) }}" class="inline"
+                                              data-confirm="¿Denegar este préstamo?" data-confirm-title="Denegar préstamo" data-confirm-text="Denegar" data-confirm-variant="danger">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="hidden" name="estatus" value="denegado">
+                                            <x-button type="submit" variant="danger" size="sm" icon="close">Denegar</x-button>
                                         </form>
                                     @endif
 

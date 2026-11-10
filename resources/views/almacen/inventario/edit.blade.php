@@ -65,7 +65,9 @@
         </div>
 
 
-        <form method="POST" action="{{ route('inventario.update', $inventario) }}">
+        <form method="POST" action="{{ route('inventario.update', $inventario) }}"
+              data-confirm="¿Guardar los cambios de este producto?"
+              data-confirm-title="Actualizar producto" data-confirm-text="Guardar cambios" data-confirm-variant="success">
             @csrf
             @method('PUT')
 

@@ -39,7 +39,8 @@
     </div>
 
     <!-- Formulario de devolución -->
-    <form method="POST" action="{{ route('prestamos.procesarDevolucion', $prestamo) }}" id="devolucionForm">
+    <form method="POST" action="{{ route('prestamos.procesarDevolucion', $prestamo) }}" id="devolucionForm"
+          data-confirm="¿Confirmar la devolución de estos productos?" data-confirm-title="Procesar devolución" data-confirm-variant="primary">
         @csrf
         
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 transition-colors duration-200">
@@ -187,7 +188,7 @@
                 <div class="mt-6 flex justify-end space-x-3">
                     <x-button :href="route('prestamos.show', $prestamo)" variant="secondary" icon="back">Cancelar</x-button>
                     <x-button type="button" onclick="marcarDevolucionCompleta()" variant="success" icon="check">Marcar todo devuelto</x-button>
-                    <x-button type="submit" variant="primary" icon="save" onclick="return confirm('¿Confirmar la devolución de estos productos?')">Procesar devolución</x-button>
+                    <x-button type="submit" variant="primary" icon="save">Procesar devolución</x-button>
                 </div>
             @else
                 <div class="text-center py-8 text-gray-500 dark:text-gray-400">

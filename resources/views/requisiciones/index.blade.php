@@ -261,17 +261,19 @@
 
                                     <!-- Botones FINANZAS -->
                                     @if(auth()->user()->canApproveFinanzas() && $requisicion->estatus_finanzas === 'pendiente')
-                                        <form method="POST" action="{{ route('requisiciones.updateEstatusFinanzas', $requisicion) }}" class="inline">
+                                        <form method="POST" action="{{ route('requisiciones.updateEstatusFinanzas', $requisicion) }}" class="inline"
+                                              data-confirm="¿Aprobar esta requisición desde finanzas?" data-confirm-title="Aprobar requisición" data-confirm-variant="success">
                                             @csrf
                                             @method('PATCH')
                                             <input type="hidden" name="estatus_finanzas" value="aprobado">
-                                            <x-button type="submit" variant="success" size="sm" icon="check" onclick="return confirm('¿Aprobar esta requisición desde finanzas?')">Aprobar</x-button>
+                                            <x-button type="submit" variant="success" size="sm" icon="check">Aprobar</x-button>
                                         </form>
-                                        <form method="POST" action="{{ route('requisiciones.updateEstatusFinanzas', $requisicion) }}" class="inline">
+                                        <form method="POST" action="{{ route('requisiciones.updateEstatusFinanzas', $requisicion) }}" class="inline"
+                                              data-confirm="¿Denegar esta requisición desde finanzas?" data-confirm-title="Denegar requisición" data-confirm-variant="danger" data-confirm-text="Denegar">
                                             @csrf
                                             @method('PATCH')
                                             <input type="hidden" name="estatus_finanzas" value="denegado">
-                                            <x-button type="submit" variant="danger" size="sm" icon="close" onclick="return confirm('¿Denegar esta requisición desde finanzas?')">Denegar</x-button>
+                                            <x-button type="submit" variant="danger" size="sm" icon="close">Denegar</x-button>
                                         </form>
                                     @elseif(auth()->user()->canApproveFinanzas() && $requisicion->estatus_finanzas !== 'pendiente')
                                         <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-md
@@ -282,17 +284,19 @@
 
                                     <!-- Botones DIRECCIÓN -->
                                     @if(auth()->user()->canApproveRequests() && $requisicion->estatus_finanzas === 'aprobado' && $requisicion->estatus === 'pendiente')
-                                        <form method="POST" action="{{ route('requisiciones.updateEstatus', $requisicion) }}" class="inline">
+                                        <form method="POST" action="{{ route('requisiciones.updateEstatus', $requisicion) }}" class="inline"
+                                              data-confirm="¿Aprobar esta requisición?" data-confirm-title="Aprobar requisición" data-confirm-variant="success">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="estatus" value="aprobado">
-                                            <x-button type="submit" variant="success" size="sm" icon="check" onclick="return confirm('¿Aprobar esta requisición?')">Aprobar</x-button>
+                                            <x-button type="submit" variant="success" size="sm" icon="check">Aprobar</x-button>
                                         </form>
-                                        <form method="POST" action="{{ route('requisiciones.updateEstatus', $requisicion) }}" class="inline">
+                                        <form method="POST" action="{{ route('requisiciones.updateEstatus', $requisicion) }}" class="inline"
+                                              data-confirm="¿Denegar esta requisición?" data-confirm-title="Denegar requisición" data-confirm-variant="danger" data-confirm-text="Denegar">
                                             @csrf
                                             @method('PUT')
                                             <input type="hidden" name="estatus" value="denegado">
-                                            <x-button type="submit" variant="danger" size="sm" icon="close" onclick="return confirm('¿Denegar esta requisición?')">Denegar</x-button>
+                                            <x-button type="submit" variant="danger" size="sm" icon="close">Denegar</x-button>
                                         </form>
                                     @endif
                                 </div>

@@ -589,8 +589,13 @@ document.addEventListener('DOMContentLoaded', () => {
     /**
      * Reinicia el formulario sin cambiar la fecha por defecto.
      */
-    function limpiarFormulario() {
-        if (!confirm('¿Deseas limpiar los datos capturados y comenzar de nuevo?')) {
+    async function limpiarFormulario() {
+        const confirmado = await window.erpConfirm(
+            '¿Deseas limpiar los datos capturados y comenzar de nuevo?',
+            { title: 'Limpiar entrada', confirmText: 'Limpiar', variant: 'danger' }
+        );
+
+        if (!confirmado) {
             return;
         }
 
@@ -728,7 +733,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    form.addEventListener('submit', event => {
+    let confirmacionEntradaAprobada = false;
+
+    form.addEventListener('submit', async event => {
         const materiales = obtenerMateriales();
 
         if (!proveedorId.value) {
@@ -787,14 +794,28 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (!confirm(`¿Confirmas registrar la entrada por ${document.getElementById('total-general').textContent}?`)) {
+        if (!confirmacionEntradaAprobada) {
             event.preventDefault();
+
+            const confirmado = await window.erpConfirm(
+                `¿Confirmas registrar la entrada por ${document.getElementById('total-general').textContent}?`,
+                { title: 'Registrar entrada', confirmText: 'Registrar', variant: 'success' }
+            );
+
+            if (!confirmado) return;
+
+            confirmacionEntradaAprobada = true;
+            form.requestSubmit(event.submitter || undefined);
             return;
         }
 
+        confirmacionEntradaAprobada = false;
+
         registrarBtn.disabled = true;
         registrarBtn.classList.add('cursor-not-allowed', 'opacity-60');
-        registrarBtn.textContent = 'Registrando entrada...';
+        const etiquetaRegistrar = registrarBtn.querySelector('[data-button-label]');
+        if (etiquetaRegistrar) etiquetaRegistrar.textContent = 'Registrando entrada...';
+        else registrarBtn.textContent = 'Registrando entrada...';
     });
 
     // Inicializar con una tarjeta vacía.

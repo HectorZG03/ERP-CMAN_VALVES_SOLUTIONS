@@ -31,7 +31,9 @@
             <x-button type="button" class="close-baja-modal" variant="ghost" size="sm" icon="close" icon-only aria-label="Cerrar ventana" title="Cerrar ventana" />
         </div>
 
-        <form method="POST" action="{{ route('bajas.store') }}" class="mt-5 space-y-4">
+        <form method="POST" action="{{ route('bajas.store') }}" class="mt-5 space-y-4"
+              data-confirm="¿Registrar la baja de este colaborador? La acción quedará guardada en su historial."
+              data-confirm-title="Registrar baja" data-confirm-text="Registrar baja" data-confirm-variant="danger">
             @csrf
 
             <!-- Selección de Colaborador (Ocupa todo el ancho) -->

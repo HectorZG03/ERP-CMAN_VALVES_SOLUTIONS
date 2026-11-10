@@ -297,12 +297,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (botonLimpiar) {
         botonLimpiar.addEventListener(
             'click',
-            () => {
-                if (
-                    !window.confirm(
-                        '¿Está seguro de que desea limpiar el formulario?'
-                    )
-                ) {
+            async () => {
+                const confirmado = await window.erpConfirm(
+                    '¿Está seguro de que desea limpiar el formulario?',
+                    { title: 'Limpiar salida', confirmText: 'Limpiar', variant: 'danger' }
+                );
+
+                if (!confirmado) {
                     return;
                 }
 
@@ -312,9 +313,11 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
+    let confirmacionSalidaAprobada = false;
+
     formulario.addEventListener(
         'submit',
-        (event) => {
+        async (event) => {
             if (!campoSolicitudId.value) {
                 event.preventDefault();
 
@@ -339,22 +342,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const confirmacion =
-                window.confirm(
+            if (!confirmacionSalidaAprobada) {
+                event.preventDefault();
+
+                const confirmado = await window.erpConfirm(
                     `¿Confirmar la salida de materiales por ${moneda(
                         gestorProductos.obtenerTotal()
-                    )}?`
+                    )}?`,
+                    { title: 'Registrar salida', confirmText: 'Registrar salida', variant: 'success' }
                 );
 
-            if (!confirmacion) {
-                event.preventDefault();
+                if (!confirmado) return;
+
+                confirmacionSalidaAprobada = true;
+                formulario.requestSubmit(event.submitter || undefined);
                 return;
             }
 
+            confirmacionSalidaAprobada = false;
+
             botonEnviar.disabled = true;
 
-            botonEnviar.textContent =
-                'Registrando salida...';
+            const etiquetaEnvio = botonEnviar.querySelector('[data-button-label]');
+            if (etiquetaEnvio) etiquetaEnvio.textContent = 'Registrando salida...';
+            else botonEnviar.textContent = 'Registrando salida...';
         }
     );
 

@@ -11,7 +11,9 @@
     </div>
 
     <div class="bg-white shadow rounded-lg p-6">
-        <form method="POST" action="{{ route('clientes.update', $cliente) }}">
+        <form method="POST" action="{{ route('clientes.update', $cliente) }}"
+              data-confirm="¿Guardar los cambios de este cliente?"
+              data-confirm-title="Actualizar cliente" data-confirm-text="Guardar cambios" data-confirm-variant="success">
             @csrf
             @method('PUT')
             

@@ -232,8 +232,10 @@
                                             <form
                                                 method="POST"
                                                 action="{{ route('bajas.reactivar', $baja) }}"
-                                                data-confirm-reactivation
-                                                data-worker-name="{{ $nombrePersona }}"
+                                                data-confirm="¿Reactivar a {{ $nombrePersona }}? La baja se conservará en el historial como anulada."
+                                                data-confirm-title="Reactivar colaborador"
+                                                data-confirm-text="Reactivar"
+                                                data-confirm-variant="success"
                                             >
                                                 @csrf
                                                 @method('PATCH')
@@ -258,6 +260,5 @@
 
 @include('rh.bajas.modales.registrar-baja')
 
-<script src="{{ asset('js/rh/bajas-index.js') }}" defer></script>
 <script src="{{ asset('js/rh/bajas-modal.js') }}" defer></script>
 @endsection

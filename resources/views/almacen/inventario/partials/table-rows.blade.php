@@ -164,7 +164,10 @@
                     <form method="POST"
                           action="{{ route('inventario.destroy', $inventario) }}"
                           class="inline"
-                          onsubmit="return confirm('¿Estás seguro de eliminar este producto?\n\nEsta acción no se puede deshacer.')">
+                          data-confirm="¿Estás seguro de eliminar este producto? Esta acción no se puede deshacer."
+                          data-confirm-title="Eliminar producto"
+                          data-confirm-text="Eliminar"
+                          data-confirm-variant="danger">
 
                         @csrf
                         @method('DELETE')

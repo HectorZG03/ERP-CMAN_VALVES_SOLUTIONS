@@ -273,6 +273,8 @@
 
 
     {{-- JavaScript global --}}
+    @include('components.confirm-dialog')
+    <script src="{{ asset('js/confirm-dialog.js') }}"></script>
     <script src="{{ asset('js/app.js') }}"></script>
 
     {{-- JavaScript del sidebar --}}

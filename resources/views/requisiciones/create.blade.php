@@ -43,7 +43,9 @@
 
 
     <div class="rounded-lg bg-white p-4 shadow transition-colors duration-200 dark:bg-gray-800 sm:p-6">
-        <form method="POST" action="{{ route('requisiciones.store') }}" id="requisicionForm">
+        <form method="POST" action="{{ route('requisiciones.store') }}" id="requisicionForm"
+              data-confirm="¿Enviar esta requisición para su revisión?"
+              data-confirm-title="Crear requisición" data-confirm-text="Enviar requisición" data-confirm-variant="success">
             @csrf
 
             <section class="mb-8" aria-labelledby="titulo-solicitante">
@@ -438,12 +440,14 @@
         btnAgregar.focus();
     }
 
-    function limpiarRequisicion() {
-        if (
-            items().length > 0
-            && !confirm('¿Estás seguro de que deseas limpiar toda la requisición?')
-        ) {
-            return;
+    async function limpiarRequisicion() {
+        if (items().length > 0) {
+            const confirmado = await window.erpConfirm(
+                '¿Estás seguro de que deseas limpiar toda la requisición?',
+                { title: 'Limpiar requisición', confirmText: 'Limpiar', variant: 'danger' }
+            );
+
+            if (!confirmado) return;
         }
 
         contenedor.innerHTML = '';
@@ -497,8 +501,15 @@
             return;
         }
 
+        // El diálogo global marca el formulario únicamente después de confirmar.
+        if (formulario.dataset.confirmApproved !== 'true') {
+            return;
+        }
+
         btnEnviar.disabled = true;
-        btnEnviar.textContent = 'Enviando...';
+        const etiqueta = btnEnviar.querySelector('[data-button-label]');
+        if (etiqueta) etiqueta.textContent = 'Enviando...';
+        else btnEnviar.textContent = 'Enviando...';
     });
 
     try {

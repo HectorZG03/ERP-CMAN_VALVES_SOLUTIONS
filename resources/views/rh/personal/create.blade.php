@@ -32,6 +32,8 @@
     <form method="POST"
           action="{{ route('personal.store') }}"
           enctype="multipart/form-data"
+          data-confirm="¿Registrar este colaborador con los datos capturados?"
+          data-confirm-title="Registrar colaborador" data-confirm-text="Guardar colaborador" data-confirm-variant="success"
           class="space-y-6">
         @csrf
 

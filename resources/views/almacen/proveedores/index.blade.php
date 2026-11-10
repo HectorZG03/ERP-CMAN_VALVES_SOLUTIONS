@@ -238,7 +238,10 @@
                                         <!-- Eliminar -->
                                         <form method="POST"
                                               action="{{ route('proveedores.destroy', $proveedor) }}"
-                                              onsubmit="return confirm('¿Estás seguro de eliminar este proveedor?\n\nEsta acción no se puede deshacer.');">
+                                              data-confirm="¿Estás seguro de eliminar este proveedor? Esta acción no se puede deshacer."
+                                              data-confirm-title="Eliminar proveedor"
+                                              data-confirm-text="Eliminar"
+                                              data-confirm-variant="danger">
                                             @csrf
                                             @method('DELETE')
 

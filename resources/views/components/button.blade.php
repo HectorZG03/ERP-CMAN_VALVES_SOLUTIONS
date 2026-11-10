@@ -11,6 +11,7 @@
 @php
     $variants = [
         'primary' => 'bg-slate-900 text-white hover:bg-slate-700 focus-visible:ring-slate-500 dark:bg-slate-700 dark:hover:bg-slate-600',
+        'info' => 'bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400',
         'secondary' => 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus-visible:ring-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700',
         'accent' => 'bg-amber-400 text-slate-950 hover:bg-amber-300 focus-visible:ring-amber-500',
         'danger' => 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500',
@@ -31,6 +32,7 @@
         'edit' => 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-7.5-3.5l6-6a2.12 2.12 0 013 3l-6 6L9 14l1.5-4.5z',
         'delete' => 'M3 6h18m-2 0-.9 14H5.9L5 6m4 0V4h6v2m-5 4v6m4-6v6',
         'view' => 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zm10-3a3 3 0 100 6 3 3 0 000-6z',
+        'user' => 'M15 7a3 3 0 11-6 0 3 3 0 016 0zM4 20a8 8 0 0116 0',
         'download' => 'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4m4-5l5 5 5-5m-5 5V3',
         'back' => 'M19 12H5m7 7-7-7 7-7',
         'search' => 'M21 21l-4.3-4.3m1.3-5.2a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z',
