@@ -16,6 +16,7 @@ class User extends Authenticatable
         'password',
         'role',
         'num_empleado',
+        'personal_id',
         'signature',
         'profile_photo',
     ];
@@ -193,6 +194,11 @@ class User extends Authenticatable
     public function getProfilePhotoUrlAttribute()
     {
         return $this->profile_photo ? asset('storage/' . $this->profile_photo) : asset('images/default-avatar.png');
+    }
+
+    public function personal()
+    {
+        return $this->belongsTo(Personal::class, 'personal_id');
     }
 
 

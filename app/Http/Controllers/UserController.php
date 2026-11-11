@@ -2,16 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Personal;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
     public function index()
     {
-        $users = User::paginate(15);
+        $users = User::with([
+            'personal.datosLaborales.estadoLaboral',
+            'personal.datosLaborales.puesto',
+        ])->paginate(15);
+
         return view('users.index', compact('users'));
     }
 
@@ -20,148 +26,208 @@ class UserController extends Controller
         return view('users.create');
     }
 
-   public function store(Request $request)
-{
-    $messages = [
-        'name.required' => 'El nombre es obligatorio',
-        'email.required' => 'El correo electrónico es obligatorio',
-        'email.email' => 'El correo debe ser una dirección válida',
-        'email.unique' => 'Este correo ya está registrado',
-        'password.required' => 'La contraseña es obligatoria',
-        'password.min' => 'La contraseña debe tener al menos 6 caracteres',
-        'password.confirmed' => 'Las contraseñas no coinciden',
-        'role.required' => 'Debes seleccionar un rol',
-        'role.in' => 'El rol seleccionado no es válido',
-        'num_empleado.required' => 'El número de empleado es obligatorio',
-        'num_empleado.unique' => 'Este número de empleado ya está registrado',
-        'signature.image' => 'La firma debe ser una imagen',
-        'signature.mimes' => 'La firma debe ser un archivo jpeg, png, jpg o gif',
-        'signature.max' => 'La firma no debe pesar más de 2MB',
-        'profile_photo.image' => 'La foto de perfil debe ser una imagen',
-        'profile_photo.mimes' => 'La foto debe ser un archivo jpeg, png, jpg o gif',
-        'profile_photo.max' => 'La foto no debe pesar más de 2MB',
-    ];
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'role' => [
+                'required',
+                'in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones,hse,aux_hse',
+            ],
+            'num_empleado' => ['required', 'string', 'max:50', 'unique:users,num_empleado'],
+            'signature' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+        ], [
+            'name.required' => 'El nombre es obligatorio.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El correo debe ser una dirección válida.',
+            'email.unique' => 'Este correo ya está registrado.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min' => 'La contraseña debe tener al menos 6 caracteres.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
+            'role.required' => 'Debes seleccionar un rol.',
+            'role.in' => 'El rol seleccionado no es válido.',
+            'num_empleado.required' => 'El número de empleado es obligatorio.',
+            'num_empleado.unique' => 'Este número de empleado ya está registrado.',
+            'signature.image' => 'La firma debe ser una imagen.',
+            'signature.mimes' => 'La firma debe ser jpeg, png, jpg o gif.',
+            'signature.max' => 'La firma no debe pesar más de 2 MB.',
+            'profile_photo.image' => 'La foto de perfil debe ser una imagen.',
+            'profile_photo.mimes' => 'La foto debe ser jpeg, png, jpg o gif.',
+            'profile_photo.max' => 'La foto no debe pesar más de 2 MB.',
+        ]);
 
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users',
-        'password' => 'required|string|min:6|confirmed',
-        'role' => 'required|in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones,hse,aux_hse',
-        'num_empleado' => 'required|string|max:50|unique:users,num_empleado',
-        'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ], $messages);
+        $data = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => $validated['role'],
+            'num_empleado' => $validated['num_empleado'],
+        ];
 
-    // ✅ Preparar datos
-    $data = [
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        'role' => $request->role,
-        'num_empleado' => $request->num_empleado,
-    ];
+        if ($request->hasFile('signature')) {
+            $data['signature'] = $request->file('signature')
+                ->store('signatures', 'public');
+        }
 
-    // ✅ Manejar firma
-    if ($request->hasFile('signature')) {
-        $data['signature'] = $request->file('signature')->store('signatures', 'public');
+        if ($request->hasFile('profile_photo')) {
+            $data['profile_photo'] = $request->file('profile_photo')
+                ->store('profile_photos', 'public');
+        }
+
+        User::create($data);
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', 'Usuario creado correctamente.');
     }
-
-    // ✅ Manejar foto de perfil
-    if ($request->hasFile('profile_photo')) {
-        $data['profile_photo'] = $request->file('profile_photo')->store('profile_photos', 'public');
-    }
-
-    // ✅ Crear el usuario
-    User::create($data);
-
-    return redirect()->route('users.index')->with('success', 'Usuario creado correctamente');
-}
-
-
-
 
     public function show(User $user)
     {
-        return view('users.show', compact('user'));
+        $user->load([
+            'personal.datosLaborales.estadoLaboral',
+            'personal.datosLaborales.puesto',
+        ]);
+
+        $personalDisponible = Personal::with([
+            'datosLaborales.estadoLaboral',
+            'datosLaborales.puesto',
+        ])
+            ->where(function ($query) use ($user) {
+                $query->whereDoesntHave('usuario')
+                    ->orWhereHas('usuario', function ($usuarioQuery) use ($user) {
+                        $usuarioQuery->where('users.id', $user->id);
+                    });
+            })
+            ->orderBy('ape_pat')
+            ->orderBy('ape_mat')
+            ->orderBy('nombre')
+            ->get();
+
+        return view('users.show', compact('user', 'personalDisponible'));
     }
 
     public function edit(User $user)
     {
-        return view('users.edit', compact('user'));
+        return redirect()->route('users.show', $user);
     }
 
     public function update(Request $request, User $user)
-{
-    // Preparar reglas de validación dinámicamente
-    $rules = [
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email,'.$user->id,
-        'role' => 'required|in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones,hse,aux_hse',
-        'num_empleado' => 'required|string|max:50|unique:users,num_empleado,'.$user->id,
-        'signature' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ];
+    {
+        $validated = $request->validate([
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'email' => [
+                'sometimes',
+                'required',
+                'email',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'role' => [
+                'sometimes',
+                'required',
+                'in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones,hse,aux_hse',
+            ],
+            'num_empleado' => [
+                'sometimes',
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('users', 'num_empleado')->ignore($user->id),
+            ],
+            'password' => ['sometimes', 'nullable', 'string', 'min:6', 'confirmed'],
+            'signature' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'profile_photo' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+        ], [
+            'name.required' => 'El nombre es obligatorio.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El correo debe ser una dirección válida.',
+            'email.unique' => 'Este correo ya está registrado.',
+            'role.required' => 'Debes seleccionar un rol.',
+            'role.in' => 'El rol seleccionado no es válido.',
+            'num_empleado.required' => 'El número de empleado es obligatorio.',
+            'num_empleado.unique' => 'Este número de empleado ya está registrado.',
+            'password.min' => 'La contraseña debe tener al menos 6 caracteres.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
+            'signature.image' => 'La firma debe ser una imagen.',
+            'signature.mimes' => 'La firma debe ser jpeg, png, jpg o gif.',
+            'signature.max' => 'La firma no debe pesar más de 2 MB.',
+            'profile_photo.image' => 'La foto debe ser una imagen.',
+            'profile_photo.mimes' => 'La foto debe ser jpeg, png, jpg o gif.',
+            'profile_photo.max' => 'La foto no debe pesar más de 2 MB.',
+        ]);
 
-    // Solo validar password si se proporcionó uno nuevo
-    if ($request->filled('password')) {
-        $rules['password'] = 'required|string|min:6|confirmed';
-    }
+        $data = [];
 
-    // Mensajes personalizados en español
-    $messages = [
-        'name.required' => 'El nombre es obligatorio',
-        'email.required' => 'El correo electrónico es obligatorio',
-        'email.email' => 'El correo debe ser una dirección válida',
-        'email.unique' => 'Este correo ya está registrado',
-        'role.required' => 'Debes seleccionar un rol',
-        'role.in' => 'El rol seleccionado no es válido',
-        'num_empleado.required' => 'El número de empleado es obligatorio',
-        'num_empleado.unique' => 'Este número de empleado ya está registrado',
-        'password.required' => 'La contraseña es obligatoria',
-        'password.min' => 'La contraseña debe tener al menos 6 caracteres',
-        'password.confirmed' => 'Las contraseñas no coinciden',
-        'signature.image' => 'La firma debe ser una imagen',
-        'signature.mimes' => 'La firma debe ser un archivo jpeg, png, jpg o gif',
-        'signature.max' => 'La firma no debe pesar más de 2MB',
-        'profile_photo.image' => 'La foto de perfil debe ser una imagen',
-        'profile_photo.mimes' => 'La foto debe ser un archivo jpeg, png, jpg o gif',
-        'profile_photo.max' => 'La foto no debe pesar más de 2MB',
-    ];
-
-    $request->validate($rules, $messages);
-
-    $data = [
-        'name' => $request->name,
-        'email' => $request->email,
-        'role' => $request->role,
-        'num_empleado' => $request->num_empleado,
-    ];
-
-    // Actualizar password solo si se proporcionó
-    if ($request->filled('password')) {
-        $data['password'] = Hash::make($request->password);
-    }
-
-    // Manejar la firma
-    if ($request->hasFile('signature')) {
-        if ($user->signature) {
-            Storage::disk('public')->delete($user->signature);
+        foreach (['name', 'email', 'role', 'num_empleado'] as $field) {
+            if (array_key_exists($field, $validated)) {
+                $data[$field] = $validated[$field];
+            }
         }
-        $signaturePath = $request->file('signature')->store('signatures', 'public');
-        $data['signature'] = $signaturePath;
-    }
 
-    // Manejar la foto de perfil
-    if ($request->hasFile('profile_photo')) {
-        if ($user->profile_photo) {
-            Storage::disk('public')->delete($user->profile_photo);
+        if (!empty($validated['password'])) {
+            $data['password'] = Hash::make($validated['password']);
         }
-        $photoPath = $request->file('profile_photo')->store('profile_photos', 'public');
-        $data['profile_photo'] = $photoPath;
+
+        if ($request->hasFile('signature')) {
+            if ($user->signature) {
+                Storage::disk('public')->delete($user->signature);
+            }
+
+            $data['signature'] = $request->file('signature')
+                ->store('signatures', 'public');
+        }
+
+        if ($request->hasFile('profile_photo')) {
+            if ($user->profile_photo) {
+                Storage::disk('public')->delete($user->profile_photo);
+            }
+
+            $data['profile_photo'] = $request->file('profile_photo')
+                ->store('profile_photos', 'public');
+        }
+
+        if ($data === []) {
+            return back()
+                ->withErrors(['update' => 'No se recibieron cambios para guardar.'])
+                ->withInput();
+        }
+
+        $user->update($data);
+
+        return redirect()
+            ->route('users.show', $user)
+            ->with('success', 'Información del usuario actualizada correctamente.');
     }
 
-    $user->update($data);
+    public function updatePersonal(Request $request, User $user)
+    {
+        abort_unless(
+            $request->user()->role === 'ti',
+            403,
+            'Solo TI puede vincular usuarios con registros de personal.'
+        );
 
-    return redirect()->route('users.index')->with('success', 'Usuario actualizado correctamente');
-}
+        $validated = $request->validate([
+            'personal_id' => [
+                'present',
+                'nullable',
+                'integer',
+                Rule::exists('personal', 'id'),
+                Rule::unique('users', 'personal_id')->ignore($user->id),
+            ],
+        ], [
+            'personal_id.exists' => 'El registro de personal seleccionado no existe.',
+            'personal_id.unique' => 'Ese registro de personal ya está vinculado a otra cuenta ERP.',
+        ]);
+
+        $user->update([
+            'personal_id' => $validated['personal_id'],
+        ]);
+
+        return redirect()
+            ->route('users.show', $user)
+            ->with('success', 'Vinculación con personal actualizada correctamente.');
+    }
 }

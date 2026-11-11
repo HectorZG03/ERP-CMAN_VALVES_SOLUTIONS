@@ -23,10 +23,17 @@ Route::get('/', function () {
     return redirect('/dashboard');
 });
 
-// Autenticación
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Acceso: solo para visitantes sin sesión iniciada
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])
+        ->name('login');
+
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+// Cierre de sesión
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->name('logout');
 
 // Rutas protegidas generales
 Route::middleware(['auth'])->group(function () {
@@ -119,7 +126,6 @@ Route::middleware(['auth'])->group(function () {
             'entradas/{entrada}/pdf',
             [EntradaController::class, 'generatePDF']
         )->name('entradas.pdf');
-
     });
 
     /*
@@ -168,7 +174,6 @@ Route::middleware(['auth'])->group(function () {
             'salidas/{salida}/pdf',
             [SalidaController::class, 'generatePDF']
         )->name('salidas.pdf');
-
     });
 
     // Solicitudes de material
@@ -294,6 +299,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Usuarios
     Route::middleware(['user.access'])->group(function () {
+        Route::patch(
+            '/users/{user}/personal',
+            [UserController::class, 'updatePersonal']
+        )->name('users.personal.update');
+
         Route::resource('users', UserController::class);
     });
 

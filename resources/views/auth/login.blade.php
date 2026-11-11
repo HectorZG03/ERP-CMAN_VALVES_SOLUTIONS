@@ -160,6 +160,7 @@
                                 id="remember"
                                 name="remember"
                                 type="checkbox"
+                                value="1"
                                 {{ old('remember') ? 'checked' : '' }}
                                 class="h-4 w-4 rounded border-gray-300 text-yellow-600 focus:ring-yellow-500"
                             >

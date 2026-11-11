@@ -145,4 +145,12 @@ class Personal extends Model
     {
         return $this->hasOne(DatosLaborales::class, 'personal_id');
     }
+
+    /**
+     * Relación uno a uno con el usuario asociado.
+     */
+    public function usuario()
+    {
+        return $this->hasOne(User::class, 'personal_id');
+    }
 }
