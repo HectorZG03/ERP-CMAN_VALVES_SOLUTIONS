@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntradaController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\OrdenCompraController;
+use App\Http\Controllers\PermisoPersonalController;
 use App\Http\Controllers\PersonalController;
 use App\Http\Controllers\PrestamoMaterialController;
 use App\Http\Controllers\ProveedorController;
@@ -23,10 +24,17 @@ Route::get('/', function () {
     return redirect('/dashboard');
 });
 
-// Autenticación
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Acceso: solo para visitantes sin sesión iniciada
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])
+        ->name('login');
+
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+// Cierre de sesión
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->name('logout');
 
 // Rutas protegidas generales
 Route::middleware(['auth'])->group(function () {
@@ -55,6 +63,32 @@ Route::middleware(['auth'])->group(function () {
                 ->values(),
         ]);
     })->name('debug-role');
+
+    // Ruta para permisos de personal;
+    Route::prefix('permisos')->name('permisos.')->group(function () {
+        Route::get('/', [PermisoPersonalController::class, 'index'])
+            ->name('index');
+
+        // Búsqueda puntual para el selector de personal usado por RH.
+        Route::get('/buscar-personal', [PermisoPersonalController::class, 'buscarPersonal'])
+            ->name('buscar-personal');
+
+        Route::post('/', [PermisoPersonalController::class, 'store'])
+            ->name('store');
+
+        Route::get('/{permiso}/pdf', [PermisoPersonalController::class, 'pdf'])
+            ->name('pdf');
+
+        // Devuelve los datos autorizados para llenar el modal de información.
+        Route::get('/{permiso}', [PermisoPersonalController::class, 'show'])
+            ->name('show');
+
+        Route::patch('/{permiso}/revision-rh', [PermisoPersonalController::class, 'revisar'])
+            ->name('revisar');
+
+        Route::patch('/{permiso}/resolver', [PermisoPersonalController::class, 'resolver'])
+            ->name('resolver');
+    });
 
     // Inventario y almacén
     Route::middleware(['inventory.access'])->group(function () {
@@ -119,7 +153,6 @@ Route::middleware(['auth'])->group(function () {
             'entradas/{entrada}/pdf',
             [EntradaController::class, 'generatePDF']
         )->name('entradas.pdf');
-
     });
 
     /*
@@ -168,7 +201,6 @@ Route::middleware(['auth'])->group(function () {
             'salidas/{salida}/pdf',
             [SalidaController::class, 'generatePDF']
         )->name('salidas.pdf');
-
     });
 
     // Solicitudes de material
@@ -294,6 +326,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Usuarios
     Route::middleware(['user.access'])->group(function () {
+        Route::patch(
+            '/users/{user}/personal',
+            [UserController::class, 'updatePersonal']
+        )->name('users.personal.update');
+
         Route::resource('users', UserController::class);
     });
 

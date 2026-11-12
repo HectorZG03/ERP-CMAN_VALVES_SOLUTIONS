@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Personal extends Model
 {
@@ -144,5 +145,21 @@ class Personal extends Model
     public function datosLaborales()
     {
         return $this->hasOne(DatosLaborales::class, 'personal_id');
+    }
+
+    /**
+     * Relación uno a uno con el usuario asociado.
+     */
+    public function usuario()
+    {
+        return $this->hasOne(User::class, 'personal_id');
+    }
+
+    /**
+     * Relación uno a muchos con los permisos del personal.
+     */
+    public function permisos(): HasMany
+    {
+        return $this->hasMany(PermisoPersonal::class, 'personal_id');
     }
 }

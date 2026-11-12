@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
@@ -16,6 +17,7 @@ class User extends Authenticatable
         'password',
         'role',
         'num_empleado',
+        'personal_id',
         'signature',
         'profile_photo',
     ];
@@ -195,6 +197,31 @@ class User extends Authenticatable
         return $this->profile_photo ? asset('storage/' . $this->profile_photo) : asset('images/default-avatar.png');
     }
 
+    public function personal()
+    {
+        return $this->belongsTo(Personal::class, 'personal_id');
+    }
+
+    /**
+     * Relación uno a muchos con los permisos del personal.
+     */
+    public function permisosRegistrados(): HasMany
+    {
+        return $this->hasMany(PermisoPersonal::class, 'registrado_por_user_id');
+    }
+
+    public function permisosRevisados(): HasMany
+    {
+        return $this->hasMany(PermisoPersonal::class, 'revisado_por_user_id');
+    }
+
+    /**
+     * Relación uno a muchos con los permisos resueltos por el usuario.
+     */
+    public function permisosResueltos(): HasMany
+    {
+        return $this->hasMany(PermisoPersonal::class, 'resuelto_por_user_id');
+    }
 
 
 
