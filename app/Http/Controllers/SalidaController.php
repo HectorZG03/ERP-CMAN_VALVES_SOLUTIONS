@@ -93,7 +93,10 @@ class SalidaController extends Controller
                             ->orWhere('area', 'like', "%{$buscar}%");
                     })
                     ->orWhereHas('user', function ($usuario) use ($buscar) {
-                        $usuario->where('name', 'like', "%{$buscar}%");
+                        $usuario->where('name', 'like', "%{$buscar}%")
+                            ->orWhereHas('personal.datosLaborales', function ($laboral) use ($buscar) {
+                                $laboral->where('employee_id', 'like', "%{$buscar}%");
+                            });
                     })
                     ->orWhereHas(
                         'solicitudMaterial',
@@ -107,7 +110,9 @@ class SalidaController extends Controller
                                             'name',
                                             'like',
                                             "%{$buscar}%"
-                                        );
+                                        )->orWhereHas('personal.datosLaborales', function ($laboral) use ($buscar) {
+                                            $laboral->where('employee_id', 'like', "%{$buscar}%");
+                                        });
                                     }
                                 )
                                 ->orWhereHas(

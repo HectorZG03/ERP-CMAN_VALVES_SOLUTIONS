@@ -22,35 +22,16 @@
               data-confirm-title="Crear usuario" data-confirm-text="Crear usuario" data-confirm-variant="success">
             @csrf
             
-            <!-- Información Personal y Fotos -->
+            <!-- Información de la cuenta y firma -->
             <div class="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
                 <h2 class="text-xl font-semibold text-gray-800 mb-6 flex items-center">
                     <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                     </svg>
-                    Información Personal e Imágenes
+                    Información de la cuenta y firma
                 </h2>
                 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Foto de Perfil -->
-                    <div class="lg:col-span-1">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Foto de Perfil (Opcional)
-                        </label>
-                        <div class="flex flex-col items-center">
-                            <div class="w-40 h-40 bg-gray-200 rounded-full overflow-hidden border-4 border-white shadow-lg mb-3">
-                                <img id="profile_preview" src="{{ asset('images/default-avatar.png') }}" 
-                                     alt="Preview" class="w-full h-full object-cover">
-                            </div>
-                            <label class="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                                <input type="file" name="profile_photo" id="profile_photo" 
-                                       accept="image/*" class="hidden" onchange="previewImage(this, 'profile_preview')">
-                                Subir Foto
-                            </label>
-                            <p class="text-xs text-gray-500 mt-2">JPG, PNG o GIF (Max. 2MB)</p>
-                        </div>
-                    </div>
-
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Firma -->
                     <div class="lg:col-span-1">
                         <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -82,14 +63,10 @@
                                    value="{{ old('name') }}" placeholder="Ej: Juan Pérez López">
                         </div>
 
-                        <div>
-                            <label for="num_empleado" class="block text-sm font-medium text-gray-700 mb-1">
-                                Número de Empleado *
-                            </label>
-                            <input type="text" name="num_empleado" id="num_empleado" required
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                   value="{{ old('num_empleado') }}" placeholder="Ej: EMP-001">
-                        </div>
+                        <p class="rounded-lg border border-blue-200 bg-white p-4 text-sm text-gray-600">
+                            Después de crear la cuenta, TI podrá vincularla con su expediente de Personal desde el detalle del usuario.
+                            El número de empleado y la fotografía se obtendrán de ese expediente.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -115,7 +92,7 @@
 
                     <div>
                         <label for="role" class="block text-sm font-medium text-gray-700 mb-1">
-                            Rol / Departamento *
+                            Rol del ERP *
                         </label>
                         <select name="role" id="role" required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
@@ -222,18 +199,6 @@
 </div>
 
 <script>
-// Preview de foto de perfil
-function previewImage(input, previewId) {
-    const preview = document.getElementById(previewId);
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-        }
-        reader.readAsDataURL(input.files[0]);
-    }
-}
-
 // Preview de firma
 function previewSignature(input) {
     const preview = document.getElementById('signature_preview');

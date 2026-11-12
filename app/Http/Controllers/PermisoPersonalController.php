@@ -13,12 +13,21 @@ class PermisoPersonalController extends Controller
 {
     public function index(Request $request)
     {
+        $filtros = $request->validate([
+            'buscar' => ['nullable', 'string', 'max:150'],
+            'alcance' => ['nullable', Rule::in(['todos', 'mios', 'otros'])],
+            'per_page' => ['nullable', 'integer', Rule::in([15, 30, 50])],
+            'page' => ['nullable', 'integer', 'min:1'],
+        ]);
         $usuario = $request->user();
         $usuario->loadMissing('personal.datosLaborales.puesto');
         $personalPropio = $usuario->personal;
         $esRh = $usuario->canManagePersonal();
         $esDireccion = $usuario->canApproveRequests();
         $esFinanzasJefe = $usuario->role === 'finanzas';
+        $buscar = trim($filtros['buscar'] ?? '');
+        $alcance = $esRh ? ($filtros['alcance'] ?? 'todos') : 'todos';
+        $porPagina = (int) ($filtros['per_page'] ?? 15);
 
         $puedeVerTodas = $esRh || $esDireccion || $esFinanzasJefe;
 
@@ -47,12 +56,43 @@ class PermisoPersonalController extends Controller
             }
         }
 
+        if ($esRh && $alcance === 'mios') {
+            $personalPropio
+                ? $query->where('personal_id', $personalPropio->id)
+                : $query->whereRaw('1 = 0');
+        } elseif ($esRh && $alcance === 'otros' && $personalPropio) {
+            $query->where('personal_id', '!=', $personalPropio->id);
+        }
+
+        if ($buscar !== '') {
+            $terminos = preg_split('/\s+/u', $buscar, -1, PREG_SPLIT_NO_EMPTY);
+            $query->where(function ($coincidencia) use ($buscar, $terminos) {
+                $coincidencia->where('motivo', 'like', "%{$buscar}%")
+                    ->orWhereHas('personal', function ($personal) use ($terminos) {
+                        foreach ($terminos as $termino) {
+                            $personal->where(function ($nombre) use ($termino) {
+                                $nombre->where('nombre', 'like', "%{$termino}%")
+                                    ->orWhere('ape_pat', 'like', "%{$termino}%")
+                                    ->orWhere('ape_mat', 'like', "%{$termino}%");
+                            });
+                        }
+                    })
+                    ->orWhereHas('personal.datosLaborales', function ($laboral) use ($buscar) {
+                        $laboral->where('employee_id', 'like', "%{$buscar}%");
+                    })
+                    ->orWhereHas('personal.usuario', function ($cuenta) use ($buscar) {
+                        $cuenta->where('name', 'like', "%{$buscar}%");
+                    });
+            });
+        }
+
         $permisos = $query
             ->orderByDesc('fecha_permiso')
             ->orderByDesc('id')
-            ->paginate(15);
+            ->paginate($porPagina)
+            ->appends(['buscar' => $buscar, 'alcance' => $alcance, 'per_page' => $porPagina]);
 
-        return view('permisos.index', [
+        $datos = [
             'permisos' => $permisos,
             'personalPropio' => $personalPropio,
             'puedeSolicitar' => ! $esDireccion
@@ -64,7 +104,20 @@ class PermisoPersonalController extends Controller
             'puedeRevisar' => $esRh || $esFinanzasJefe,
             'puedeResolver' => $esDireccion,
             'mensajeVinculo' => $mensajeVinculo,
-        ]);
+            'buscar' => $buscar,
+            'alcance' => $alcance,
+            'porPagina' => $porPagina,
+        ];
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('permisos.partials.listado', $datos)->render(),
+                'total' => $permisos->total(),
+                'page' => $permisos->currentPage(),
+            ]);
+        }
+
+        return view('permisos.index', $datos);
     }
 
     public function buscarPersonal(Request $request)

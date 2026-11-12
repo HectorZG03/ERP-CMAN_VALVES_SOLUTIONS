@@ -72,7 +72,7 @@
     <section class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
         <div class="flex flex-col gap-4 bg-slate-900 px-6 py-5 text-white sm:flex-row sm:items-center">
             <img
-                src="{{ $user->profile_photo ? asset('storage/' . $user->profile_photo) : asset('images/default-avatar.png') }}"
+                src="{{ $user->profile_photo_url }}"
                 alt="Foto de {{ $user->name }}"
                 class="h-16 w-16 shrink-0 rounded-full border-2 border-white/70 object-cover"
             >
@@ -86,7 +86,7 @@
                         {{ $roles[$user->role] ?? ucfirst(str_replace('_', ' ', $user->role)) }}
                     </span>
                     <span class="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-100">
-                        Cuenta ERP: {{ $user->num_empleado ?: 'Sin número' }}
+                        {{ $user->personal ? 'No. laboral: ' . ($user->numero_empleado_laboral ?? 'Sin número registrado') : 'Sin expediente vinculado' }}
                     </span>
                 </div>
             </div>
@@ -110,7 +110,7 @@
                         Datos generales
                     </h2>
                     <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        Guarda aquí los cambios de nombre, correo, rol o número de empleado.
+                        Guarda aquí los cambios de nombre, correo, rol y firma de la cuenta.
                     </p>
                 </div>
 
@@ -161,24 +161,13 @@
                         </div>
 
                         <div>
-                            <label for="num_empleado" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Número de empleado de la cuenta
-                            </label>
-                            <input
-                                id="num_empleado"
-                                name="num_empleado"
-                                type="text"
-                                value="{{ old('num_empleado', $user->num_empleado) }}"
-                                required
-                                maxlength="50"
-                                class="{{ $inputClass }}"
-                            >
-                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                Este número pertenece a la cuenta ERP; el número laboral del expediente se muestra en la tarjeta de Personal.
+                            <p class="block text-sm font-medium text-gray-700 dark:text-gray-300">Número laboral del expediente</p>
+                            <p class="mt-1 rounded-lg bg-gray-100 px-3 py-2.5 text-sm text-gray-900 dark:bg-gray-800 dark:text-white">
+                                {{ $user->personal ? ($user->numero_empleado_laboral ?? 'Sin número registrado') : 'Sin expediente vinculado' }}
                             </p>
-                            @error('num_empleado')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
+                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                RH administra este dato desde el expediente de personal.
+                            </p>
                         </div>
 
                         <div>
@@ -248,38 +237,11 @@
 
                     <details class="rounded-lg border border-gray-200 dark:border-gray-700">
                         <summary class="cursor-pointer px-4 py-3 text-sm font-semibold text-gray-800 dark:text-gray-200">
-                            Actualizar foto y firma
+                            Actualizar firma
                             <span class="ml-1 font-normal text-gray-500">(opcional)</span>
                         </summary>
 
-                        <div class="grid grid-cols-1 gap-5 border-t border-gray-200 p-4 sm:grid-cols-2 dark:border-gray-700">
-                            <div>
-                                <div class="mb-3 flex items-center gap-3">
-                                    <img
-                                        src="{{ $user->profile_photo ? asset('storage/' . $user->profile_photo) : asset('images/default-avatar.png') }}"
-                                        alt="Foto actual"
-                                        class="h-12 w-12 rounded-full border border-gray-200 object-cover dark:border-gray-700"
-                                    >
-                                    <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                        Foto de perfil
-                                    </span>
-                                </div>
-
-                                <input
-                                    id="profile_photo"
-                                    name="profile_photo"
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/jpg,image/gif"
-                                    class="block w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:font-semibold dark:text-gray-300 dark:file:bg-gray-800"
-                                >
-                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                    JPEG, PNG, JPG o GIF; máximo 2 MB.
-                                </p>
-                                @error('profile_photo')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
+                        <div class="border-t border-gray-200 p-4 dark:border-gray-700">
                             <div>
                                 <div class="mb-3 flex h-12 items-center gap-3">
                                     <div class="flex h-12 w-20 items-center justify-center rounded border border-dashed border-gray-300 bg-gray-50 p-1 dark:border-gray-600 dark:bg-gray-800">
@@ -335,6 +297,9 @@
                     <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                         Vincula la cuenta con el expediente correcto. La relación no se asigna automáticamente por nombre o número.
                     </p>
+                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        El número laboral y la fotografía se toman de este expediente. RH administra ambos datos desde Personal.
+                    </p>
                 </div>
 
                 @if ($user->personal)
@@ -350,7 +315,7 @@
                             <div class="flex justify-between gap-3">
                                 <dt class="text-gray-600 dark:text-gray-400">Número laboral</dt>
                                 <dd class="text-right font-medium text-gray-900 dark:text-white">
-                                    {{ $user->personal->datosLaborales?->employee_id ?? 'Sin número' }}
+                                    {{ $user->numero_empleado_laboral ?? 'Sin número registrado' }}
                                 </dd>
                             </div>
                             <div class="flex justify-between gap-3">

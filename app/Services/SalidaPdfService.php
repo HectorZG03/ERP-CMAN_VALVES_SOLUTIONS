@@ -68,7 +68,7 @@ class SalidaPdfService
             'cliente',
             'user',
             'detalles.inventario',
-            'solicitudMaterial.user',
+            'solicitudMaterial.user.personal.datosLaborales',
             'solicitudMaterial.operadorPersonal',
         ];
     }

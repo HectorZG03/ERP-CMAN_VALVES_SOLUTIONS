@@ -16,10 +16,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'num_empleado',
         'personal_id',
         'signature',
-        'profile_photo',
     ];
 
     protected $hidden = [
@@ -190,11 +188,28 @@ class User extends Authenticatable
     }
 
     /**
-     * Obtener la URL de la foto de perfil
+     * Número laboral del expediente vinculado. Los campos heredados de la
+     * cuenta se conservan durante la transición, sin utilizarlos como respaldo.
      */
-    public function getProfilePhotoUrlAttribute()
+    public function getNumeroEmpleadoLaboralAttribute(): ?string
     {
-        return $this->profile_photo ? asset('storage/' . $this->profile_photo) : asset('images/default-avatar.png');
+        $numero = trim((string) $this->personal?->datosLaborales?->employee_id);
+
+        return $numero === '' || strtoupper($numero) === 'N/A' ? null : $numero;
+    }
+
+    /**
+     * Foto del expediente vinculado o avatar cuando no hay foto registrada.
+     */
+    public function getProfilePhotoUrlAttribute(): string
+    {
+        $foto = trim((string) $this->personal?->foto);
+
+        if ($foto === '' || strtoupper($foto) === 'N/A') {
+            return asset('images/default-avatar.svg');
+        }
+
+        return asset('storage/' . ltrim($foto, '/'));
     }
 
     public function personal()

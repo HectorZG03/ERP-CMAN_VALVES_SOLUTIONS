@@ -470,8 +470,9 @@ document.addEventListener('DOMContentLoaded', () => {
         mostrarModal(modalCrear, botonAbrirCrear);
     });
 
-    document.querySelectorAll('[data-permiso-open]').forEach((boton) => {
-        boton.addEventListener('click', () => cargarDetalle(boton));
+    document.addEventListener('click', (evento) => {
+        const boton = evento.target.closest('[data-permiso-open]');
+        if (boton) cargarDetalle(boton);
     });
 
     document.querySelectorAll('[data-modal]').forEach((modal) => {

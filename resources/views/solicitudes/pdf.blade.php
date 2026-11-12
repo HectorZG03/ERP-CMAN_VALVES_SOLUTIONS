@@ -671,10 +671,10 @@
                         <span class="field-value" style="font-size:9.5px;">{{ $solicitud->user->email }}</span>
                     </div>
                     @endif
-                    @if($solicitud->user->num_empleado ?? false)
+                    @if($solicitud->user?->numero_empleado_laboral)
                     <div class="field-row">
                         <span class="field-label">No. Empleado</span>
-                        <span class="field-value">{{ $solicitud->user->num_empleado }}</span>
+                        <span class="field-value">{{ $solicitud->user->numero_empleado_laboral }}</span>
                     </div>
                     @endif
                     <div class="field-row">

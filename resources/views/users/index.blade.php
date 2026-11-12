@@ -81,11 +81,21 @@
                     @forelse ($users as $user)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/70">
                             <td class="px-5 py-4">
-                                <div class="font-semibold text-gray-900 dark:text-white">
-                                    {{ $user->name }}
-                                </div>
-                                <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                    Empleado ERP: {{ $user->num_empleado ?: 'Sin número' }}
+                                <div class="flex items-center gap-3">
+                                    <img
+                                        src="{{ $user->profile_photo_url }}"
+                                        alt="Foto de {{ $user->name }}"
+                                        class="h-10 w-10 shrink-0 rounded-full object-cover"
+                                        loading="lazy"
+                                    >
+                                    <div class="min-w-0">
+                                        <div class="font-semibold text-gray-900 dark:text-white">
+                                            {{ $user->name }}
+                                        </div>
+                                        <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            {{ $user->personal ? 'No. laboral: ' . ($user->numero_empleado_laboral ?? 'Sin número registrado') : 'Sin expediente vinculado' }}
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
 
