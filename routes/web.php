@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EntradaController;
 use App\Http\Controllers\InventarioController;
 use App\Http\Controllers\OrdenCompraController;
+use App\Http\Controllers\PermisoPersonalController;
 use App\Http\Controllers\PersonalController;
 use App\Http\Controllers\PrestamoMaterialController;
 use App\Http\Controllers\ProveedorController;
@@ -62,6 +63,32 @@ Route::middleware(['auth'])->group(function () {
                 ->values(),
         ]);
     })->name('debug-role');
+
+    // Ruta para permisos de personal;
+    Route::prefix('permisos')->name('permisos.')->group(function () {
+        Route::get('/', [PermisoPersonalController::class, 'index'])
+            ->name('index');
+
+        // Búsqueda puntual para el selector de personal usado por RH.
+        Route::get('/buscar-personal', [PermisoPersonalController::class, 'buscarPersonal'])
+            ->name('buscar-personal');
+
+        Route::post('/', [PermisoPersonalController::class, 'store'])
+            ->name('store');
+
+        Route::get('/{permiso}/pdf', [PermisoPersonalController::class, 'pdf'])
+            ->name('pdf');
+
+        // Devuelve los datos autorizados para llenar el modal de información.
+        Route::get('/{permiso}', [PermisoPersonalController::class, 'show'])
+            ->name('show');
+
+        Route::patch('/{permiso}/revision-rh', [PermisoPersonalController::class, 'revisar'])
+            ->name('revisar');
+
+        Route::patch('/{permiso}/resolver', [PermisoPersonalController::class, 'resolver'])
+            ->name('resolver');
+    });
 
     // Inventario y almacén
     Route::middleware(['inventory.access'])->group(function () {

@@ -156,6 +156,17 @@
                     <i class="fas fa-hand-holding w-5 text-center"></i>
                     <span>Préstamos</span>
                 </a>
+                <a
+                    href="{{ route('permisos.index') }}"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-lg
+                        text-sm font-medium transition
+                        {{ request()->routeIs('permisos.*')
+                            ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300'
+                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800' }}"
+                >
+                    <i class="fas fa-clock w-5 text-center"></i>
+                    <span>Permisos</span>
+                </a>
             </div>
         </div>
 
