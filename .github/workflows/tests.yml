@@ -41,10 +41,14 @@ jobs:
         run: composer install --prefer-dist --no-interaction --no-progress
 
       - name: Create environment file
-        run: touch .env
+        run: |
+          printf 'APP_ENV=testing\nAPP_KEY=\n' > .env
 
       - name: Generate app key
         run: php artisan key:generate --no-interaction
+
+      - name: Clear configuration cache
+        run: php artisan config:clear
 
       - name: Execute tests
         run: php artisan test

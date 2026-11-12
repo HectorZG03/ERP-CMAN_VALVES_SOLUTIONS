@@ -36,9 +36,7 @@ class UserController extends Controller
                 'required',
                 'in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones,hse,aux_hse',
             ],
-            'num_empleado' => ['required', 'string', 'max:50', 'unique:users,num_empleado'],
             'signature' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
-            'profile_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ], [
             'name.required' => 'El nombre es obligatorio.',
             'email.required' => 'El correo electrónico es obligatorio.',
@@ -49,14 +47,9 @@ class UserController extends Controller
             'password.confirmed' => 'Las contraseñas no coinciden.',
             'role.required' => 'Debes seleccionar un rol.',
             'role.in' => 'El rol seleccionado no es válido.',
-            'num_empleado.required' => 'El número de empleado es obligatorio.',
-            'num_empleado.unique' => 'Este número de empleado ya está registrado.',
             'signature.image' => 'La firma debe ser una imagen.',
             'signature.mimes' => 'La firma debe ser jpeg, png, jpg o gif.',
             'signature.max' => 'La firma no debe pesar más de 2 MB.',
-            'profile_photo.image' => 'La foto de perfil debe ser una imagen.',
-            'profile_photo.mimes' => 'La foto debe ser jpeg, png, jpg o gif.',
-            'profile_photo.max' => 'La foto no debe pesar más de 2 MB.',
         ]);
 
         $data = [
@@ -64,7 +57,6 @@ class UserController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
-            'num_empleado' => $validated['num_empleado'],
         ];
 
         if ($request->hasFile('signature')) {
@@ -72,16 +64,11 @@ class UserController extends Controller
                 ->store('signatures', 'public');
         }
 
-        if ($request->hasFile('profile_photo')) {
-            $data['profile_photo'] = $request->file('profile_photo')
-                ->store('profile_photos', 'public');
-        }
-
-        User::create($data);
+        $user = User::create($data);
 
         return redirect()
-            ->route('users.index')
-            ->with('success', 'Usuario creado correctamente.');
+            ->route('users.show', $user)
+            ->with('success', 'Usuario creado correctamente. TI puede vincularlo ahora con su expediente de personal.');
     }
 
     public function show(User $user)
@@ -129,16 +116,8 @@ class UserController extends Controller
                 'required',
                 'in:ti,aux_ti,direccion,almacen,aux_almacen,aux_calidad,aux_contabilidad,aux_estimaciones,aux_finanzas,aux_logistica,aux_rh,calidad,contabilidad,estimaciones,finanzas,logistica,rh,operaciones,aux_operaciones,hse,aux_hse',
             ],
-            'num_empleado' => [
-                'sometimes',
-                'required',
-                'string',
-                'max:50',
-                Rule::unique('users', 'num_empleado')->ignore($user->id),
-            ],
             'password' => ['sometimes', 'nullable', 'string', 'min:6', 'confirmed'],
             'signature' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
-            'profile_photo' => ['sometimes', 'nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ], [
             'name.required' => 'El nombre es obligatorio.',
             'email.required' => 'El correo electrónico es obligatorio.',
@@ -146,21 +125,16 @@ class UserController extends Controller
             'email.unique' => 'Este correo ya está registrado.',
             'role.required' => 'Debes seleccionar un rol.',
             'role.in' => 'El rol seleccionado no es válido.',
-            'num_empleado.required' => 'El número de empleado es obligatorio.',
-            'num_empleado.unique' => 'Este número de empleado ya está registrado.',
             'password.min' => 'La contraseña debe tener al menos 6 caracteres.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
             'signature.image' => 'La firma debe ser una imagen.',
             'signature.mimes' => 'La firma debe ser jpeg, png, jpg o gif.',
             'signature.max' => 'La firma no debe pesar más de 2 MB.',
-            'profile_photo.image' => 'La foto debe ser una imagen.',
-            'profile_photo.mimes' => 'La foto debe ser jpeg, png, jpg o gif.',
-            'profile_photo.max' => 'La foto no debe pesar más de 2 MB.',
         ]);
 
         $data = [];
 
-        foreach (['name', 'email', 'role', 'num_empleado'] as $field) {
+        foreach (['name', 'email', 'role'] as $field) {
             if (array_key_exists($field, $validated)) {
                 $data[$field] = $validated[$field];
             }
@@ -177,15 +151,6 @@ class UserController extends Controller
 
             $data['signature'] = $request->file('signature')
                 ->store('signatures', 'public');
-        }
-
-        if ($request->hasFile('profile_photo')) {
-            if ($user->profile_photo) {
-                Storage::disk('public')->delete($user->profile_photo);
-            }
-
-            $data['profile_photo'] = $request->file('profile_photo')
-                ->store('profile_photos', 'public');
         }
 
         if ($data === []) {

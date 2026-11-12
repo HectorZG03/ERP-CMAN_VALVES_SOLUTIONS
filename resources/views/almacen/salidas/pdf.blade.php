@@ -327,7 +327,7 @@
     $solicitanteNombre = $usuarioSolicitante?->name
         ?? $salida->cliente?->nombre
         ?? 'NO DISPONIBLE';
-    $solicitanteId = $usuarioSolicitante?->num_empleado ?? 'N/A';
+    $solicitanteId = $usuarioSolicitante?->numero_empleado_laboral ?? 'N/A';
     $solicitanteEmail = $usuarioSolicitante?->email
         ?? $salida->cliente?->email
         ?? 'N/A';

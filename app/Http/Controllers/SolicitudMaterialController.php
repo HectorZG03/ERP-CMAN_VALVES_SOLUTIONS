@@ -600,7 +600,7 @@ class SolicitudMaterialController extends Controller
     {
         $solicitud->load([
             'detalles.inventario',
-            'user',
+            'user.personal.datosLaborales',
             'operadorPersonal',
         ]);
 

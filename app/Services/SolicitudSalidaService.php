@@ -45,7 +45,9 @@ class SolicitudSalidaService
                 'created_at',
             ])
             ->with([
-                'user:id,name,email,num_empleado',
+                'user:id,name,email,personal_id',
+                'user.personal:id',
+                'user.personal.datosLaborales:id,personal_id,employee_id',
 
                 'operadorPersonal:id,nombre,ape_pat,ape_mat',
                 'operadorPersonal.datosLaborales:id,personal_id,puesto_id,employee_id',
@@ -73,7 +75,9 @@ class SolicitudSalidaService
                     $userQuery
                         ->where('name', 'LIKE', "%{$termino}%")
                         ->orWhere('email', 'LIKE', "%{$termino}%")
-                        ->orWhere('num_empleado', 'LIKE', "%{$termino}%");
+                        ->orWhereHas('personal.datosLaborales', function ($laboral) use ($termino) {
+                            $laboral->where('employee_id', 'LIKE', "%{$termino}%");
+                        });
                 });
 
                 $query->orWhereHas('operadorPersonal', function ($personalQuery) use ($termino) {
@@ -125,7 +129,7 @@ class SolicitudSalidaService
                     'solicitante' => $solicitud->user?->name
                         ?? 'Usuario no disponible',
 
-                    'numero_empleado' => $solicitud->user?->num_empleado
+                    'numero_empleado' => $solicitud->user?->numero_empleado_laboral
                         ?? 'N/A',
 
                     'destino' => $solicitud->destino
@@ -160,7 +164,9 @@ class SolicitudSalidaService
         }
 
         $solicitud->load([
-            'user:id,name,email,num_empleado,role',
+            'user:id,name,email,personal_id,role',
+            'user.personal:id',
+            'user.personal.datosLaborales:id,personal_id,employee_id',
 
             'operadorPersonal:id,nombre,ape_pat,ape_mat',
             'operadorPersonal.datosLaborales:id,personal_id,puesto_id,employee_id',
@@ -235,7 +241,7 @@ class SolicitudSalidaService
 
             'solicitante' => [
                 'nombre' => $solicitud->user?->name ?? 'N/A',
-                'numero_empleado' => $solicitud->user?->num_empleado
+                'numero_empleado' => $solicitud->user?->numero_empleado_laboral
                     ?? 'N/A',
                 'email' => $solicitud->user?->email ?? 'N/A',
                 'area' => $solicitud->user?->role ?? 'N/A',
