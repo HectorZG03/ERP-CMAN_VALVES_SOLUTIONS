@@ -192,9 +192,11 @@
                                 <td class="px-4 py-3">
                                     <div class="flex min-w-56 items-center gap-3">
                                         @if ($persona->foto && $persona->foto !== 'N/A')
-                                            <img src="{{ asset('storage/' . $persona->foto) }}"
-                                                 alt=""
-                                                 class="h-9 w-9 shrink-0 rounded-full object-cover">
+                                            <x-photo-thumbnail
+                                                :src="asset('storage/' . $persona->foto)"
+                                                :name="$persona->nombre_mostrar"
+                                                image-class="h-9 w-9 rounded-full"
+                                            />
                                         @else
                                             <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
                                                 {{ strtoupper(substr($persona->nombre_mostrar ?? 'NA', 0, 2)) }}

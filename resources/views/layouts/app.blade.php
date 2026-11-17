@@ -280,6 +280,12 @@
     {{-- JavaScript del sidebar --}}
     <script src="{{ asset('js/sidebar.js') }}"></script>
 
+    {{-- Visor compartido de fotografías --}}
+    @auth
+        @include('components.photo-viewer')
+        <script src="{{ asset('js/photo-viewer.js') }}" defer></script>
+    @endauth
+
 
     {{-- JavaScript específico de cada vista --}}
     @stack('scripts')

@@ -43,7 +43,7 @@
 
 
     <div class="rounded-lg bg-white p-4 shadow transition-colors duration-200 dark:bg-gray-800 sm:p-6">
-        <form method="POST" action="{{ route('requisiciones.store') }}" id="requisicionForm"
+        <form method="POST" action="{{ route('requisiciones.store') }}" id="requisicionForm" data-uppercase-form
               data-confirm="¿Enviar esta requisición para su revisión?"
               data-confirm-title="Crear requisición" data-confirm-text="Enviar requisición" data-confirm-variant="success">
             @csrf
@@ -62,7 +62,7 @@
                         </label>
 
                         <input
-                            type="text"
+                            type="text" data-uppercase
                             name="nombre_solicitante"
                             id="nombre_solicitante"
                             required
@@ -84,7 +84,7 @@
                         </label>
 
                         <input
-                            type="text"
+                            type="text" data-uppercase
                             id="departamento"
                             class="mt-1 block h-10 w-full truncate rounded-md border border-gray-300 bg-gray-100 px-3 text-sm font-semibold uppercase tracking-wider text-gray-900 shadow-sm transition-colors duration-200 dark:border-gray-600 dark:bg-gray-600 dark:text-white"
                             value="{{ $departamento }}"
@@ -166,7 +166,7 @@
                             </label>
 
                             <input
-                                type="text"
+                                type="text" data-uppercase
                                 name="{{ $nombre }}"
                                 id="{{ $nombre }}"
                                 class="{{ $clase($nombre) }}"
@@ -186,7 +186,7 @@
                         </label>
 
                         <input
-                            type="text"
+                            type="text" data-uppercase
                             name="destino"
                             id="destino"
                             class="{{ $clase('destino') }}"
@@ -267,7 +267,7 @@
                 </label>
 
                 <textarea
-                    name="comentario"
+                    name="comentario" data-uppercase
                     id="comentario"
                     rows="4"
                     required
@@ -339,7 +339,7 @@
                     Material/Descripción <span class="text-red-500" aria-hidden="true">*</span>
                 </label>
                 <input
-                    type="text"
+                    type="text" data-uppercase
                     data-campo="descripcion"
                     name="materiales[INDEX][material]"
                     class="material-descripcion h-10 w-full rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 transition-colors duration-200 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-500 dark:bg-gray-600 dark:text-white dark:focus:border-blue-400 dark:focus:ring-blue-400"
@@ -370,7 +370,7 @@
                     Unidad <span class="text-red-500" aria-hidden="true">*</span>
                 </label>
                 <input
-                    type="text"
+                    type="text" data-uppercase
                     data-campo="unidad"
                     name="materiales[INDEX][unidad]"
                     list="unidades-sugeridas"
@@ -388,6 +388,7 @@
     @json(array_values(old('materiales', [])))
 </script>
 
+<script src="{{ asset('js/forms/uppercase.js') }}" defer></script>
 <script>
 (() => {
     const formulario   = document.getElementById('requisicionForm');

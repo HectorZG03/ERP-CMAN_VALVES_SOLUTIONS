@@ -71,12 +71,12 @@
 
     <section class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-900">
         <div class="flex flex-col gap-4 bg-slate-900 px-6 py-5 text-white sm:flex-row sm:items-center">
-            <img
-                src="{{ $user->profile_photo_url }}"
-                alt="Foto de {{ $user->name }}"
-                class="h-16 w-16 shrink-0 rounded-full border-2 border-white/70 object-cover"
-            >
-
+            <x-photo-thumbnail
+                :src="$user->profile_photo_url"
+                :name="$user->name"
+                image-class="h-16 w-16 rounded-full border-2 border-white/70"
+                loading="eager"
+            />
             <div class="min-w-0 flex-1">
                 <h2 class="truncate text-xl font-bold">{{ $user->name }}</h2>
                 <p class="mt-1 truncate text-sm text-slate-300">{{ $user->email }}</p>
