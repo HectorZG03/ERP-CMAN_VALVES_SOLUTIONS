@@ -106,10 +106,12 @@
         <label for="foto" class="{{ $labelClass }}">Fotografía</label>
         <div class="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center">
             @if ($personal->foto && $personal->foto !== 'N/A')
-                <img src="{{ asset('storage/' . $personal->foto) }}"
-                     alt="Fotografía actual de {{ $personal->nombre_mostrar }}"
-                     class="h-20 w-20 rounded-lg border border-gray-200 object-cover dark:border-gray-700">
-            @endif
+                <x-photo-thumbnail
+                    :src="asset('storage/' . $personal->foto)"
+                    :name="$personal->nombre_mostrar"
+                    image-class="h-20 w-20 rounded-lg border border-gray-200 dark:border-gray-700"
+                />
+             @endif
 
             <div class="min-w-0 flex-1">
                 <input id="foto" name="foto" type="file" accept="image/jpeg,image/png"

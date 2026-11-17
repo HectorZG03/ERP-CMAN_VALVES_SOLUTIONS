@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreRequisicionRequest;
 use App\Models\Requisicion;
 use App\Models\RequisicionDetalle;
 use App\Models\Contrato;
@@ -133,65 +134,36 @@ class RequisicionController extends Controller
         return view('requisiciones.create', compact('contratos'));
     }
 
-    public function store(Request $request)
+    public function store(StoreRequisicionRequest $request)
     {
-        // Mensajes personalizados en español
-        $messages = [
-            'nombre_solicitante.required' => 'El nombre del solicitante es obligatorio',
-            'departamento.required' => 'El departamento es obligatorio',
-            'tipo_requerimiento.required' => 'Debes seleccionar un tipo de requerimiento',
-            'tipo_requerimiento.in' => 'El tipo de requerimiento debe ser interno o externo',
-            'comentario.required' => 'Debes proporcionar un comentario o justificación',
-            'materiales.required' => 'Debes agregar al menos un material',
-            'materiales.min' => 'Debes agregar al menos un material',
-            'materiales.*.cantidad.required' => 'La cantidad es obligatoria',
-            'materiales.*.cantidad.integer' => 'La cantidad debe ser un número entero',
-            'materiales.*.cantidad.min' => 'La cantidad debe ser al menos 1',
-            'materiales.*.unidad.required' => 'La unidad es obligatoria',
-            'materiales.*.material.required' => 'La descripción del material es obligatoria',
-            'contrato_id.required' => 'Debes seleccionar un contrato',
-        ];
-
-        $request->validate([
-            'nombre_solicitante' => 'required|string|max:255',
-            'departamento' => 'required|string|max:255',
-            'plataforma' => 'nullable|string|max:255',
-            'destino' => 'nullable|string|max:255',
-            'tipo_requerimiento' => 'required|in:interno,externo',
-            'comentario' => 'required|string',
-            'contrato_id' => 'required|exists:contratos,id',
-            'materiales' => 'required|array|min:1',
-            'materiales.*.cantidad' => 'required|integer|min:1',
-            'materiales.*.unidad' => 'required|string|max:255',
-            'materiales.*.material' => 'required|string|max:255',
-        ], $messages);
+        $validated = $request->validated();
 
         DB::beginTransaction();
 
         try {
             $requisicion = Requisicion::create([
-                'nombre_solicitante' => $request->nombre_solicitante,
-                'departamento' => $request->departamento,
-                'proyecto' => $request->proyecto ?? 'N/A',
-                'sit' => $request->sit ?? 'N/A',
-                'partida' => $request->partida ?? 'N/A',
+                'nombre_solicitante' => $validated['nombre_solicitante'],
+                'departamento' => $validated['departamento'],
+                'proyecto' => $validated['proyecto'] ?? 'N/A',
+                'sit' => $validated['sit'] ?? 'N/A',
+                'partida' => $validated['partida'] ?? 'N/A',
 
                 // Si plataforma viene vacía, se guarda como N/A
-                'plataforma' => $request->plataforma ?: 'N/A',
+                'plataforma' => ($validated['plataforma'] ?? null) ?: 'N/A',
 
-                'area' => $request->area ?? 'N/A',
-                'activo' => $request->activo ?? 'N/A',
-                'contrato_id' => $request->contrato_id,
+                'area' => $validated['area'] ?? 'N/A',
+                'activo' => $validated['activo'] ?? 'N/A',
+                'contrato_id' => $validated['contrato_id'],
 
                 // Destino como texto libre
-                'destino' => $request->destino ?: null,
+                'destino' => ($validated['destino'] ?? null) ?: null,
 
-                'tipo_requerimiento' => $request->tipo_requerimiento,
-                'comentario' => $request->comentario,
+                'tipo_requerimiento' => $validated['tipo_requerimiento'],
+                'comentario' => $validated['comentario'],
                 'user_id' => auth()->id(),
             ]);
 
-            foreach ($request->materiales as $material) {
+            foreach ($validated['materiales'] as $material) {
                 RequisicionDetalle::create([
                     'requisicion_id' => $requisicion->id,
                     'cantidad' => $material['cantidad'],

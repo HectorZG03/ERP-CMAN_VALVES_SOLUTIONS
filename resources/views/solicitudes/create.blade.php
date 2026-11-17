@@ -75,6 +75,7 @@
             method="POST"
             action="{{ route('solicitudes.store') }}"
             id="solicitudForm"
+            data-uppercase-form
             data-confirm="¿Enviar esta solicitud de material?"
             data-confirm-title="Crear solicitud" data-confirm-text="Enviar solicitud" data-confirm-variant="success"
             data-buscar-productos-url="{{ route('solicitudes.buscar-productos') }}"
@@ -349,7 +350,7 @@
 
                                 <input
                                     type="text"
-                                    name="destino"
+                                    name="destino" data-uppercase
                                     id="destino"
                                     value="{{ old('destino') }}"
                                     maxlength="255"
@@ -449,7 +450,7 @@
                                 </label>
 
                                 <textarea
-                                    name="comentario"
+                                    name="comentario" data-uppercase
                                     id="comentario"
                                     rows="4"
                                     @error('comentario') aria-invalid="true" aria-describedby="error-comentario" @enderror
@@ -570,6 +571,7 @@
     @json(old('productos', []))
 </script>
 
+<script src="{{ asset('js/forms/uppercase.js') }}" defer></script>
 <script src="{{ asset('js/solicitudes/create.js') }}" defer></script>
 <script src="{{ asset('js/solicitudes/personal-search.js') }}" defer></script>
 @endsection

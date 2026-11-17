@@ -35,9 +35,12 @@
     <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex min-w-0 items-center gap-4">
             @if ($personal->foto && $personal->foto !== 'N/A')
-                <img src="{{ asset('storage/' . $personal->foto) }}"
-                     alt="Fotografía de {{ $personal->nombre_mostrar }}"
-                     class="h-14 w-14 shrink-0 rounded-full border border-gray-200 object-cover dark:border-gray-700">
+                <x-photo-thumbnail
+                    :src="asset('storage/' . $personal->foto)"
+                    :name="$personal->nombre_mostrar"
+                    image-class="h-14 w-14 rounded-full border border-gray-200 dark:border-gray-700"
+                    loading="eager"
+                />
             @else
                 <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-100 text-lg font-bold text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
                     {{ strtoupper(substr($personal->nombre_mostrar ?: 'NA', 0, 2)) }}

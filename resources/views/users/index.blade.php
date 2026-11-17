@@ -82,12 +82,11 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/70">
                             <td class="px-5 py-4">
                                 <div class="flex items-center gap-3">
-                                    <img
-                                        src="{{ $user->profile_photo_url }}"
-                                        alt="Foto de {{ $user->name }}"
-                                        class="h-10 w-10 shrink-0 rounded-full object-cover"
-                                        loading="lazy"
-                                    >
+                                    <x-photo-thumbnail
+                                        :src="$user->profile_photo_url"
+                                        :name="$user->name"
+                                        image-class="h-10 w-10 rounded-full"
+                                    />
                                     <div class="min-w-0">
                                         <div class="font-semibold text-gray-900 dark:text-white">
                                             {{ $user->name }}
